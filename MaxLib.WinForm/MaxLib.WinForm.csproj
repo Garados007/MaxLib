@@ -97,6 +97,9 @@
     <Compile Include="WinForms\RefreshingListBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="WinForms\TablessControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MaxLib.SystemDrawing\MaxLib.SystemDrawing.csproj">
