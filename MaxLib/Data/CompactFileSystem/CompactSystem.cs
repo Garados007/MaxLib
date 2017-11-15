@@ -537,9 +537,8 @@ namespace MaxLib.Data.CompactFileSystem
         /// <exception cref="ArgumentOutOfRangeException"/>
         public CompactBlockStream(CompactSystem system, ulong pointer)
         {
-            if (system == null) throw new ArgumentNullException("system");
             if (pointer == 0) throw new ArgumentOutOfRangeException("pointer", "0 is not a valid pointer");
-            this.System = system;
+            this.System = system ?? throw new ArgumentNullException("system");
             this.Pointer = pointer;
             this.SystemPointer = System.ToSystemPointer(pointer);
             BufferSize = (int)Math.Min(65535, System.BlockSize);
@@ -574,17 +573,17 @@ namespace MaxLib.Data.CompactFileSystem
             ulong completeSize = 0;
             while (pointer != 0)
             {
-                ulong size, next;
-                System.ReadHeader(pointer, out size, out next);
+                System.ReadHeader(pointer, out ulong size, out ulong next);
                 completeSize += size;
-                var m = new BlockMeasures();
-                m.CompleteSize = completeSize;
-                m.NextBlock = next;
-                m.Position = pointer;
-                m.BlockPosition = System.ToBlockPointer(pointer);
-                m.Size = size;
-                m.SystemNextBlock = pointer = System.ToSystemPointer(next);
-                blockMeasures.Add(m);
+                blockMeasures.Add(new BlockMeasures
+                {
+                    CompleteSize = completeSize,
+                    NextBlock = next,
+                    Position = pointer,
+                    BlockPosition = System.ToBlockPointer(pointer),
+                    Size = size,
+                    SystemNextBlock = pointer = System.ToSystemPointer(next)
+                });
             }
         }
 
@@ -763,14 +762,15 @@ namespace MaxLib.Data.CompactFileSystem
                         last.SystemNextBlock = p;
                         last.NextBlock = System.ToBlockPointer(p);
                         System.WriteHeader(last.Position, last.Size, last.NextBlock);
-                        var l= new BlockMeasures();
-                        l.CompleteSize = last.CompleteSize;
-                        l.NextBlock = 0;
-                        l.Position = p;
-                        l.BlockPosition = last.NextBlock;
-                        l.Size = 0;
-                        l.SystemNextBlock = 0;
-                        blockMeasures.Add(l);
+                        blockMeasures.Add(new BlockMeasures
+                        {
+                            CompleteSize = last.CompleteSize,
+                            NextBlock = 0,
+                            Position = p,
+                            BlockPosition = last.NextBlock,
+                            Size = 0,
+                            SystemNextBlock = 0
+                        });
                     }
                 }
             }
@@ -890,12 +890,14 @@ namespace MaxLib.Data.CompactFileSystem
                     else
                     {
                         var page = System.FreeSpace.GetFreePage();
-                        var t = new BlockMeasures();
-                        t.NextBlock = blockMeasures[ind].NextBlock;
-                        t.SystemNextBlock = blockMeasures[ind].SystemNextBlock;
-                        t.Position = System.ToSystemPointer(page);
-                        t.BlockPosition = page;
-                        t.Size = 0;
+                        var t = new BlockMeasures
+                        {
+                            NextBlock = blockMeasures[ind].NextBlock,
+                            SystemNextBlock = blockMeasures[ind].SystemNextBlock,
+                            Position = System.ToSystemPointer(page),
+                            BlockPosition = page,
+                            Size = 0
+                        };
                         blockMeasures[ind].NextBlock = page;
                         blockMeasures[ind].SystemNextBlock = t.Position;
                         blockMeasures.Insert(ind + 1, t);
@@ -1483,15 +1485,14 @@ namespace MaxLib.Data.CompactFileSystem
             if (IsProtected) throw new InvalidOperationException("this entry is protected");
             if ((System.Flag & CompactSystemFlags.CompactMode) == CompactSystemFlags.CompactMode)
                 throw new InvalidOperationException("this system is readonly");
-            if (name == null) throw new ArgumentNullException(name);
-
             var p = System.FreeSpace.GetFreePage();
             OffstreamPointer.Add(p);
             Flag |= CompactEntryFlags.ContainsOffstreams;
             CallChange();
-            var s = new CompactOffStream(this, p);
-            s.Name = name;
-            return s;
+            return new CompactOffStream(this, p)
+            {
+                Name = name ?? throw new ArgumentNullException(name)
+            };
         }
         /// <summary>
         /// Entfernt einen Offstream aus der Liste und gibt alle verwendeten Blöcke wieder frei.
@@ -2250,10 +2251,9 @@ namespace MaxLib.Data.CompactFileSystem
             /// <exception cref="ArgumentOutOfRangeException" />
             public PartitionTable(CompactSystem system, int maxEntryCount)
             {
-                if (system == null) throw new ArgumentNullException("system");
                 if (maxEntryCount < 1) throw new ArgumentOutOfRangeException("maxEntryCount");
-                this.System = system;
-                this.MaxEntryCount = maxEntryCount;
+                System = system ?? throw new ArgumentNullException("system");
+                MaxEntryCount = maxEntryCount;
                 groups = new SyncedList<PartitionGroup>();
                 Groups = groups.ToSyncedList(true);
                 entrys = new SyncedList<PartitionEntry>();
@@ -2288,19 +2288,20 @@ namespace MaxLib.Data.CompactFileSystem
             private bool CreateEntry(PartitionGroup group, ulong blockPointer, ulong blockIndex,
                 ulong filledSize, ulong blockSize)
             {
-                PartitionEntry entry;
-                return CreateEntry(group, blockPointer, blockIndex, filledSize, blockSize, out entry);
+                return CreateEntry(group, blockPointer, blockIndex, filledSize, blockSize, out PartitionEntry entry);
             }
 
             private PartitionGroup CreateGroup(PartitionType type, CompactEntry entry = null, 
                 uint offstreamIndex = 0)
             {
-                var group = new PartitionGroup();
-                group.Type = type;
-                group.BlockCount = 0;
-                group.Id = lastGroupId++;
-                group.AssignedEntry = entry;
-                group.OffstreamIndex = offstreamIndex;
+                var group = new PartitionGroup
+                {
+                    Type = type,
+                    BlockCount = 0,
+                    Id = lastGroupId++,
+                    AssignedEntry = entry,
+                    OffstreamIndex = offstreamIndex
+                };
                 groups.Add(group);
                 return group;
             }
@@ -2424,8 +2425,7 @@ namespace MaxLib.Data.CompactFileSystem
                         if (!CreateEntry(null, pointer, 0, 0, cs, out current)) return false;
                         d.Add(pointer, current);
                     }
-                    ulong size, next;
-                    s.ReadHeader(p, out size, out next);
+                    s.ReadHeader(p, out ulong size, out ulong next);
                     current.FilledSize = size;
                     if (next != 0) {
                         PartitionEntry nextp;
