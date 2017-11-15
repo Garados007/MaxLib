@@ -42,6 +42,8 @@
   <ItemGroup>
     <Compile Include="Collections\OverlapModel.cs" />
     <Compile Include="Collections\SlotReserver.cs" />
+    <Compile Include="Console\ConsoleHelper\ConsoleHelper.cs" />
+    <Compile Include="Console\ConsoleHelper\Lister.cs" />
     <Compile Include="Data\StartupParameter\ParamLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Data\Json\JsonElement.cs" />
