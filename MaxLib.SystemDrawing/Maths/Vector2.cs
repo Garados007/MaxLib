@@ -6,7 +6,7 @@ using System.Drawing;
 
 namespace MaxLib.Maths
 {
-    public struct Vector2
+    public struct Vector2 : IEquatable<Vector2Int>
     {
         public float X { get; set; }
         public float Y { get; set; }
@@ -206,6 +206,33 @@ namespace MaxLib.Maths
             var phi = Math.Acos(v.X / r);
             phi += degrees * Math.PI / 180;
             return new Vector2((float)Math.Cos(phi), (float)Math.Sin(phi)) * r;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Vector2))
+            {
+                return false;
+            }
+
+            var vector = (Vector2)obj;
+            return X == vector.X &&
+                   Y == vector.Y;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = 1861411795;
+            hashCode = hashCode * -1521134295 + base.GetHashCode();
+            hashCode = hashCode * -1521134295 + X.GetHashCode();
+            hashCode = hashCode * -1521134295 + Y.GetHashCode();
+            return hashCode;
+        }
+
+        public bool Equals(Vector2Int other)
+        {
+            return X == other.X &&
+                      Y == other.Y;
         }
 
         public static Vector2 Zero { get { return new Vector2(0, 0); } }

@@ -6,7 +6,7 @@ using System.Drawing;
 
 namespace MaxLib.Maths
 {
-    public struct Vector2Int
+    public struct Vector2Int : IEquatable<Vector2Int>
     {
         public int X { get; set; }
         public int Y { get; set; }
@@ -110,6 +110,26 @@ namespace MaxLib.Maths
         public override string ToString()
         {
             return string.Format("X={0}; Y={1}", X, Y);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Vector2Int && Equals((Vector2Int)obj);
+        }
+
+        public bool Equals(Vector2Int other)
+        {
+            return X == other.X &&
+                   Y == other.Y;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = 1861411795;
+            hashCode = hashCode * -1521134295 + base.GetHashCode();
+            hashCode = hashCode * -1521134295 + X.GetHashCode();
+            hashCode = hashCode * -1521134295 + Y.GetHashCode();
+            return hashCode;
         }
 
         public static Vector2Int Zero { get { return new Vector2Int(0, 0); } }

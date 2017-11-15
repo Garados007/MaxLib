@@ -47,6 +47,7 @@
     <Compile Include="Console\ConsoleHelper\Lister.cs" />
     <Compile Include="Data\AddOns\AddOnLoader.cs" />
     <Compile Include="Data\CompactFileSystem\CompactSystem.cs" />
+    <Compile Include="Data\HtmlDom\HtmlParser.cs" />
     <Compile Include="Data\IniFiles\OptionsLoader.cs" />
     <Compile Include="Data\StartupParameter\ParamLoader.cs" />
     <Compile Include="Disposeable.cs" />

@@ -100,7 +100,7 @@ namespace MaxLib.WinForms
                     var d = converter.Convert(Text[0]);
                     Digit = d;
                 }
-                else Digit = Digits.Digit.None;
+                else Digit = Digit.None;
             }
         }
     }

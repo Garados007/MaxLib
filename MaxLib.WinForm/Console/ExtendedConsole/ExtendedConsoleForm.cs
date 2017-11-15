@@ -86,7 +86,7 @@ namespace MaxLib.Console.ExtendedConsole
         BufferedGraphics Buffer;
         Graphics targetGraphics;
         Size LastSize = new Size();
-        public ExtendedConsole Owner { get; internal set; }
+        public new ExtendedConsole Owner { get; internal set; }
 
         object flushlocker = new object();
 

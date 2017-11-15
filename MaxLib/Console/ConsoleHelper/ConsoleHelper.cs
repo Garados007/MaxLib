@@ -269,5 +269,16 @@ namespace MaxLib.Console.ConsoleHelper
         {
             return base.Equals(obj);
         }
+
+        public override int GetHashCode()
+        {
+            var hashCode = 679998008;
+            hashCode = hashCode * -1521134295 + Data.GetHashCode();
+            hashCode = hashCode * -1521134295 + TextColor.GetHashCode();
+            hashCode = hashCode * -1521134295 + BackGroundColor.GetHashCode();
+            hashCode = hashCode * -1521134295 + RePaint.GetHashCode();
+            hashCode = hashCode * -1521134295 + Empty.GetHashCode();
+            return hashCode;
+        }
     }
 }

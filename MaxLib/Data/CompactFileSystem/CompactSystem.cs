@@ -2203,7 +2203,7 @@ namespace MaxLib.Data.CompactFileSystem
 
     namespace Info
     {
-        using SyncedCollections;
+        using MaxLib.Collections;
         /// <summary>
         /// Ermöglicht die Darstellungen der Partitionen und Verteilung der Daten in 
         /// <see cref="CompactSystem"/>.
