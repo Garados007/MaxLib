@@ -56,6 +56,9 @@
     <Compile Include="WinForms\DrawGround.designer.cs">
       <DependentUpon>DrawGround.cs</DependentUpon>
     </Compile>
+    <Compile Include="WinForms\RefreshingListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MaxLib.SystemDrawing\MaxLib.SystemDrawing.csproj">
