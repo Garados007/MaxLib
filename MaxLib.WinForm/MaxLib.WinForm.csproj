@@ -71,6 +71,20 @@
       <DependentUpon>BoxGridView.cs</DependentUpon>
     </Compile>
     <Compile Include="Collections\BoxGridViewContainer.cs" />
+    <Compile Include="WinForms\Digit.cs" />
+    <Compile Include="WinForms\DigitConverter.cs" />
+    <Compile Include="WinForms\DigitList.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WinForms\DigitList.designer.cs">
+      <DependentUpon>DigitList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WinForms\DigitViewer.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WinForms\DigitViewer.designer.cs">
+      <DependentUpon>DigitViewer.cs</DependentUpon>
+    </Compile>
     <Compile Include="WinForms\DrawGround.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -94,6 +108,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Console\ExtendedConsole\ExtendedConsoleForm.resx">
       <DependentUpon>ExtendedConsoleForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WinForms\DigitList.resx">
+      <DependentUpon>DigitList.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WinForms\DrawGround.resx">
       <DependentUpon>DrawGround.cs</DependentUpon>
