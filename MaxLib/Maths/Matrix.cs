@@ -32,7 +32,7 @@ namespace MaxLib.Maths
                 if (!IsSquare) return false;
                 for (int x = 0; x < Width; ++x)
                     for (int y = 0; y < Height; ++y)
-                        if (!data[y, x].Equals(x == y ? One : Zero)) return false;
+                        if (!Data[y, x].Equals(x == y ? One : Zero)) return false;
                 return true;
             }
         }
@@ -44,7 +44,7 @@ namespace MaxLib.Maths
                 if (!IsSquare) return false;
                 for (int y = 1; y < Height; ++y)
                     for (int x = 0; x < y; ++x)
-                        if (!data[y, x].Equals(Zero))
+                        if (!Data[y, x].Equals(Zero))
                             return false;
                 return true;
             }
@@ -57,7 +57,7 @@ namespace MaxLib.Maths
                 if (!IsSquare) return false;
                 for (int y = 0; y < Height - 1; ++y)
                     for (int x = y + 1; x < Width; ++x)
-                        if (!data[y, x].Equals(Zero))
+                        if (!Data[y, x].Equals(Zero))
                             return false;
                 return true;
             }
@@ -80,7 +80,7 @@ namespace MaxLib.Maths
             var d = new T[Width, Height];
             for (int x = 0; x < Width; ++x)
                 for (int y = 0; y < Height; ++y)
-                    d[x, y] = data[y, x];
+                    d[x, y] = Data[y, x];
             return CreateMatrix(d);
         }
 
@@ -91,7 +91,7 @@ namespace MaxLib.Maths
             for (int x = 0; x < Width; ++x)
                 for (int y = 0; y < Height; ++y)
                     if (y != index)
-                        d[y < index ? y : y - 1, x] = data[y, x];
+                        d[y < index ? y : y - 1, x] = Data[y, x];
             return CreateMatrix(d);
         }
 
@@ -102,7 +102,7 @@ namespace MaxLib.Maths
             for (int x = 0; x < Width; ++x)
                 if (x != index)
                     for (int y = 0; y < Height; ++y)
-                        d[y, x < index ? x : x - 1] = data[y, x];
+                        d[y, x < index ? x : x - 1] = Data[y, x];
             return CreateMatrix(d);
         }
 
@@ -111,7 +111,7 @@ namespace MaxLib.Maths
             if (index < 0 || index >= Height) throw new ArgumentOutOfRangeException("index");
             var d = new T[1, Width];
             for (var i = 0; i < Width; ++i)
-                d[0, i] = data[index, i];
+                d[0, i] = Data[index, i];
             return CreateMatrix(d);
         }
 
@@ -120,7 +120,7 @@ namespace MaxLib.Maths
             if (index < 0 || index >= Width) throw new ArgumentOutOfRangeException("index");
             var d = new T[Height, 1];
             for (var i = 0; i < Height; ++i)
-                d[i, 0] = data[i, index];
+                d[i, 0] = Data[i, index];
             return CreateMatrix(d);
         }
 

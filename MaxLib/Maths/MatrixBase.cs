@@ -9,7 +9,7 @@ namespace MaxLib.Maths
     {
         #region Variablen
 
-        protected T[,] data { get; private set; }
+        protected T[,] Data { get; private set; }
 
         #endregion
 
@@ -19,12 +19,12 @@ namespace MaxLib.Maths
         {
             if (width <= 0) throw new ArgumentOutOfRangeException("width");
             if (height <= 0) throw new ArgumentOutOfRangeException("height");
-            data = new T[height, width];
+            Data = new T[height, width];
         }
 
         public MatrixBase(T[,] data)
         {
-            this.data = data ?? throw new ArgumentNullException("data");
+            this.Data = data ?? throw new ArgumentNullException("data");
         }
 
         #endregion
@@ -33,12 +33,12 @@ namespace MaxLib.Maths
 
         public int Width
         {
-            get { return data.GetLength(1); }
+            get { return Data.GetLength(1); }
         }
 
         public int Height
         {
-            get { return data.GetLength(0); }
+            get { return Data.GetLength(0); }
         }
 
         public T this[int y, int x]
@@ -47,13 +47,13 @@ namespace MaxLib.Maths
             {
                 if (y < 0 || y >= Height) throw new ArgumentOutOfRangeException("y");
                 if (x < 0 || x >= Width) throw new ArgumentOutOfRangeException("x");
-                return data[y, x];
+                return Data[y, x];
             }
             set
             {
                 if (y < 0 || y >= Height) throw new ArgumentOutOfRangeException("y");
                 if (x < 0 || x >= Width) throw new ArgumentOutOfRangeException("x");
-                data[y, x] = value;
+                Data[y, x] = value;
             }
         }
 
@@ -63,7 +63,7 @@ namespace MaxLib.Maths
             {
                 for (var x = 0; x < Width; ++x)
                     for (var y = 0; y < Height; ++y)
-                        if (data[y, x].Equals(Zero))
+                        if (Data[y, x].Equals(Zero))
                             return false;
                 return true;
             }
@@ -91,7 +91,7 @@ namespace MaxLib.Maths
                 if (Height != Width) return false;
                 for (int i1 = 1; i1 < Height; ++i1)
                     for (int i2 = 0; i2 < i1; ++i2)
-                        if (data[i1, i2].Equals(data[i2, i1])) return false;
+                        if (Data[i1, i2].Equals(Data[i2, i1])) return false;
                 return true;
             }
         }
@@ -103,7 +103,7 @@ namespace MaxLib.Maths
                 if (Width != Height) return false;
                 for (int x = 0; x < Width; ++x)
                     for (int y = 0; y < Height; ++y)
-                        if (x != y && !data[y, x].Equals(Zero))
+                        if (x != y && !Data[y, x].Equals(Zero))
                             return false;
                 return true;
             }
@@ -122,7 +122,7 @@ namespace MaxLib.Maths
             if (Width != m.Width || Height != m.Height) return false;
             for (var x = 0; x < Width; ++x)
                 for (var y = 0; y < Height; ++y)
-                    if (!data[y, x].Equals(m.data[y, x])) return false;
+                    if (!Data[y, x].Equals(m.Data[y, x])) return false;
             return true;
         }
 
@@ -141,7 +141,7 @@ namespace MaxLib.Maths
                 for (int x = 0; x < Width; ++x)
                 {
                     if (x != 0) sb.Append(';');
-                    sb.Append(data[y, x]);
+                    sb.Append(Data[y, x]);
                 }
                 sb.Append(')');
             }
@@ -156,13 +156,13 @@ namespace MaxLib.Maths
         public Matrix<T> ToMatrix()
         {
             if (this is Matrix<T>) return (Matrix<T>)this;
-            return CreateMatrix(data);
+            return CreateMatrix(Data);
         }
 
         public Determinat<T> ToDeterminat()
         {
             if (this is Determinat<T>) return (Determinat<T>)this;
-            return CreateDeterminat(data);
+            return CreateDeterminat(Data);
         }
 
         protected abstract Matrix<T> CreateMatrix(T[,] data);

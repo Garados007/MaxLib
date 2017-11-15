@@ -28,7 +28,7 @@ namespace MaxLib.Maths
                 if (x != collumnIndex)
                     for (int y = 0; y < Height; ++y)
                         if (y != rowIndex)
-                            d[y < rowIndex ? y : y - 1, x < collumnIndex ? x : x - 1] = data[y, x];
+                            d[y < rowIndex ? y : y - 1, x < collumnIndex ? x : x - 1] = Data[y, x];
             return CreateDeterminat(d);
         }
 

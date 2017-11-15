@@ -167,7 +167,7 @@ namespace MaxLib.Maths
         {
             var d = v1 * v2 / (v1.Abs() * v2.Abs());
             d = Math.Max(-1, Math.Min(1, d));
-            var r = System.Math.Acos(d);
+            var r = Math.Acos(d);
             if (r == 0) r = v1 != v2 ? (float)Math.PI : 0;
             r *= Math.Sign(MultS(v1, v2));
             return (float)r;

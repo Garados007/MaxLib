@@ -21,7 +21,7 @@ namespace MaxLib.Maths
             set
             {
                 real = value;
-                setAngleView();
+                SetAngleView();
             }
         }
         /// <summary>
@@ -33,7 +33,7 @@ namespace MaxLib.Maths
             set
             {
                 imag = value;
-                setAngleView();
+                SetAngleView();
             }
         }
         /// <summary>
@@ -45,7 +45,7 @@ namespace MaxLib.Maths
             set
             {
                 rad = value;
-                setArithmView();
+                SetArithmView();
             }
         }
         /// <summary>
@@ -56,10 +56,10 @@ namespace MaxLib.Maths
             get { return ang; }
             set
             {
-                value = value % (2 * System.Math.PI);
-                if (value < 0) value += 2 * System.Math.PI;
+                value = value % (2 * Math.PI);
+                if (value < 0) value += 2 * Math.PI;
                 ang = value;
-                setArithmView();
+                SetArithmView();
             }
         }
 
@@ -68,9 +68,9 @@ namespace MaxLib.Maths
         /// <summary>
         /// Rechnet <see cref="rad"/> und <see cref="ang"/> aus.
         /// </summary>
-        private void setAngleView()
+        private void SetAngleView()
         {
-            rad = System.Math.Sqrt(real * real + imag * imag);
+            rad = Math.Sqrt(real * real + imag * imag);
             if (rad == 0)
             {
                 ang = 0;
@@ -78,24 +78,24 @@ namespace MaxLib.Maths
             }
             var acos = real / rad;
             var asin = imag / rad;
-            var sin = System.Math.Asin(System.Math.Abs(asin));
+            var sin = Math.Asin(Math.Abs(asin));
 
             if (asin >= 0 && acos >= 0)
                 ang = sin;
             else if (asin >= 0 && acos < 0)
-                ang = System.Math.PI - sin;
+                ang = Math.PI - sin;
             else if (asin < 0 && acos < 0)
-                ang = System.Math.PI + sin;
-            else ang = System.Math.PI * 2 - sin;
+                ang = Math.PI + sin;
+            else ang = Math.PI * 2 - sin;
 
         }
         /// <summary>
         /// Rechnet <see cref="real"/> und <see cref="imag"/> aus.
         /// </summary>
-        private void setArithmView()
+        private void SetArithmView()
         {
-            real = rad * System.Math.Cos(ang);
-            imag = rad * System.Math.Sin(ang);
+            real = rad * Math.Cos(ang);
+            imag = rad * Math.Sin(ang);
             if (rad == 0) ang = 0;
         }
 
@@ -117,8 +117,8 @@ namespace MaxLib.Maths
         {
             this.real = real;
             imag = 0;
-            rad = System.Math.Abs(real);
-            ang = real < 0 ? System.Math.PI : 0;
+            rad = Math.Abs(real);
+            ang = real < 0 ? Math.PI : 0;
         }
         /// <summary>
         /// Erstellt eine neue komplexe Zahl. Je nachdem, wie isAngleView definiert wurde, werden die Parameter in der 
@@ -133,13 +133,13 @@ namespace MaxLib.Maths
             {
                 rad = real;
                 ang = imag;
-                setArithmView();
+                SetArithmView();
             }
             else
             {
                 this.real = real;
                 this.imag = imag;
-                setAngleView();
+                SetAngleView();
             }
         }
 
@@ -386,7 +386,7 @@ namespace MaxLib.Maths
 
         public static Complex Pow(Complex c, double z)
         {
-            return new Complex(System.Math.Pow(c.rad, z), z * c.ang, true);
+            return new Complex(Math.Pow(c.rad, z), z * c.ang, true);
         }
 
         public static Complex[] Root(Complex c, int z)
@@ -394,7 +394,7 @@ namespace MaxLib.Maths
             if (z <= 0) throw new ArgumentOutOfRangeException("z");
             var r = new Complex[z];
             for (var i = 0; i < z; ++i)
-                r[i] = new Complex(System.Math.Pow(c.rad, 1.0 / z), (c.ang + 2 * i * System.Math.PI) / z, true);
+                r[i] = new Complex(Math.Pow(c.rad, 1.0 / z), (c.ang + 2 * i * Math.PI) / z, true);
             return r;
         }
 
