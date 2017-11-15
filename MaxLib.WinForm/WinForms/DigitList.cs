@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace MaxLib.Controls.Digits
+namespace MaxLib.WinForms
 {
     public partial class DigitList : Control
     {

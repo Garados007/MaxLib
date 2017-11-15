@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MaxLib.Controls.Digits
+namespace MaxLib.WinForms
 {
     public interface DigitConverter
     {

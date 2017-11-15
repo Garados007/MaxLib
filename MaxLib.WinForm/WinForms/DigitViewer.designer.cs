@@ -1,4 +1,4 @@
-﻿namespace MaxLib.Controls.Digits
+﻿namespace MaxLib.WinForms
 {
     partial class DigitViewer
     {
