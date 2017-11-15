@@ -116,7 +116,7 @@ namespace MaxLib.Maths
         public Complex(double real)
         {
             this.real = real;
-            this.imag = 0;
+            imag = 0;
             rad = System.Math.Abs(real);
             ang = real < 0 ? System.Math.PI : 0;
         }
@@ -131,8 +131,8 @@ namespace MaxLib.Maths
         {
             if (isAngleView)
             {
-                this.rad = real;
-                this.ang = imag;
+                rad = real;
+                ang = imag;
                 setArithmView();
             }
             else

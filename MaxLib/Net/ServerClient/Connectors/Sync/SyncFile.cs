@@ -56,7 +56,7 @@ namespace MaxLib.Net.ServerClient.Connectors.Sync
                     });
                 if (message.Type == SyncFileMessageType.ConnectionSuccess)
                 {
-                    this.FileTransport.StartTask(file.Task);
+                    FileTransport.StartTask(file.Task);
                 }
             }
         }

@@ -223,7 +223,7 @@ namespace MaxLib.Console.ExtendedConsole
 
             public Enumerator(bool Vertical, ExtendedConsoleCellMatrix matrix)
             {
-                this.vertical = Vertical;
+                vertical = Vertical;
                 this.matrix = matrix;
             }
 
@@ -274,7 +274,7 @@ namespace MaxLib.Console.ExtendedConsole
 
         internal ExtendedConsoleDataStrip(ExtendedConsoleCellMatrix m, int index, bool vertical)
         {
-            this.Vertical = vertical;
+            Vertical = vertical;
             Cells = new ExtendedConsoleCell[vertical ? m.Height : m.Width];
             for (int i = 0; i < Cells.Length; ++i) Cells[i] = m[vertical ? index : i, vertical ? i : index];
         }
@@ -315,9 +315,9 @@ namespace MaxLib.Console.ExtendedConsole
         {
             if (c.Value >= 32)
             {
-                this.value = c.value;
-                this.bgCol = c.bgCol;
-                this.fgCol = c.fgCol;
+                value = c.value;
+                bgCol = c.bgCol;
+                fgCol = c.fgCol;
             }
         }
     }
@@ -406,18 +406,18 @@ namespace MaxLib.Console.ExtendedConsole
 
         public ExtendedConsoleColor(int a, int r, int g, int b) : this()
         {
-            this.A = a;
-            this.R = r;
-            this.G = g;
-            this.B = b;
+            A = a;
+            R = r;
+            G = g;
+            B = b;
         }
 
         public ExtendedConsoleColor(System.Drawing.Color c) : this()
         {
-            this.A = c.A;
-            this.R = c.R;
-            this.G = c.G;
-            this.B = c.B;
+            A = c.A;
+            R = c.R;
+            G = c.G;
+            B = c.B;
         }
 
         public ExtendedConsoleColor(int c) : this(System.Drawing.Color.FromArgb(c)) { }

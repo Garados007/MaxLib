@@ -48,7 +48,7 @@ namespace MaxLib.Net.Webserver
 
         public WebServer(WebServerSettings settings)
         {
-            this.Settings = settings;
+            Settings = settings;
             for (int i = 1; i <= 7; ++i) WebServiceGroups.Add((WebServiceType)i, new WebServiceGroup((WebServiceType)i));
         }
 
@@ -341,8 +341,8 @@ namespace MaxLib.Net.Webserver
 
         public WebServerSettings(int port, int connectionTimeout)
         {
-            this.Port = port;
-            this.ConnectionTimeout = connectionTimeout;
+            Port = port;
+            ConnectionTimeout = connectionTimeout;
         }
     }
 
@@ -433,9 +433,9 @@ namespace MaxLib.Net.Webserver
 
             public SessionInformation(string hexkey, byte[] bytekey, DateTime generated)
             {
-                this.HexKey = hexkey;
-                this.ByteKey = bytekey;
-                this.Generated = generated;
+                HexKey = hexkey;
+                ByteKey = bytekey;
+                Generated = generated;
                 Information = new Dictionary<object, object>();
             }
         }
@@ -1178,16 +1178,16 @@ namespace MaxLib.Net.Webserver
 
         public InfoTile(InfoType type, Type sender, string infoType, string information)
         {
-            this.Type = type;
-            this.Sender = sender;
-            this.InfoType = infoType;
-            this.Information = information;
+            Type = type;
+            Sender = sender;
+            InfoType = infoType;
+            Information = information;
         }
 
         public InfoTile(InfoType type, Type sender, string infoType, object additionlData, string information)
             : this(type, sender, infoType, information)
         {
-            this.AdditionalData = additionlData;
+            AdditionalData = additionlData;
         }
 
         public InfoTile(InfoType type, Type sender, string infoType, string mask, params object[] data)
@@ -1654,7 +1654,7 @@ namespace MaxLib.Net.Webserver
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append(this.CompleteRequestCookie);
+            sb.Append(CompleteRequestCookie);
             return sb.ToString();
         }
     }
@@ -3017,8 +3017,8 @@ namespace MaxLib.Net.Webserver
             {
                 if (!input.CanRead) throw new ArgumentException("input is not readable");
                 if (!output.CanWrite) throw new ArgumentException("output is not writeable");
-                this.Input = input;
-                this.Output = output;
+                Input = input;
+                Output = output;
             }
 
             public override bool CanRead

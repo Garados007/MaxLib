@@ -1340,21 +1340,21 @@ namespace MaxLib.Data.IniFiles
 
         public OptionsGroup()
         {
-            this.Name = "Unnamed Group";
+            Name = "Unnamed Group";
             Options = new OptionsCollection(true);
             Attributes = new OptionsCollection(false);
         }
 
         public OptionsGroup(string name)
         {
-            this.Name = name;
+            Name = name;
             Options = new OptionsCollection(true);
             Attributes = new OptionsCollection(false);
         }
 
         internal OptionsGroup(bool main)
         {
-            this.Name = main ? "Main Group" : "Unnamed Group";
+            Name = main ? "Main Group" : "Unnamed Group";
             Options = new OptionsCollection(true);
             Attributes = main ? null : new OptionsCollection(false);
         }
@@ -1430,8 +1430,8 @@ namespace MaxLib.Data.IniFiles
 
         internal OptionsKey(string name, string valueText, bool internalValue = true)
         {
-            this.Name = name;
-            this.ValueText = valueText;
+            Name = name;
+            ValueText = valueText;
         }
 
         public string ToStreamString()

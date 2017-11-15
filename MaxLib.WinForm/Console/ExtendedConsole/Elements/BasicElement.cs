@@ -43,7 +43,7 @@ namespace MaxLib.Console.ExtendedConsole.Elements
         {
             if (item == null) throw new ArgumentNullException("item");
             elements.Add(item);
-            item.Changed += this.DoClientChange;
+            item.Changed += DoClientChange;
             DoClientChange();
         }
 
@@ -76,7 +76,7 @@ namespace MaxLib.Console.ExtendedConsole.Elements
         public bool Remove(BasicElement item)
         {
             var r = elements.Remove(item);
-            item.Changed -= this.DoClientChange;
+            item.Changed -= DoClientChange;
             DoClientChange();
             return r;
         }

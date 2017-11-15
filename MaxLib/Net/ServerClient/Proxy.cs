@@ -9,7 +9,7 @@ namespace MaxLib.Net.ServerClient
     {
         public Proxy(ConnectionManager manager)
         {
-            this.Manager = manager;
+            Manager = manager;
             Server = new List<ProxyServer>();
         }
 

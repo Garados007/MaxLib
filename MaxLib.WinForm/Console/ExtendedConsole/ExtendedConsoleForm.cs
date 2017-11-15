@@ -15,13 +15,13 @@ namespace MaxLib.Console.ExtendedConsole
         {
             InitializeComponent();
             FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Load += ExtendedConsoleForm_Load;
-            this.FormClosing += ExtendedConsoleForm_FormClosing;
-            this.MouseMove += ExtendedConsoleForm_MouseMove;
-            this.KeyDown += ExtendedConsoleForm_KeyDown;
-            this.KeyUp += ExtendedConsoleForm_KeyUp;
-            this.MouseDown += ExtendedConsoleForm_MouseDown;
-            this.MouseUp += ExtendedConsoleForm_MouseUp;
+            Load += ExtendedConsoleForm_Load;
+            FormClosing += ExtendedConsoleForm_FormClosing;
+            MouseMove += ExtendedConsoleForm_MouseMove;
+            KeyDown += ExtendedConsoleForm_KeyDown;
+            KeyUp += ExtendedConsoleForm_KeyUp;
+            MouseDown += ExtendedConsoleForm_MouseDown;
+            MouseUp += ExtendedConsoleForm_MouseUp;
             DoubleBuffered = true;
             Cursor.Hide();
         }

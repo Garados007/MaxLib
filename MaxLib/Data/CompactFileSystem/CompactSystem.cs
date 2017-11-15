@@ -294,7 +294,7 @@ namespace MaxLib.Data.CompactFileSystem
             if (stream.Length == 0) throw new FormatException("the stream is empty and does not contains any data");
             if (!stream.CanRead) throw new ArgumentException("stream", "stream is not readable");
             if (!stream.CanSeek) throw new ArgumentException("stream", "stream is not seekable");
-            this.FileStream = stream;
+            FileStream = stream;
             Reader = new BinaryReader(stream);
             Writer = new BinaryWriter(stream);
             stream.Position = 0;
@@ -329,7 +329,7 @@ namespace MaxLib.Data.CompactFileSystem
             var mbs = MaxBlockSize(pointerSize);
             if (blockSize > mbs) throw new ArgumentOutOfRangeException("blockSize",
                 "this value is to large to store in this file. (required <=" + mbs.ToString() + ")");
-            this.FileStream = stream;
+            FileStream = stream;
             Reader = new BinaryReader(stream);
             Writer = new BinaryWriter(stream);
             Flag = flags;
@@ -538,9 +538,9 @@ namespace MaxLib.Data.CompactFileSystem
         public CompactBlockStream(CompactSystem system, ulong pointer)
         {
             if (pointer == 0) throw new ArgumentOutOfRangeException("pointer", "0 is not a valid pointer");
-            this.System = system ?? throw new ArgumentNullException("system");
-            this.Pointer = pointer;
-            this.SystemPointer = System.ToSystemPointer(pointer);
+            System = system ?? throw new ArgumentNullException("system");
+            Pointer = pointer;
+            SystemPointer = System.ToSystemPointer(pointer);
             BufferSize = (int)Math.Min(65535, System.BlockSize);
             GetMeasures();
             buffer = new byte[BufferSize];
@@ -1037,7 +1037,7 @@ namespace MaxLib.Data.CompactFileSystem
 
         internal CompactContentStream(CompactEntry entry)
         {
-            this.Entry = entry;
+            Entry = entry;
             Stream = new CompactBlockStream(entry.System, entry.ContentPointer);
         }
 
@@ -1735,7 +1735,7 @@ namespace MaxLib.Data.CompactFileSystem
 
         internal CompactEntry(CompactSystem system, BinaryReader r)
         {
-            this.System = system;
+            System = system;
             TableOffset = r.BaseStream.Position;
             FromBytes(r);
             constructMode = false;
@@ -1743,13 +1743,13 @@ namespace MaxLib.Data.CompactFileSystem
 
         internal CompactEntry(CompactSystem system, ulong id, string name, CompactEntryFlags flags, CompactEntry parent)
         {
-            this.System = system;
-            this.Id = id;
-            this.BaseName = name;
-            this.Flag = flags;
-            this.Parent = parent;
-            this.ParentId = parent?.Id ?? 0;
-            this.constructMode = false;
+            System = system;
+            Id = id;
+            BaseName = name;
+            Flag = flags;
+            Parent = parent;
+            ParentId = parent?.Id ?? 0;
+            constructMode = false;
         }
     }
 
@@ -1860,7 +1860,7 @@ namespace MaxLib.Data.CompactFileSystem
 
         internal CompactFreeSpaceRegistry(CompactSystem system)
         {
-            this.System = system;
+            System = system;
             Stream = new CompactBlockStream(system, system.FreeSpaceBlock);
             Reader = new BinaryReader(Stream);
             Writer = new BinaryWriter(Stream);
@@ -1903,7 +1903,7 @@ namespace MaxLib.Data.CompactFileSystem
 
         internal CompactFileTable(CompactSystem system)
         {
-            this.System = system;
+            System = system;
             Stream = new CompactBlockStream(system, system.StartMFTBlock);
             Entrys = new Dictionary<ulong, CompactEntry>();
             var r = new BinaryReader(Stream);

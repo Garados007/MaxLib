@@ -172,7 +172,7 @@ namespace MaxLib.Net.ServerClient.Remoting
         public RemoteConnectorHelper(Connector con, RemoteManager man)
             : base (con)
         {
-            this.Owner = man;
+            Owner = man;
             con._MesRec += con__MesRec;
         }
 
@@ -379,8 +379,8 @@ namespace MaxLib.Net.ServerClient.Remoting
 
         public RemoteObject(T DefaultObject)
         {
-            this.MainObject = DefaultObject;
-            this.domain = AppDomain.CurrentDomain;
+            MainObject = DefaultObject;
+            domain = AppDomain.CurrentDomain;
         }
 
         public virtual bool IsObjectAvaible(AppDomain current)

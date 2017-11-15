@@ -105,7 +105,7 @@ namespace MaxLib.WinForms
                 dv.ForeColor = ForeColor;
                 dv.BackColor = BackColor;
                 dv.InactiveColor = InactiveColor;
-                if (TimerEnabled && s.Length > 0) dv.Text = s[(this.offset + i) % length].ToString();
+                if (TimerEnabled && s.Length > 0) dv.Text = s[(offset + i) % length].ToString();
                 else if (s.Length>i) dv.Text = s[i].ToString();
                 else dv.Text = "";
 

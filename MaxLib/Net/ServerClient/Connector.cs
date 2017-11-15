@@ -100,9 +100,9 @@ namespace MaxLib.Net.ServerClient
         public Connection(ConnectorProtocol protocol, int port)
         {
             if (protocol == ConnectorProtocol.Unknown) throw new WrongProtocolException();
-            this.Protocol = protocol;
-            this.Port = port;
-            this.Target = "";
+            Protocol = protocol;
+            Port = port;
+            Target = "";
         }
 
         public static Connection Create(ConnectorProtocol protocol, int port)
@@ -120,9 +120,9 @@ namespace MaxLib.Net.ServerClient
         public Connection(ConnectorProtocol protocol, int port, string target)
         {
             if (protocol == ConnectorProtocol.Unknown) throw new WrongProtocolException();
-            this.Protocol = protocol;
-            this.Port = port;
-            this.Target = target;
+            Protocol = protocol;
+            Port = port;
+            Target = target;
         }
 
         public static Connection Create(ConnectorProtocol protocol, int port, string target)
@@ -255,7 +255,7 @@ namespace MaxLib.Net.ServerClient
             if (MainProtocol != ConnectorProtocol.Unknown && key.Protocol != MainProtocol)
                 throw new WrongProtocolException();
             if (Count >= MaxCount) throw new FullConnectionListException();
-            this.connections.Add(key, value);
+            connections.Add(key, value);
             ConAdd(key);
         }
 
@@ -273,7 +273,7 @@ namespace MaxLib.Net.ServerClient
         {
             if (isReadOnly) throw new AccessViolationException();
             ConRem(key);
-            return this.connections.Remove(key);
+            return connections.Remove(key);
         }
 
         public bool TryGetValue(Connection key, out bool value)
@@ -384,11 +384,11 @@ namespace MaxLib.Net.ServerClient
 
         public ConnectionLostEventArgument(Connector connector, Connection connection, Message sendedMessage)
         {
-            this.Connector = connector;
-            this.Connection = connection;
-            this.SendedMessage = sendedMessage;
-            this.Retry = false;
-            this.UserLogout = true;
+            Connector = connector;
+            Connection = connection;
+            SendedMessage = sendedMessage;
+            Retry = false;
+            UserLogout = true;
         }
     }
 

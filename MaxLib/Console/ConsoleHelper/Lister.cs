@@ -23,7 +23,7 @@ namespace MaxLib.Console.ConsoleHelper
 
         public Lister(ConsoleHelper helper, int left, int top, int width, int height, params object[] initialElements)
         {
-            this.ConsoleHelper = helper;
+            ConsoleHelper = helper;
             Left = left; Top = top; Width = width; Height = height;
             Elements.AddRange(initialElements);
             writer = new ConsoleWriterAsync(helper);

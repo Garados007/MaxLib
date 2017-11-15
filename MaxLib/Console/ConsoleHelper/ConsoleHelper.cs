@@ -235,10 +235,10 @@ namespace MaxLib.Console.ConsoleHelper
 
         internal void CopyFrom(ConsoleCellData ccd)
         {
-            this.Data = ccd.Data;
-            this.BackGroundColor = ccd.BackGroundColor;
-            this.TextColor = ccd.TextColor;
-            this.RePaint = ccd.RePaint;
+            Data = ccd.Data;
+            BackGroundColor = ccd.BackGroundColor;
+            TextColor = ccd.TextColor;
+            RePaint = ccd.RePaint;
         }
 
         internal ConsoleCellData()

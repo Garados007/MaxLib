@@ -130,7 +130,7 @@ namespace MaxLib.Data.AddOns
         /// <exception cref="NotSupportedException"/>
         public void DetectTypes()
         {
-            this.RegistredFiles.ForEach((f) => f.DetectTypes());
+            RegistredFiles.ForEach((f) => f.DetectTypes());
         }
 
         public override string ToString()
@@ -210,9 +210,9 @@ namespace MaxLib.Data.AddOns
         {
             try
             {
-                this.AssemblyName = AssemblyName.GetAssemblyName(FileInfo.FullName);
-                this.Assembly = Assembly.Load(this.AssemblyName);
-                if (this.Assembly == null) return;
+                AssemblyName = AssemblyName.GetAssemblyName(FileInfo.FullName);
+                Assembly = Assembly.Load(AssemblyName);
+                if (Assembly == null) return;
                 var types = Assembly.GetTypes();
                 foreach (var type in types)
                 {

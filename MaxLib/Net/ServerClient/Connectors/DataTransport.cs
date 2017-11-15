@@ -48,12 +48,12 @@ namespace MaxLib.Net.ServerClient.Connectors
 
         public override void StartProgress()
         {
-            for (int i = 0; i < Connections.Count; ++i) this.ConnectionAdded(Connections[i]);
+            for (int i = 0; i < Connections.Count; ++i) ConnectionAdded(Connections[i]);
         }
 
         public override void StopProgress()
         {
-            for (int i = 0; i < Connections.Count; ++i) this.ConnectionRemoved(Connections[i]);
+            for (int i = 0; i < Connections.Count; ++i) ConnectionRemoved(Connections[i]);
         }
 
         public override void SendMessage(PrimaryMessage message)
@@ -234,9 +234,9 @@ namespace MaxLib.Net.ServerClient.Connectors
 
         public LogoutUser(User user, Connector connector, ConnectionLostEventArgument argument)
         {
-            this.User = user;
-            this.Connector = connector;
-            this.Argument = argument;
+            User = user;
+            Connector = connector;
+            Argument = argument;
         }
     }
 

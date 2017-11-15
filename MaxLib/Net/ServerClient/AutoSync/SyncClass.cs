@@ -147,9 +147,9 @@ namespace MaxLib.Net.ServerClient.AutoSync
         /// <param name="runAsServer">gibt an, ob diese Instanz als Server fungiert.</param>
         public SyncManager(ConnectionManager manager, bool runAsServer)
         {
-            this.Manager = manager;
+            Manager = manager;
             manager.SyncData.Add(this);
-            this.Id = LastID++;
+            Id = LastID++;
             RunAsServer = runAsServer;
         }
         /// <summary>

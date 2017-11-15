@@ -54,19 +54,21 @@ namespace MaxLib.Data.HtmlDom
         public static void ParseHtml(HtmlDomDocument document, string html)
         {
             document.Elements.Clear();
-            var rp = new RealParser();
-            rp.Document = document;
-            rp.Stream = new System.IO.MemoryStream(DefaultEncoding.GetBytes(html));
-            document.Elements.AddRange(rp.Build());
+            document.Elements.AddRange(new RealParser
+            {
+                Document = document,
+                Stream = new System.IO.MemoryStream(DefaultEncoding.GetBytes(html))
+            }.Build());
         }
 
         public static void ParseHtml(HtmlDomDocument document, System.IO.Stream stream)
         {
             document.Elements.Clear();
-            var rp = new RealParser();
-            rp.Document = document;
-            rp.Stream = stream;
-            document.Elements.AddRange(rp.Build());
+            document.Elements.AddRange(new RealParser
+            {
+                Document = document,
+                Stream = stream
+            }.Build());
         }
 
         #endregion
@@ -372,8 +374,10 @@ namespace MaxLib.Data.HtmlDom
                     sr = GetNextSingleRaw();
                     while (sr != null && sr.Type != ParseRawType.TagCloser && sr.Type != ParseRawType.TagEnd)
                     {
-                        var att = new HtmlDomAttribute("", null);
-                        att.Key = sr.Text;
+                        var att = new HtmlDomAttribute("", null)
+                        {
+                            Key = sr.Text
+                        };
                         ew.Element.Attributes.Add(att);
                         if ((sr = GetNextSingleRaw()) == null) break;
                         if (sr.Type==ParseRawType.AttributeName) continue;
@@ -557,10 +561,12 @@ namespace MaxLib.Data.HtmlDom
                             ActiveType = ActiveParserType.Tag;
                             pr.Text = pr.Text.Trim();
                             ParseRawQueue.Enqueue(pr);
-                            pr = new ParseRaw();
-                            pr.Pos = SavePos();
-                            pr.Type = ParseRawType.TagStart;
-                            pr.Text = "<";
+                            pr = new ParseRaw
+                            {
+                                Pos = SavePos(),
+                                Type = ParseRawType.TagStart,
+                                Text = "<"
+                            };
                             ParseRawQueue.Enqueue(pr);
                             return true;
                         }
@@ -619,28 +625,34 @@ namespace MaxLib.Data.HtmlDom
                             }
                             if (cc == '<')
                             {
-                                pr = new ParseRaw();
-                                pr.Pos = SavePos();
-                                pr.Type = ParseRawType.TagStart;
-                                pr.Text = "<";
+                                pr = new ParseRaw
+                                {
+                                    Pos = SavePos(),
+                                    Type = ParseRawType.TagStart,
+                                    Text = "<"
+                                };
                                 ParseRawQueue.Enqueue(pr);
                                 return true;
                             }
                             if (cc == '/')
                             {
-                                pr = new ParseRaw();
-                                pr.Pos = SavePos();
-                                pr.Type = ParseRawType.TagCloser;
-                                pr.Text = "/";
+                                pr = new ParseRaw
+                                {
+                                    Pos = SavePos(),
+                                    Type = ParseRawType.TagCloser,
+                                    Text = "/"
+                                };
                                 ParseRawQueue.Enqueue(pr);
                                 return true;
                             }
                             if (cc == '>')
                             {
-                                pr = new ParseRaw();
-                                pr.Pos = SavePos();
-                                pr.Type = ParseRawType.TagEnd;
-                                pr.Text = ">";
+                                pr = new ParseRaw
+                                {
+                                    Pos = SavePos(),
+                                    Type = ParseRawType.TagEnd,
+                                    Text = ">"
+                                };
                                 ActiveType = ActiveParserType.Text;
                                 ParseRawQueue.Enqueue(pr);
                                 ignorerules = false;
@@ -758,10 +770,12 @@ namespace MaxLib.Data.HtmlDom
                             ActiveType = ActiveParserType.AttributeName;
                             if (cc == '"' || cc=='\'')
                             {
-                                pr = new ParseRaw();
-                                pr.Pos = SavePos();
-                                pr.Text = "\"";
-                                pr.Type = ParseRawType.AttributeEnd;
+                                pr = new ParseRaw
+                                {
+                                    Pos = SavePos(),
+                                    Text = "\"",
+                                    Type = ParseRawType.AttributeEnd
+                                };
                                 ParseRawQueue.Enqueue(pr);
                                 return true;
                             }
@@ -967,11 +981,6 @@ namespace MaxLib.Data.HtmlDom
                 Text,           //Ein einfacher Text
                 Hidden,         //Inhalte, die nicht geparst werden durften
             }
-            class ActiveParse
-            {
-                internal ActiveParserType Type;
-                internal string Text;
-            }
             enum ActiveParserType
             {
                 Text,
@@ -1044,7 +1053,7 @@ namespace MaxLib.Data.HtmlDom
     {
         public HtmlParserHelperAttribute(HtmlParserHelperType helperType)
         {
-            this.HelperType = helperType;
+            HelperType = helperType;
         }
 
         public HtmlParserHelperType HelperType { get; set; }
@@ -1158,7 +1167,7 @@ namespace MaxLib.Data.HtmlDom
         }
         public HtmlDomElement(string name, params HtmlDomAttribute[] attributes) : this(name)
         {
-            this.Attributes.AddRange(attributes);
+            Attributes.AddRange(attributes);
         }
 
         #endregion
@@ -1341,7 +1350,7 @@ namespace MaxLib.Data.HtmlDom
         [HtmlParserHelper(HtmlParserHelperType.ContentTarget)]
         protected void SetScriptCode(string code)
         {
-            this.ScriptCode = code;
+            ScriptCode = code;
         }
 
         public override string GetOuterHtml()
@@ -1366,7 +1375,7 @@ namespace MaxLib.Data.HtmlDom
         [HtmlParserHelper(HtmlParserHelperType.ContentTarget)]
         protected void SetStyleCode(string code)
         {
-            this.StyleCode = code;
+            StyleCode = code;
         }
 
         public override string GetOuterHtml()
@@ -1408,7 +1417,7 @@ namespace MaxLib.Data.HtmlDom
         [HtmlParserHelper(HtmlParserHelperType.ContentTarget)]
         protected void SetComment(string comment)
         {
-            this.Comment = comment;
+            Comment = comment;
         }
 
         public override string GetOuterHtml()
@@ -1435,7 +1444,7 @@ namespace MaxLib.Data.HtmlDom
         [HtmlParserHelper(HtmlParserHelperType.ContentTarget)]
         protected void SetDoctype(string doctype)
         {
-            this.Doctype = doctype;
+            Doctype = doctype;
         }
 
         public override string GetOuterHtml()
@@ -1462,8 +1471,8 @@ namespace MaxLib.Data.HtmlDom
 
         public HtmlDomAttribute(string key, object value)
         {
-            this.Key = key;
-            this.Value = value == null ? "" : value.ToString();
+            Key = key;
+            Value = value == null ? "" : value.ToString();
         }
 
         public override string ToString()
@@ -1491,12 +1500,12 @@ namespace MaxLib.Data.HtmlDom
     {
         public HtmlDomClass(HtmlDomElement element)
         {
-            this.Element = element;
+            Element = element;
         }
 
         public HtmlDomElement Element { get; private set; }
 
-        List<string> getTiles()
+        List<string> GetTiles()
         {
             var att = Element.GetAttribute("class");
             if (att.Length == 0) return new List<string>();
@@ -1506,7 +1515,7 @@ namespace MaxLib.Data.HtmlDom
             return tiles;
         }
 
-        void setTiles(List<string> tiles)
+        void SetTiles(List<string> tiles)
         {
             var sb = new StringBuilder();
             for (int i = 0; i < tiles.Count; ++i)
@@ -1519,62 +1528,62 @@ namespace MaxLib.Data.HtmlDom
 
         public int IndexOf(string item)
         {
-            return getTiles().IndexOf(item);
+            return GetTiles().IndexOf(item);
         }
 
         public void Insert(int index, string item)
         {
-            var list = getTiles();
+            var list = GetTiles();
             list.Insert(index, item);
-            setTiles(list);
+            SetTiles(list);
         }
 
         public void RemoveAt(int index)
         {
-            var list = getTiles();
+            var list = GetTiles();
             list.RemoveAt(index);
-            setTiles(list);
+            SetTiles(list);
         }
 
         public string this[int index]
         {
             get
             {
-                return getTiles()[index];
+                return GetTiles()[index];
             }
             set
             {
-                var list = getTiles();
+                var list = GetTiles();
                 list[index] = value;
-                setTiles(list);
+                SetTiles(list);
             }
         }
 
         public void Add(string item)
         {
-            var list = getTiles();
+            var list = GetTiles();
             list.Add(item);
-            setTiles(list);
+            SetTiles(list);
         }
 
         public void Clear()
         {
-            setTiles(new List<string>());
+            SetTiles(new List<string>());
         }
 
         public bool Contains(string item)
         {
-            return getTiles().Contains(item);
+            return GetTiles().Contains(item);
         }
 
         public void CopyTo(string[] array, int arrayIndex)
         {
-            getTiles().CopyTo(array, arrayIndex);
+            GetTiles().CopyTo(array, arrayIndex);
         }
 
         public int Count
         {
-            get { return getTiles().Count; }
+            get { return GetTiles().Count; }
         }
 
         public bool IsReadOnly
@@ -1584,20 +1593,20 @@ namespace MaxLib.Data.HtmlDom
 
         public bool Remove(string item)
         {
-            var list = getTiles();
+            var list = GetTiles();
             var removed = list.Remove(item);
-            setTiles(list);
+            SetTiles(list);
             return removed;
         }
 
         public IEnumerator<string> GetEnumerator()
         {
-            return getTiles().GetEnumerator();
+            return GetTiles().GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return getTiles().GetEnumerator();
+            return GetTiles().GetEnumerator();
         }
     }
 
@@ -1808,7 +1817,7 @@ namespace MaxLib.Data.HtmlDom
 
         public HtmlDomDataSource(HtmlDomDocument document)
         {
-            this.Document = document;
+            Document = document;
         }
 
         public override void Dispose()

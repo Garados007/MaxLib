@@ -207,7 +207,7 @@ namespace MaxLib.Maths
             for (int y = 0; y < Height; ++y)
                 for (int x = 0; x < Width; ++x)
                     d[y, x] = this[y, x];
-            return this.CreateMatrix(d);
+            return CreateMatrix(d);
         }
 
         #endregion

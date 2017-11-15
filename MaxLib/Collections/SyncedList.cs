@@ -52,7 +52,7 @@ namespace MaxLib.Collections
 
         public SyncedList<T> ToSyncedList(bool readOnly)
         {
-            if (!readOnly && this.ReadOnly)
+            if (!readOnly && ReadOnly)
                 throw new InvalidOperationException("a readonly list cannot create a writeable list");
             return new SyncedList<T>(list, lockList, readOnly);
         }

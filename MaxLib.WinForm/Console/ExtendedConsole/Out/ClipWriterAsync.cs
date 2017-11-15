@@ -35,10 +35,10 @@ namespace MaxLib.Console.ExtendedConsole.Out
         public ClipWriterAsync(ExtendedConsole Owner, int x, int y, int width, int height)
         {
             this.Owner = Owner;
-            this.X = x;
-            this.Y = y;
-            this.Width = width;
-            this.Height = height;
+            X = x;
+            Y = y;
+            Width = width;
+            Height = height;
         }
 
         public ClipWriterAsync(ExtendedConsole Owner) : this(Owner, 0, 0, Owner.Matrix.Width, Owner.Matrix.Height) { }
