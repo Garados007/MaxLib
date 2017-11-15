@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DB\Database.cs" />
+    <Compile Include="DB\Factory.cs" />
     <Compile Include="DB\Query.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
