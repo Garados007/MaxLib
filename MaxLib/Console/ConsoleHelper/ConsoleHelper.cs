@@ -33,9 +33,10 @@ namespace MaxLib.Console.ConsoleHelper
             }
             Console.CursorVisible = ShowCursor;
             Console.CancelKeyPress += Console_CancelKeyPress;
-            Updater = new Thread(Updating);
-            Updater.Name = "ConsoleHelper Updater Thread";
-            Updater.Start();
+            (Updater = new Thread(Updating)
+            {
+                Name = "ConsoleHelper Updater Thread"
+            }).Start();
         }
 
         public void Close()
@@ -117,8 +118,7 @@ namespace MaxLib.Console.ConsoleHelper
 
         public ConsoleWriterAsync(ConsoleHelper helper)
         {
-            if (helper == null) throw new ArgumentNullException("helper");
-            this.ConsoleHelper = helper;
+            ConsoleHelper = helper ?? throw new ArgumentNullException("helper");
         }
 
         ConsoleCellData[,] buffer = null;
@@ -136,7 +136,7 @@ namespace MaxLib.Console.ConsoleHelper
 
         public void Clear(int left, int top, int width, int height)
         {
-            var target = buffer == null ? ConsoleHelper.buffer : buffer;
+            var target = buffer ?? ConsoleHelper.buffer;
             for (int x = left; x<left+width; ++x) for (int y = top; y<top+height; ++y)
                 {
                     if (textc != null) target[x, y].TextColor = textc.Value;
@@ -148,14 +148,14 @@ namespace MaxLib.Console.ConsoleHelper
 
         public void SetCursorPos(int left, int top)
         {
-            this.WriterLeft = left;
-            this.WriterTop = top;
+            WriterLeft = left;
+            WriterTop = top;
         }
 
         public void Write<T>(T data)
         {
             var s = data.ToString();
-            var target = buffer == null ? ConsoleHelper.buffer : buffer;
+            var target = buffer ?? ConsoleHelper.buffer;
             for (int i = 0; i < s.Length; ++i)
             {
                 if (textc != null) target[WriterLeft, WriterTop].TextColor = textc.Value;
@@ -183,7 +183,7 @@ namespace MaxLib.Console.ConsoleHelper
         public void Write<T>(T data, ConsoleColor textColor, ConsoleColor bgColor)
         {
             var s = data.ToString();
-            var target = buffer == null ? ConsoleHelper.buffer : buffer;
+            var target = buffer ?? ConsoleHelper.buffer;
             for (int i = 0; i < s.Length; ++i)
             {
 
