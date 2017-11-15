@@ -7,7 +7,7 @@
     <ProjectGuid>{604C9820-2353-4044-89CD-2CBB48806B3B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MaxLib.SystemDrawing</RootNamespace>
+    <RootNamespace>MaxLib</RootNamespace>
     <AssemblyName>MaxLib.SystemDrawing</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -42,6 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Collections\LineGridContainer.cs" />
+    <Compile Include="Maths\Vector2.cs" />
+    <Compile Include="Maths\Vector2Int.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -50,5 +52,6 @@
       <Name>MaxLib</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

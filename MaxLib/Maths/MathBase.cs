@@ -1,0 +1,22 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace MaxLib.Maths
+{
+    public abstract class MathBase<T>
+    {
+        protected abstract T One { get; }
+
+        protected abstract T Zero { get; }
+
+        protected abstract T Add(T value1, T value2);
+
+        protected abstract T Negate(T value);
+
+        protected abstract T Multiplicate(T value1, T value2);
+
+        protected abstract T Divide(T value1, T value2);
+    }
+}
