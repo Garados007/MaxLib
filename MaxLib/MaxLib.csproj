@@ -44,6 +44,7 @@
     <Compile Include="Collections\SlotReserver.cs" />
     <Compile Include="Console\ConsoleHelper\ConsoleHelper.cs" />
     <Compile Include="Console\ConsoleHelper\Lister.cs" />
+    <Compile Include="Data\IniFiles\OptionsLoader.cs" />
     <Compile Include="Data\StartupParameter\ParamLoader.cs" />
     <Compile Include="ILoadSaveAble.cs" />
     <Compile Include="Net\ServerClient\AutoSync\SyncClass.cs" />
@@ -64,8 +65,6 @@
     <Compile Include="Data\Json\Smart.cs" />
     <Compile Include="FrameTimeCounter.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Data\IniFiles\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
