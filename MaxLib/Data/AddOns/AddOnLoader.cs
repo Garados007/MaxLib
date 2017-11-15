@@ -24,8 +24,7 @@ namespace MaxLib.Data.AddOns
         /// </summary>
         public AddOnLoader()
         {
-            SupportedExtensions = new List<string>();
-            SupportedExtensions.Add(".dll");
+            SupportedExtensions = new List<string> { ".dll" };
             RegistredFiles = new List<AddOnFile>();
             AddOnTypes = new List<Type>();
         }
