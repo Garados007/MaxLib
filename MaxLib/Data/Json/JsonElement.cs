@@ -118,12 +118,10 @@ namespace MaxLib.Data.Json
         }
         public JsonElement Parse(string text)
         {
-            var parser = new parser();
-            parser.Text = text;
-            return parser.ParseElement() ?? new JsonValue() { ArgumentString = "" };
+            return new Parser{ Text = text }.ParseElement() ?? new JsonValue{ ArgumentString = "" };
         }
 
-        class parser
+        class Parser
         {
             public JsonElement ParseElement()
             {
@@ -131,10 +129,10 @@ namespace MaxLib.Data.Json
                 if (pb==null) return null;
                 switch (pb.Type)
                 {
-                    case parserBaseType.ObjectOpen:
+                    case ParserBaseType.ObjectOpen:
                         {
                             var obj = new JsonObject();
-                            while ((pb = GetNextBase()).Type!= parserBaseType.ObjectClose)
+                            while ((pb = GetNextBase()).Type!= ParserBaseType.ObjectClose)
                             {
                                 var name = pb.Text;
                                 if (name.StartsWith("\"")) name = name.Substring(1);
@@ -142,29 +140,30 @@ namespace MaxLib.Data.Json
                                 pb = GetNextBase(); //Zuweisung
                                 obj.Add(name, ParseElement());
                                 pb = GetNextBase(); //Trenner
-                                if (pb.Type == parserBaseType.ObjectClose) break;
+                                if (pb.Type == ParserBaseType.ObjectClose) break;
                             }
                             return obj;
                         }
-                    case parserBaseType.ArrayOpen:
+                    case ParserBaseType.ArrayOpen:
                         {
                             var arr = new JsonArray();
                             var pos = StorePos();
-                            while((pb=GetNextBase()).Type!=parserBaseType.ArrayClose)
+                            while((pb=GetNextBase()).Type!=ParserBaseType.ArrayClose)
                             {
                                 RestorePos(pos);
                                 arr.Add(ParseElement());
                                 pb = GetNextBase();
-                                if (pb.Type == parserBaseType.ArrayClose) break;
+                                if (pb.Type == ParserBaseType.ArrayClose) break;
                                 pos = StorePos();
                             }
                             return arr;
                         }
-                    case parserBaseType.Value:
+                    case ParserBaseType.Value:
                         {
-                            var val = new JsonValue();
-                            val.ArgumentString = pb.Text;
-                            return val;
+                            return new JsonValue
+                            {
+                                ArgumentString = pb.Text
+                            };
                         }
                     default: return null;
                 }
@@ -183,9 +182,9 @@ namespace MaxLib.Data.Json
             {
                 Line = pos.Item1; Position = pos.Item2; Index = pos.Item3;
             }
-            parserBase GetNextBase()
+            ParserBase GetNextBase()
             {
-                var pb = new parserBase();
+                var pb = new ParserBase();
                 char c;
                 do c = GetNextChar();
                 while ((c == ' ' || c == '\t' || c == '\r' || c == '\n') && c != 0);
@@ -194,15 +193,15 @@ namespace MaxLib.Data.Json
                 pb.Text = c.ToString();
                 switch (c)
                 {
-                    case '{': pb.Type = parserBaseType.ObjectOpen; return pb;
-                    case '}': pb.Type = parserBaseType.ObjectClose; return pb;
-                    case '[': pb.Type = parserBaseType.ArrayOpen; return pb;
-                    case ']': pb.Type = parserBaseType.ArrayClose; return pb;
-                    case ':': pb.Type = parserBaseType.NameSetter; return pb;
-                    case ',': pb.Type = parserBaseType.ArraySeperator; return pb;
+                    case '{': pb.Type = ParserBaseType.ObjectOpen; return pb;
+                    case '}': pb.Type = ParserBaseType.ObjectClose; return pb;
+                    case '[': pb.Type = ParserBaseType.ArrayOpen; return pb;
+                    case ']': pb.Type = ParserBaseType.ArrayClose; return pb;
+                    case ':': pb.Type = ParserBaseType.NameSetter; return pb;
+                    case ',': pb.Type = ParserBaseType.ArraySeperator; return pb;
                     default:
                         {
-                            pb.Type = parserBaseType.Value;
+                            pb.Type = ParserBaseType.Value;
                             if (c == '"') isLiteral = true;
                             var lc = c;
                             var rp = StorePos();
@@ -256,13 +255,13 @@ namespace MaxLib.Data.Json
                 return c;
 
             }
-            class parserBase
+            class ParserBase
             {
                 public Tuple<int, int, int> Pos;
                 public string Text;
-                public parserBaseType Type;
+                public ParserBaseType Type;
             }
-            enum parserBaseType
+            enum ParserBaseType
             {
                 ObjectOpen,
                 ObjectClose,
