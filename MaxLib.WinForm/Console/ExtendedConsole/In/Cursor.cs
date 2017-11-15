@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace MaxLib.Console.ExtendedConsole.In
+﻿namespace MaxLib.Console.ExtendedConsole.In
 {
     public sealed class Cursor
     {

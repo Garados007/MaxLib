@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace MaxLib.Console.ExtendedConsole.Windows
+﻿namespace MaxLib.Console.ExtendedConsole.Windows
 {
-    using Elements;
-
     public class MainTargetWindow : Elements.BasicCountainerElement
     {
         public ImageViewer Background { get; private set; }
