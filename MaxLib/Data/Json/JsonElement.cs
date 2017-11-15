@@ -5,7 +5,7 @@ using System.Text;
 
 //Keine Fehlersicherheit eingebaut!!!
 
-namespace MaxLib.Web.Json
+namespace MaxLib.Data.Json
 {
     public class JsonParser
     {

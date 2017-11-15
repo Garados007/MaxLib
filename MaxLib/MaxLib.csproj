@@ -41,8 +41,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Web\Json\JsonElement.cs" />
-    <Compile Include="Web\Json\Smart.cs" />
+    <Compile Include="Data\Json\JsonElement.cs" />
+    <Compile Include="Data\Json\Smart.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Data\IniFiles\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

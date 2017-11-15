@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MaxLib.Web.Json
+namespace MaxLib.Data.Json
 {
     namespace Smart
     {
