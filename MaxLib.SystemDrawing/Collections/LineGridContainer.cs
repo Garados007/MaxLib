@@ -159,7 +159,7 @@ namespace MaxLib.Collections
         public float Offset
         {
             get => offset;
-            internal set
+            set
             {
                 offset = value;
                 foreach (var e in elements)

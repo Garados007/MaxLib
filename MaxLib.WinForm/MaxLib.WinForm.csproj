@@ -43,6 +43,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WinForms\BoxGridView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WinForms\BoxGridView.designer.cs">
+      <DependentUpon>BoxGridView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Collections\BoxGridViewContainer.cs" />
     <Compile Include="WinForms\DrawGround.cs">
       <SubType>Component</SubType>
     </Compile>

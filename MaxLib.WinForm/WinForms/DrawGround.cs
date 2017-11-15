@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace MaxLib.WinForm
+namespace MaxLib.WinForms
 {
     public partial class DrawGround : Control
     {

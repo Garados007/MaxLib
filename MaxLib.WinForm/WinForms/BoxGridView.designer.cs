@@ -1,6 +1,6 @@
 ﻿namespace MaxLib.WinForms
 {
-    partial class DrawGround
+    partial class BoxGridView
     {
         /// <summary> 
         /// Erforderliche Designervariable.
@@ -28,14 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.SuspendLayout();
-            // 
-            // PersonOverview
-            // 
-            this.Name = "PersonOverview";
-            this.Size = new System.Drawing.Size(633, 509);
-            this.ResumeLayout(false);
-
+            components = new System.ComponentModel.Container();
         }
 
         #endregion
