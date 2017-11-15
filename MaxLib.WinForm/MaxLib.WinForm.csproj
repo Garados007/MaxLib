@@ -91,6 +91,9 @@
     <Compile Include="WinForms\DrawGround.designer.cs">
       <DependentUpon>DrawGround.cs</DependentUpon>
     </Compile>
+    <Compile Include="WinForms\EditingLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="WinForms\RefreshingListBox.cs">
       <SubType>Component</SubType>
     </Compile>
