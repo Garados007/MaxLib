@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Collections\OverlapModel.cs" />
     <Compile Include="Collections\SlotReserver.cs" />
+    <Compile Include="Collections\SyncedList.cs" />
     <Compile Include="Console\ConsoleHelper\ConsoleHelper.cs" />
     <Compile Include="Console\ConsoleHelper\Lister.cs" />
     <Compile Include="Data\IniFiles\OptionsLoader.cs" />
