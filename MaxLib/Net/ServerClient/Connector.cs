@@ -538,8 +538,7 @@ namespace MaxLib.Net.ServerClient
             get { return proxy; }
             set
             {
-                if (value == null) throw new ArgumentNullException("Proxy");
-                proxy = value;
+                proxy = value ?? throw new ArgumentNullException("Proxy");
             }
         }
 

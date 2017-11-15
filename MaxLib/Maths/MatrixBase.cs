@@ -24,8 +24,7 @@ namespace MaxLib.Maths
 
         public MatrixBase(T[,] data)
         {
-            if (data == null) throw new ArgumentNullException("data");
-            this.data = data;
+            this.data = data ?? throw new ArgumentNullException("data");
         }
 
         #endregion

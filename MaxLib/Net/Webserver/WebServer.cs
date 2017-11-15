@@ -1321,8 +1321,7 @@ namespace MaxLib.Net.Webserver
             get { return host; }
             set
             {
-                if (value == null) throw new ArgumentNullException("Host");
-                host = value;
+                host = value ?? throw new ArgumentNullException("Host");
             }
         }
 
@@ -1423,8 +1422,7 @@ namespace MaxLib.Net.Webserver
 
         public virtual void SetLocation(string url)
         {
-            if (url == null) throw new ArgumentNullException("url");
-            Url = url;
+            Url = url ?? throw new ArgumentNullException("url");
             var ind = url.IndexOf('?');
             if (ind == -1)
             {
@@ -1516,10 +1514,8 @@ namespace MaxLib.Net.Webserver
 
             public Cookie(string name, string value)
             {
-                if (name == null) throw new ArgumentNullException("name");
-                if (value == null) throw new ArgumentNullException("value");
-                Name = name;
-                Value = value;
+                Name = name ?? throw new ArgumentNullException("name");
+                Value = value ?? throw new ArgumentNullException("value");
                 Expires = new DateTime(9999, 12, 31);
                 MaxAge = -1;
                 Path = "";
@@ -1527,10 +1523,8 @@ namespace MaxLib.Net.Webserver
 
             public Cookie(string name, string value, DateTime expires)
             {
-                if (name == null) throw new ArgumentNullException("name");
-                if (value == null) throw new ArgumentNullException("value");
-                Name = name;
-                Value = value;
+                Name = name ?? throw new ArgumentNullException("name");
+                Value = value ?? throw new ArgumentNullException("value");
                 Expires = expires;
                 MaxAge = -1;
                 Path = "";
@@ -1538,10 +1532,8 @@ namespace MaxLib.Net.Webserver
 
             public Cookie(string name, string value, int maxAge)
             {
-                if (name == null) throw new ArgumentNullException("name");
-                if (value == null) throw new ArgumentNullException("value");
-                Name = name;
-                Value = value;
+                Name = name ?? throw new ArgumentNullException("name");
+                Value = value ?? throw new ArgumentNullException("value");
                 Expires = new DateTime(9999, 12, 31);
                 MaxAge = maxAge;
                 Path = "";
@@ -1549,26 +1541,20 @@ namespace MaxLib.Net.Webserver
 
             public Cookie(string name, string value, string path)
             {
-                if (name == null) throw new ArgumentNullException("name");
-                if (value == null) throw new ArgumentNullException("value");
-                if (path == null) throw new ArgumentNullException("path");
-                Name = name;
-                Value = value;
+                Name = name ?? throw new ArgumentNullException("name");
+                Value = value ?? throw new ArgumentNullException("value");
                 Expires = new DateTime(9999, 12, 31);
                 MaxAge = -1;
-                Path = path;
+                Path = path ?? throw new ArgumentNullException("path");
             }
 
             public Cookie(string name, string value, DateTime expires, int maxAge, string path)
             {
-                if (name == null) throw new ArgumentNullException("name");
-                if (value == null) throw new ArgumentNullException("value");
-                if (path == null) throw new ArgumentNullException("path");
-                Name = name;
-                Value = value;
+                Name = name ?? throw new ArgumentNullException("name");
+                Value = value ?? throw new ArgumentNullException("value");
                 Expires = expires;
                 MaxAge = maxAge;
-                Path = path;
+                Path = path ?? throw new ArgumentNullException("path");
             }
 
             public override string ToString()
@@ -1616,8 +1602,7 @@ namespace MaxLib.Net.Webserver
 
         public virtual void SetRequestCookieString(string cookie)
         {
-            if (cookie == null) throw new ArgumentNullException("Cookie");
-            CompleteRequestCookie = cookie;
+            CompleteRequestCookie = cookie ?? throw new ArgumentNullException("Cookie");
             AddedCookies.Clear();
             var l = new List<Cookie>();
             var rck = new List<string>();
@@ -1667,8 +1652,7 @@ namespace MaxLib.Net.Webserver
 
         public virtual void SetPost(string post)
         {
-            if (post == null) throw new ArgumentNullException("Post");
-            CompletePost = post;
+            CompletePost = post ?? throw new ArgumentNullException("Post");
             PostParameter.Clear();
             if (CompletePost != "")
             {
@@ -2477,8 +2461,7 @@ namespace MaxLib.Net.Webserver
             get { return data; }
             set
             {
-                if (value == null) throw new ArgumentNullException("Data");
-                data = value;
+                data = value ?? throw new ArgumentNullException("Data");
             }
         }
 
@@ -2497,8 +2480,7 @@ namespace MaxLib.Net.Webserver
 
         public HttpStringDataSource(string data)
         {
-            if (data == null) throw new ArgumentNullException("data");
-            Data = data;
+            Data = data ?? throw new ArgumentNullException("data");
             NeedBufferManagement = false;
             Encoder = Encoding.UTF8;
             encoding = Encoder.WebName;

@@ -148,7 +148,7 @@ namespace MaxLib.Data.IniFiles
         public void Import(System.IO.Stream stream)
         {
             var r = new System.IO.StreamReader(stream);
-            var d = new List<OptionsStreamPart>();
+            var d = new List<IOptionsStreamPart>();
             var parser = new LineParser();
             while (!r.EndOfStream)
                 d.Add(parser.Parse(r.ReadLine()));
@@ -206,26 +206,30 @@ namespace MaxLib.Data.IniFiles
     #region Collections
 
     public class OptionsGroupCollection :
-        GenC.IList<OptionsGroup>
+        IList<OptionsGroup>
     {
         protected List<OptionsGroup> Groups;
 
         internal OptionsGroupCollection()
         {
-            Groups = new List<OptionsGroup>();
-            Groups.Add(new OptionsGroup(true));
+            Groups = new List<OptionsGroup>
+            {
+                new OptionsGroup(true)
+            };
         }
 
         public OptionsGroupSearchCollection GetSearch()
         {
-            var ogsc = new OptionsGroupSearchCollection();
-            ogsc.Groups = Groups.ToList();
+            var ogsc = new OptionsGroupSearchCollection
+            {
+                Groups = Groups.ToList()
+            };
             return ogsc;
         }
 
         public List<T> ConvertAll<T>(Converter<OptionsGroup, T> converter)
         {
-            return Groups.ConvertAll<T>(converter);
+            return Groups.ConvertAll(converter);
         }
 
         #region Fast Access
@@ -303,9 +307,8 @@ namespace MaxLib.Data.IniFiles
             }
             set
             {
-                if (value == null) throw new ArgumentNullException("OptionsLoader[int]");
                 if (index == 0) throw new NotSupportedException("You can't replace the main group.");
-                Groups[index] = value;
+                Groups[index] = value ?? throw new ArgumentNullException("OptionsLoader[int]");
             }
         }
 
@@ -363,13 +366,13 @@ namespace MaxLib.Data.IniFiles
     }
 
     public class OptionsCollection :
-        GenC.ICollection<OptionsStreamPart>,
-        GenC.IEnumerable<OptionsStreamPart>,
-        GenC.IList<OptionsStreamPart>
+        GenC.ICollection<IOptionsStreamPart>,
+        GenC.IEnumerable<IOptionsStreamPart>,
+        GenC.IList<IOptionsStreamPart>
     {
         #region internal Default
 
-        protected List<OptionsStreamPart> StreamParts = new List<OptionsStreamPart>();
+        protected List<IOptionsStreamPart> StreamParts = new List<IOptionsStreamPart>();
 
         public bool CommentsAllowed { get; private set; }
 
@@ -384,7 +387,7 @@ namespace MaxLib.Data.IniFiles
 
         #region ICollection, IEnumerable
 
-        public void Add(OptionsStreamPart item)
+        public void Add(IOptionsStreamPart item)
         {
             if (item == null) throw new ArgumentNullException("item");
             if (!CommentsAllowed && !(item is OptionsKey)) throw new NotSupportedException();
@@ -396,13 +399,13 @@ namespace MaxLib.Data.IniFiles
             StreamParts.Clear();
         }
 
-        public bool Contains(OptionsStreamPart item)
+        public bool Contains(IOptionsStreamPart item)
         {
             if (item == null) return false;
             return StreamParts.Contains(item);
         }
 
-        public void CopyTo(OptionsStreamPart[] array, int arrayIndex)
+        public void CopyTo(IOptionsStreamPart[] array, int arrayIndex)
         {
             StreamParts.CopyTo(array, arrayIndex);
         }
@@ -417,13 +420,13 @@ namespace MaxLib.Data.IniFiles
             get { return false; }
         }
 
-        public bool Remove(OptionsStreamPart item)
+        public bool Remove(IOptionsStreamPart item)
         {
             if (item == null) return false;
             return StreamParts.Remove(item);
         }
 
-        public IEnumerator<OptionsStreamPart> GetEnumerator()
+        public IEnumerator<IOptionsStreamPart> GetEnumerator()
         {
             return StreamParts.GetEnumerator();
         }
@@ -437,13 +440,13 @@ namespace MaxLib.Data.IniFiles
 
         #region Rest of IList
 
-        public int IndexOf(OptionsStreamPart item)
+        public int IndexOf(IOptionsStreamPart item)
         {
             if (item == null) return -1;
             return StreamParts.IndexOf(item);
         }
 
-        public void Insert(int index, OptionsStreamPart item)
+        public void Insert(int index, IOptionsStreamPart item)
         {
             if (item == null) throw new ArgumentNullException("item");
             if (!CommentsAllowed && !(item is OptionsKey)) throw new NotSupportedException();
@@ -455,7 +458,7 @@ namespace MaxLib.Data.IniFiles
             StreamParts.RemoveAt(index);
         }
 
-        public OptionsStreamPart this[int index]
+        public IOptionsStreamPart this[int index]
         {
             get
             {
@@ -496,16 +499,17 @@ namespace MaxLib.Data.IniFiles
 
         public OptionsSearchCollection GetSearch()
         {
-            var osc = new OptionsSearchCollection();
-            osc.StreamParts = StreamParts.ToList();
-            return osc;
+            return new OptionsSearchCollection
+            {
+                StreamParts = StreamParts.ToList()
+            };
         }
 
         #endregion
 
         #region static Methods
 
-        public static void Sort(OptionsCollection collection, Comparison<OptionsStreamPart> comparison)
+        public static void Sort(OptionsCollection collection, Comparison<IOptionsStreamPart> comparison)
         {
             if (collection == null) throw new ArgumentNullException("collection");
             if (comparison == null) throw new ArgumentNullException("comparison");
@@ -1309,7 +1313,7 @@ namespace MaxLib.Data.IniFiles
         /// <param name="match">Der Filter anhand dessen gefiltert werden soll.</param>
         /// <param name="include">true um alle gefundenen Elemente zu behalten, false um diese zu entfernen.</param>
         /// <returns>Diese Auflistung</returns>
-        public OptionsSearchCollection Filter(Predicate<OptionsStreamPart> match, bool include)
+        public OptionsSearchCollection Filter(Predicate<IOptionsStreamPart> match, bool include)
         {
             StreamParts.RemoveAll((osp) => include ^ match(osp));
             return this;
@@ -1320,7 +1324,7 @@ namespace MaxLib.Data.IniFiles
 
     #region Data
 
-    public class OptionsGroup : OptionsStreamPart
+    public class OptionsGroup : IOptionsStreamPart
     {
         private string name;
 
@@ -1329,8 +1333,7 @@ namespace MaxLib.Data.IniFiles
             get { return name; }
             set
             {
-                if (value == null) throw new ArgumentNullException("Name");
-                name = value;
+                name = value ?? throw new ArgumentNullException("Name");
             }
         }
 
@@ -1387,12 +1390,12 @@ namespace MaxLib.Data.IniFiles
         }
     }
 
-    public interface OptionsStreamPart
+    public interface IOptionsStreamPart
     {
         string ToStreamString();
     }
 
-    public class OptionsEmpty : OptionsStreamPart
+    public class OptionsEmpty : IOptionsStreamPart
     {
         public OptionsEmpty() { }
 
@@ -1402,7 +1405,7 @@ namespace MaxLib.Data.IniFiles
         }
     }
 
-    public class OptionsMeta : OptionsStreamPart
+    public class OptionsMeta : IOptionsStreamPart
     {
         public string MetaText { get; set; }
 
@@ -1422,7 +1425,7 @@ namespace MaxLib.Data.IniFiles
         }
     }
 
-    public class OptionsKey : OptionsStreamPart
+    public class OptionsKey : IOptionsStreamPart
     {
         public string Name { get; private set; }
 
@@ -1772,8 +1775,7 @@ namespace MaxLib.Data.IniFiles
 
         public void SetValueText(string valueText)
         {
-            if (valueText == null) throw new ArgumentNullException("valueText");
-            ValueText = valueText;
+            ValueText = valueText ?? throw new ArgumentNullException("valueText");
         }
 
         #endregion
@@ -1851,17 +1853,17 @@ namespace MaxLib.Data.IniFiles
 
     #region Parser
 
-    interface OptionParser<Source, Target>
+    interface IOptionParser<Source, Target>
     {
         Target Parse(Source source);
     }
 
-    interface OptionStringParser<Target> : OptionParser<string, Target>
+    interface IOptionStringParser<Target> : IOptionParser<string, Target>
     {
 
     }
 
-    class MetaParser : OptionStringParser<OptionsMeta>, OptionStringParser<object>
+    class MetaParser : IOptionStringParser<OptionsMeta>, IOptionStringParser<object>
     {
         public OptionsMeta Parse(string source)
         {
@@ -1871,26 +1873,26 @@ namespace MaxLib.Data.IniFiles
             return new OptionsMeta(sb.ToString());
         }
 
-        object OptionParser<string, object>.Parse(string source)
+        object IOptionParser<string, object>.Parse(string source)
         {
-            return ((OptionStringParser<OptionsMeta>)this).Parse(source);
+            return ((IOptionStringParser<OptionsMeta>)this).Parse(source);
         }
     }
 
-    class EmptyParser : OptionStringParser<OptionsEmpty>, OptionStringParser<object>
+    class EmptyParser : IOptionStringParser<OptionsEmpty>, IOptionStringParser<object>
     {
         public OptionsEmpty Parse(string source)
         {
             return new OptionsEmpty();
         }
 
-        object OptionParser<string, object>.Parse(string source)
+        object IOptionParser<string, object>.Parse(string source)
         {
-            return ((OptionStringParser<OptionsEmpty>)this).Parse(source);
+            return ((IOptionStringParser<OptionsEmpty>)this).Parse(source);
         }
     }
 
-    class KeyParser : OptionStringParser<OptionsKey>, OptionStringParser<object>
+    class KeyParser : IOptionStringParser<OptionsKey>, IOptionStringParser<object>
     {
         public OptionsKey Parse(string source)
         {
@@ -1919,13 +1921,13 @@ namespace MaxLib.Data.IniFiles
             return new OptionsKey(key, valueText: value);
         }
 
-        object OptionParser<string, object>.Parse(string source)
+        object IOptionParser<string, object>.Parse(string source)
         {
-            return ((OptionStringParser<OptionsKey>)this).Parse(source);
+            return ((IOptionStringParser<OptionsKey>)this).Parse(source);
         }
     }
 
-    class GroupParser : OptionStringParser<OptionsGroup>, OptionStringParser<object>
+    class GroupParser : IOptionStringParser<OptionsGroup>, IOptionStringParser<object>
     {
         public OptionsGroup Parse(string source)
         {
@@ -1981,22 +1983,22 @@ namespace MaxLib.Data.IniFiles
             return og;
         }
 
-        object OptionParser<string, object>.Parse(string source)
+        object IOptionParser<string, object>.Parse(string source)
         {
-            return ((OptionStringParser<OptionsGroup>)this).Parse(source);
+            return ((IOptionStringParser<OptionsGroup>)this).Parse(source);
         }
     }
 
-    class LineParser : OptionStringParser<OptionsStreamPart>
+    class LineParser : IOptionStringParser<IOptionsStreamPart>
     {
-        public OptionsStreamPart Parse(string source)
+        public IOptionsStreamPart Parse(string source)
         {
-            OptionStringParser<object> parser;
-            if (source.StartsWith("#")) parser = (OptionStringParser<object>)new MetaParser();
-            else if (source.StartsWith("[")) parser = (OptionStringParser<object>)new GroupParser();
-            else if (string.IsNullOrWhiteSpace(source)) parser = (OptionStringParser<object>)new EmptyParser();
-            else parser = (OptionStringParser<object>)new KeyParser();
-            return (OptionsStreamPart)parser.Parse(source);
+            IOptionStringParser<object> parser;
+            if (source.StartsWith("#")) parser = (IOptionStringParser<object>)new MetaParser();
+            else if (source.StartsWith("[")) parser = (IOptionStringParser<object>)new GroupParser();
+            else if (string.IsNullOrWhiteSpace(source)) parser = (IOptionStringParser<object>)new EmptyParser();
+            else parser = (IOptionStringParser<object>)new KeyParser();
+            return (IOptionsStreamPart)parser.Parse(source);
         }
     }
 

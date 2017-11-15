@@ -1694,7 +1694,7 @@ namespace MaxLib.Data.HtmlDom
 
         public List<T> ConvertAll<T>(Converter<HtmlDomElement,T> converter)
         {
-            return elements.ConvertAll<T>(converter);
+            return elements.ConvertAll(converter);
         }
 
         #endregion

@@ -500,8 +500,7 @@ namespace MaxLib.Data.Json
             get { return argumentString; }
             set
             {
-                if (value == null) throw new ArgumentNullException("ArgumentString");
-                argumentString = value;
+                argumentString = value ?? throw new ArgumentNullException("ArgumentString");
             }
         }
 

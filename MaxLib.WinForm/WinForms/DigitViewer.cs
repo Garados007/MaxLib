@@ -31,7 +31,7 @@ namespace MaxLib.WinForms
         public DigitConverter Converter
         {
             get { return converter; }
-            set { if (value == null) throw new ArgumentNullException(); converter = value; }
+            set { converter = value ?? throw new ArgumentNullException(); }
         }
 
         private Color inactiveColor = Color.Gray;
