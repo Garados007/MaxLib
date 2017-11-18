@@ -302,6 +302,17 @@ namespace MaxLib.Net.Webserver
 
         public string SettingsPath { get; private set; }
 
+        public virtual void LoadSettingFromData(string data)
+        {
+            var sf = new OptionsLoader(data);
+            var type = sf["Setting"].Options.GetEnum<SettingTypes>("Type");
+            switch (type)
+            {
+                case SettingTypes.MimeAssociation: Load_Mime(sf); break;
+                case SettingTypes.ServerSettings: Load_Server(sf); break;
+            }
+        }
+
         public virtual void LoadSetting(string path)
         {
             SettingsPath = path;
