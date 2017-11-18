@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaxLib", "MaxLib\MaxLib.csproj", "{D53BE740-579B-412D-9FA8-3505A12E958D}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaxLib.SystemDrawing", "MaxLib.SystemDrawing\MaxLib.SystemDrawing.csproj", "{604C9820-2353-4044-89CD-2CBB48806B3B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaxLib.WinForm", "MaxLib.WinForm\MaxLib.WinForm.csproj", "{1D50A2F2-AB1E-418C-A4D9-D6DB8751D062}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaxLib.Js", "MaxLib.Js\MaxLib.Js.csproj", "{C1595273-71FF-4AAD-857B-A9F6EBF1E096}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,8 +35,15 @@ Global
 		{1D50A2F2-AB1E-418C-A4D9-D6DB8751D062}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D50A2F2-AB1E-418C-A4D9-D6DB8751D062}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D50A2F2-AB1E-418C-A4D9-D6DB8751D062}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1595273-71FF-4AAD-857B-A9F6EBF1E096}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1595273-71FF-4AAD-857B-A9F6EBF1E096}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1595273-71FF-4AAD-857B-A9F6EBF1E096}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1595273-71FF-4AAD-857B-A9F6EBF1E096}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6E481A9B-B274-4FA1-BABC-47D5AEAD7E11}
 	EndGlobalSection
 EndGlobal
