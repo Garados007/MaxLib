@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -309,7 +310,7 @@ namespace MaxLib.Data.Json
         { get { return this as JsonValue; } }
     }
 
-    public class JsonObject : JsonElement
+    public class JsonObject : JsonElement, IEnumerable<KeyValuePair<string, JsonElement>>
     {
         internal Dictionary<string, JsonElement> Elements = new Dictionary<string, JsonElement>();
 
@@ -389,6 +390,16 @@ namespace MaxLib.Data.Json
             }
         }
 
+        public IEnumerator<KeyValuePair<string, JsonElement>> GetEnumerator()
+        {
+            return Elements.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return Elements.GetEnumerator();
+        }
+
         public override int ChildCount
         {
             get { return Elements.Count; }
@@ -404,7 +415,7 @@ namespace MaxLib.Data.Json
         }
     }
 
-    public class JsonArray: JsonElement
+    public class JsonArray: JsonElement, IEnumerable<JsonElement>
     {
         List<JsonElement> Elements = new List<JsonElement>();
 
@@ -474,6 +485,16 @@ namespace MaxLib.Data.Json
                 }
                 sb.Append(']');
             }
+        }
+
+        public IEnumerator<JsonElement> GetEnumerator()
+        {
+            return Elements.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return Elements.GetEnumerator();
         }
 
         public override int ChildCount
