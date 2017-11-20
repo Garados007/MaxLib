@@ -86,7 +86,7 @@ namespace MaxLib.Net.Webserver
         {
             WebServerInfo.Add(InfoType.Information, GetType(), "StartUp", "Start Server on Port {0}", Settings.Port);
             ServerExecution = true;
-            Listener = new TcpListener(new IPEndPoint(IPAddress.Any, Settings.Port));
+            Listener = new TcpListener(new IPEndPoint(Settings.IPFilter, Settings.Port));
             Listener.Start();
             ServerThread = new Thread(ServerMainTask);
             ServerThread.Name = "ServerThread - Port: " + Settings.Port.ToString();
@@ -283,6 +283,13 @@ namespace MaxLib.Net.Webserver
         public int Port { get; private set; }
 
         public int ConnectionTimeout { get; private set; }
+
+        IPAddress ipFilter = IPAddress.Any;
+        public IPAddress IPFilter
+        {
+            get => ipFilter;
+            set => ipFilter = value ?? throw new ArgumentNullException("IPFilter");
+        }
 
         //Debug
         public bool Debug_WriteRequests = false;
