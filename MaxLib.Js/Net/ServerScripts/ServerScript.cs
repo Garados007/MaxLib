@@ -77,6 +77,7 @@ namespace MaxLib.Net.ServerScripts
 
             void Execute(string task)
             {
+                js.SetValue("$", sso);
                 try { js.Execute(task); }
                 catch (Jint.Parser.ParserException e)
                 {
