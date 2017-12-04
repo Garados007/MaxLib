@@ -35,12 +35,12 @@ namespace MaxLib.Data.StartupParameter
             Commands = new List<string>();
             for (int i = 0; i<args.Length; ++i)
             {
-                if (args[i].StartsWith("-"))
+                if (IsStart(args[i]))
                 {
                     var ind = args[i].IndexOf('=');
                     if (ind == -1)
                     {
-                        if (i < args.Length - 1 && !args[i + 1].StartsWith("-"))
+                        if (i < args.Length - 1 && !IsStart(args[i + 1]))
                             Options[args[i]] = Options[args[++i]];
                         else Options[args[i]] = null;
                     }
@@ -53,6 +53,12 @@ namespace MaxLib.Data.StartupParameter
                 }
                 else Commands.Add(args[i]);
             }
+        }
+
+        bool IsStart(string text)
+        {
+            if (text.Length == 0) return false;
+            return text[0] == '-' || text[0] == '/';
         }
     }
 }
