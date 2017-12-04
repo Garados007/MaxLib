@@ -2,7 +2,7 @@
 
 namespace MaxLib.Data.StartupParameter
 {
-    class ParamLoader
+    public class ParamLoader
     {
         public Dictionary<string, string> Options { get; private set; }
 
