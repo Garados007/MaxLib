@@ -607,5 +607,7 @@ namespace MaxLib.Data.Json
             val.Set(value);
             return val;
         }
+
+        public static JsonValue Null => Create<object>(null);
     }
 }
