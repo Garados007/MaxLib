@@ -6,6 +6,7 @@ using GenC = System.Collections.Generic;
 
 namespace MaxLib.Data.IniFiles
 {
+    [Serializable]
     public class OptionsLoader
     {
         public OptionsGroupCollection Groups { get; private set; }
@@ -48,7 +49,7 @@ namespace MaxLib.Data.IniFiles
                     ol.Groups.Add(new OptionsGroup(o.Name));
                 }
                 var n = ol.Groups[i];
-                for (var si = 0; si < o.Attributes.Count; ++si)
+                for (var si = 0; si < (o.Attributes?.Count ?? 0); ++si)
                 {
                     if (!takeOptionKey(o, true, (OptionsKey)o.Attributes[si])) continue;
                     n.Attributes.Add(o.Attributes[si]);
@@ -205,6 +206,7 @@ namespace MaxLib.Data.IniFiles
 
     #region Collections
 
+    [Serializable]
     public class OptionsGroupCollection :
         IList<OptionsGroup>
     {
@@ -365,6 +367,7 @@ namespace MaxLib.Data.IniFiles
         #endregion
     }
 
+    [Serializable]
     public class OptionsCollection :
         GenC.ICollection<IOptionsStreamPart>,
         GenC.IEnumerable<IOptionsStreamPart>,
@@ -1006,9 +1009,11 @@ namespace MaxLib.Data.IniFiles
 
         #endregion
     }
+    
     /// <summary>
     /// Eine <see cref="OptionsGroupCollection"/>, die zum Heraussuchen gedacht ist.
     /// </summary>
+    [Serializable]
     public class OptionsGroupSearchCollection : OptionsGroupCollection
     {
         internal OptionsGroupSearchCollection() : base() { }
@@ -1251,9 +1256,11 @@ namespace MaxLib.Data.IniFiles
             return this;
         }
     }
+
     /// <summary>
     /// Eine <see cref="OptionsCollection"/>, die zum Heraussuchen gedacht ist.
     /// </summary>
+    [Serializable]
     public class OptionsSearchCollection : OptionsCollection
     {
         internal OptionsSearchCollection() : base(true) { }
@@ -1324,6 +1331,7 @@ namespace MaxLib.Data.IniFiles
 
     #region Data
 
+    [Serializable]
     public class OptionsGroup : IOptionsStreamPart
     {
         private string name;
@@ -1389,12 +1397,13 @@ namespace MaxLib.Data.IniFiles
             return sb.ToString();
         }
     }
-
+    
     public interface IOptionsStreamPart
     {
         string ToStreamString();
     }
 
+    [Serializable]
     public class OptionsEmpty : IOptionsStreamPart
     {
         public OptionsEmpty() { }
@@ -1405,6 +1414,7 @@ namespace MaxLib.Data.IniFiles
         }
     }
 
+    [Serializable]
     public class OptionsMeta : IOptionsStreamPart
     {
         public string MetaText { get; set; }
@@ -1425,6 +1435,7 @@ namespace MaxLib.Data.IniFiles
         }
     }
 
+    [Serializable]
     public class OptionsKey : IOptionsStreamPart
     {
         public string Name { get; private set; }
@@ -1996,7 +2007,7 @@ namespace MaxLib.Data.IniFiles
             IOptionStringParser<object> parser;
             if (source.StartsWith("#")) parser = (IOptionStringParser<object>)new MetaParser();
             else if (source.StartsWith("[")) parser = (IOptionStringParser<object>)new GroupParser();
-            else if (string.IsNullOrWhiteSpace(source)) parser = (IOptionStringParser<object>)new EmptyParser();
+            else if (string.IsNullOrWhiteSpace(source) || source == "\0") parser = (IOptionStringParser<object>)new EmptyParser();
             else parser = (IOptionStringParser<object>)new KeyParser();
             return (IOptionsStreamPart)parser.Parse(source);
         }
