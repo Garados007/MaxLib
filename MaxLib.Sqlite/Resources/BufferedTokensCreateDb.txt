@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS BufferedTokens (
+	Id TEXT PRIMARY KEY,
+	Hash BLOB,
+	Mime TEXT,
+	LocalPath TEXT,
+	Url TEXT,
+	RessourceHandle TEXT
+);
