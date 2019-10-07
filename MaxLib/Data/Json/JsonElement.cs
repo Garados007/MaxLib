@@ -276,6 +276,7 @@ namespace MaxLib.Data.Json
         }
     }
 
+    [Serializable]
     public abstract class JsonElement
     {
         public string Json
@@ -310,6 +311,7 @@ namespace MaxLib.Data.Json
         { get { return this as JsonValue; } }
     }
 
+    [Serializable]
     public class JsonObject : JsonElement, IEnumerable<KeyValuePair<string, JsonElement>>
     {
         internal Dictionary<string, JsonElement> Elements = new Dictionary<string, JsonElement>();
@@ -331,6 +333,11 @@ namespace MaxLib.Data.Json
         {
             if (!Elements.ContainsKey(name)) return null;
             return (T)Elements[name];
+        }
+
+        public bool Contains(string name)
+        {
+            return Elements.ContainsKey(name);
         }
 
         public JsonElement this[string name]
@@ -415,6 +422,7 @@ namespace MaxLib.Data.Json
         }
     }
 
+    [Serializable]
     public class JsonArray: JsonElement, IEnumerable<JsonElement>
     {
         List<JsonElement> Elements = new List<JsonElement>();
@@ -512,6 +520,7 @@ namespace MaxLib.Data.Json
         }
     }
 
+    [Serializable]
     public class JsonValue : JsonElement
     {
         private string argumentString = "";
@@ -573,7 +582,7 @@ namespace MaxLib.Data.Json
             if (CheckClass<double, T>()) return (T)(object)double.Parse(NumStringExpr());
             if (CheckClass<decimal, T>()) return (T)(object)decimal.Parse(NumStringExpr());
             if (CheckClass<char, T>()) return (T)(object)JsonParser.FromLiteral(ArgStringExpr())[0];
-            if (CheckClass<string, T>()) return (T)(object)JsonParser.FromLiteral(ArgStringExpr());
+            if (CheckClass<string, T>()) return IsNull() ? (T)(object)null : (T)(object)JsonParser.FromLiteral(ArgStringExpr());
             throw new InvalidOperationException();
         }
 
