@@ -7,6 +7,7 @@ namespace MaxLib.Data.HtmlDom
 {
     #region Html DOM Parser
 
+    [Serializable]
     public static class HtmlDomParser
     {
         #region Parsereinstellungen
@@ -1000,6 +1001,7 @@ namespace MaxLib.Data.HtmlDom
 
     #region Zusatzinformationen zum Html DOM Parser
 
+    [Serializable]
     public class HtmlDomParserRule
     {
         public string Name { get; set; }
@@ -1065,6 +1067,7 @@ namespace MaxLib.Data.HtmlDom
         NameTarget
     }
 
+    [Serializable]
     public class HtmlDomParserError
     {
         public bool Fatal { get; internal set; }
@@ -1090,6 +1093,7 @@ namespace MaxLib.Data.HtmlDom
 
     #region Basis Element
 
+    [Serializable]
     public class HtmlDomBasicElement
     {
         /// <summary>
@@ -1151,6 +1155,7 @@ namespace MaxLib.Data.HtmlDom
 
     #region Html Dom Elemente
 
+    [Serializable]
     public class HtmlDomElement : HtmlDomBasicElement, ICloneable
     {
         #region Kontruktoren
@@ -1329,6 +1334,7 @@ namespace MaxLib.Data.HtmlDom
 
     #region Erweiterte Dom Elemente
 
+    [Serializable]
     public class HtmlDomElementImg : HtmlDomElement
     {
         public string Src
@@ -1338,6 +1344,7 @@ namespace MaxLib.Data.HtmlDom
         }
     }
 
+    [Serializable]
     public class HtmlDomElementScript : HtmlDomElement
     {
         public HtmlDomElementScript() : base()
@@ -1368,6 +1375,7 @@ namespace MaxLib.Data.HtmlDom
         }
     }
 
+    [Serializable]
     public class HtmlDomElementStyle : HtmlDomElement
     {
         public string StyleCode { get; set; }
@@ -1393,6 +1401,7 @@ namespace MaxLib.Data.HtmlDom
         }
     }
 
+    [Serializable]
     public class HtmlDomElementText : HtmlDomElement
     {
         public string Text { get; set; }
@@ -1410,6 +1419,7 @@ namespace MaxLib.Data.HtmlDom
         }
     }
 
+    [Serializable]
     public class HtmlDomElementComment : HtmlDomElement
     {
         public string Comment { get; set; }
@@ -1437,6 +1447,7 @@ namespace MaxLib.Data.HtmlDom
         }
     }
 
+    [Serializable]
     public class HtmlDomElementDoctype : HtmlDomElement
     {
         public string Doctype { get; set; }
@@ -1464,6 +1475,7 @@ namespace MaxLib.Data.HtmlDom
 
     #region Eigenschaften der DOM Elemente
 
+    [Serializable]
     public class HtmlDomAttribute : ICloneable
     {
         public string Key { get; set; }
@@ -1496,6 +1508,7 @@ namespace MaxLib.Data.HtmlDom
         #endregion
     }
 
+    [Serializable]
     public class HtmlDomClass : IList<string>
     {
         public HtmlDomClass(HtmlDomElement element)
@@ -1610,6 +1623,7 @@ namespace MaxLib.Data.HtmlDom
         }
     }
 
+    [Serializable]
     public class HtmlDomElementCollection : IList<HtmlDomElement>
     {
         #region Datenquelle
@@ -1792,6 +1806,7 @@ namespace MaxLib.Data.HtmlDom
 
     #region DOM Dokument
 
+    [Serializable]
     public class HtmlDomDocument : HtmlDomBasicElement
     {
         public virtual HtmlDomDataSource ToDataSource()
@@ -1811,6 +1826,7 @@ namespace MaxLib.Data.HtmlDom
 
     #region Integration des Html DOM Models in den Webserver
 
+    [Serializable]
     public class HtmlDomDataSource : Net.Webserver.HttpDataSource
     {
         public HtmlDomDocument Document { get; private set; }
