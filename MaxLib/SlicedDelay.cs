@@ -28,33 +28,59 @@ namespace MaxLib
 
         public void Wait(int duration)
         {
-            var m = new ManualResetEvent(false);
-            _wait(duration, () => m.Set());
-            m.WaitOne();
-            m.Dispose();
+            var start = Environment.TickCount;
+            var rest = 0;
+            while ((rest = start + duration - Environment.TickCount) > 0)
+            {
+                if (IsDisposed) return;
+                else Thread.Sleep(Math.Min(rest, sliceTime));
+            }
         }
 
         public void WaitAsync(int duration, object data)
         {
-            _wait(duration, () =>
-            {
-                if (AsyncWaitFinished != null) AsyncWaitFinished(data);
-            });
-        }
-
-        void _wait(int duration, Action callback)
-        {
-            new Task(() =>
+            Task.Run(async () =>
             {
                 var start = Environment.TickCount;
                 var rest = 0;
-                while ((rest = start+duration-Environment.TickCount)>0)
+                while ((rest = start + duration - Environment.TickCount) > 0)
                 {
-                    if (IsDisposed) return;
-                    else Thread.Sleep(Math.Min(rest, sliceTime));
+                    if (IsDisposed) break;
+                    else await Task.Delay(Math.Min(rest, sliceTime));
                 }
-                callback();
-            }).Start();
+                AsyncWaitFinished?.Invoke(data);
+            });
         }
+
+        //public void Wait(int duration)
+        //{
+        //    var m = new ManualResetEvent(false);
+        //    _wait(duration, () => m.Set());
+        //    m.WaitOne();
+        //    m.Dispose();
+        //}
+
+        //public void WaitAsync(int duration, object data)
+        //{
+        //    _wait(duration, () =>
+        //    {
+        //        AsyncWaitFinished?.Invoke(data);
+        //    });
+        //}
+
+        //void _wait(int duration, Action callback)
+        //{
+        //    new Task(() =>
+        //    {
+        //        var start = Environment.TickCount;
+        //        var rest = 0;
+        //        while ((rest = start + duration - Environment.TickCount) > 0)
+        //        {
+        //            if (IsDisposed) break;
+        //            else Thread.Sleep(Math.Min(rest, sliceTime));
+        //        }
+        //        callback();
+        //    }).Start();
+        //}
     }
 }
