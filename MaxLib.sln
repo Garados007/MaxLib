@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaxLib.WinForm", "MaxLib.Wi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaxLib.Js", "MaxLib.Js\MaxLib.Js.csproj", "{C1595273-71FF-4AAD-857B-A9F6EBF1E096}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaxLib.Test", "MaxLib.Test\MaxLib.Test.csproj", "{9893849D-BFD5-4233-A920-D7CE5629E332}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{C1595273-71FF-4AAD-857B-A9F6EBF1E096}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1595273-71FF-4AAD-857B-A9F6EBF1E096}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1595273-71FF-4AAD-857B-A9F6EBF1E096}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9893849D-BFD5-4233-A920-D7CE5629E332}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9893849D-BFD5-4233-A920-D7CE5629E332}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9893849D-BFD5-4233-A920-D7CE5629E332}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9893849D-BFD5-4233-A920-D7CE5629E332}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
