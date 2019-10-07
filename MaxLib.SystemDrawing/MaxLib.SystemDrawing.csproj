@@ -44,6 +44,7 @@
     <Compile Include="Collections\LineGridContainer.cs" />
     <Compile Include="Maths\Vector2.cs" />
     <Compile Include="Maths\Vector2Int.cs" />
+    <Compile Include="Net\Webserver\Files\IconFactoryExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
