@@ -26,7 +26,7 @@ namespace MaxLib.DB
             public static Action<T, object> BuildUntypedSetter<T>(PropertyInfo propertyInfo)
             {
                 var targetType = propertyInfo.DeclaringType;
-                var methodInfo = propertyInfo.GetSetMethod();
+                var methodInfo = propertyInfo.GetSetMethod(true);
                 var exTarget = Expression.Parameter(typeof(T), "t");
                 var exTarget2 = Expression.Convert(exTarget, targetType);
                 var exValue = Expression.Parameter(typeof(object), "p");
@@ -39,7 +39,7 @@ namespace MaxLib.DB
             public static Func<T, object> BuildUntypedGetter<T>(PropertyInfo propertyInfo)
             {
                 var targetType = propertyInfo.DeclaringType;
-                var methodInfo = propertyInfo.GetGetMethod();
+                var methodInfo = propertyInfo.GetGetMethod(true);
                 var returnType = methodInfo.ReturnType;
                 var exTarget = Expression.Parameter(typeof(T), "t");
                 var exTarget2 = Expression.Convert(exTarget, targetType);
@@ -219,6 +219,7 @@ namespace MaxLib.DB
             if (p.PropertyType.IsAssignableFrom(typeof(Guid))) return "Gui";
             if (Nullable.GetUnderlyingType(p.PropertyType)?.IsEnum ?? false) return "en?";
             if (p.PropertyType.IsEnum) return "enu";
+            if (p.PropertyType.IsAssignableFrom(typeof(byte[]))) return "bar";
             return null;
         }
 
@@ -228,7 +229,7 @@ namespace MaxLib.DB
             cont.ClassType = type;
             cont.ClassAttribute = type.GetCustomAttribute<DbClassAttribute>();
             if (cont.ClassAttribute == null) throw new TypeAccessException("type doesn't contains DbClassAttribute");
-            foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic))
             {
                 var attr = prop.GetCustomAttribute<DbPropAttribute>();
                 if (attr == null) continue;
@@ -365,6 +366,7 @@ namespace MaxLib.DB
                     case "Gui": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, new Guid(), () => reader.GetGuid(ind)); break;
                     case "en?": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, null, () => (int?)reader.GetInt32(ind)); break;
                     case "enu": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, 0, () => reader.GetInt32(ind)); break;
+                    case "bar": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, null, () => GetByteArray(reader, ind)); break;
 
                     default:
                         {
@@ -386,7 +388,9 @@ namespace MaxLib.DB
                                 !MatchTransfer(r, prop, reader.IsDBNull(ind), attr.NullValue, 0, () => reader.GetDouble(ind)) &
                                 !MatchTransfer(r, prop, reader.IsDBNull(ind), attr.NullValue, 0, () => reader.GetChar(ind)) &
                                 !MatchTransfer(r, prop, reader.IsDBNull(ind), attr.NullValue, DateTime.Now, () => reader.GetDateTime(ind)) &
-                                !MatchTransfer(r, prop, reader.IsDBNull(ind), attr.NullValue, new Guid(), () => reader.GetGuid(ind)))
+                                !MatchTransfer(r, prop, reader.IsDBNull(ind), attr.NullValue, new Guid(), () => reader.GetGuid(ind)) &
+                                !MatchTransfer(r, prop, reader.IsDBNull(ind), attr.NullValue, null, () => GetByteArray(reader, ind))
+                                )
                                 throw new ArgumentException("cannot found matching local type for " + prefix + name);
                         } break;
                 }
@@ -394,6 +398,22 @@ namespace MaxLib.DB
             }
 
             return r;
+        }
+
+        byte[] GetByteArray(SQLiteDataReader reader, int ind)
+        {
+            if (reader.IsDBNull(ind)) return null;
+            byte[] buffer = new byte[0x1000];
+            long offs = 0, r;
+            using (var m = new System.IO.MemoryStream())
+            {
+                while ((r = reader.GetBytes(ind, offs, buffer, 0, buffer.Length)) > 0)
+                {
+                    m.Write(buffer, 0, (int)r);
+                    offs += r;
+                }
+                return m.ToArray();
+            }
         }
 
         public T LoadSingle<T>(params DbValue[] keys) where T : new()
