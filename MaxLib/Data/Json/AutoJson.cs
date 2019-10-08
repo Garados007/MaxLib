@@ -124,6 +124,8 @@ namespace MaxLib.Data.Json.Auto
             AddParser(TransformResult<double>(JsonValue.Create));
             AddParser(TransformResult<string>(JsonValue.Create));
             AddParser(TransformResult<bool>(JsonValue.Create));
+            AddParser<DateTime>(e => JsonValue.Create(e.ToString("r")));
+            AddParser<DateTime?>(e => e == null ? JsonValue.Null : JsonValue.Create(e.Value.ToString("e")));
             
             AddParser((o) => o is IDictionary,
                 (o) =>
