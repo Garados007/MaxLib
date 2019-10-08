@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,21 +17,18 @@ namespace MaxLib.Data.HtmlDom
 
         #region Parserregeln
 
-        private static List<HtmlDomParserRule> rules =
-            new List<HtmlDomParserRule>(new HtmlDomParserRule[]{
+        public static List<HtmlDomParserRule> Rules { get; } = new List<HtmlDomParserRule>
+            {
                 HtmlDomParserRule.BreakElement,
                 HtmlDomParserRule.ImgElement,
                 HtmlDomParserRule.ScriptElement,
                 HtmlDomParserRule.Commentary,
                 HtmlDomParserRule.Doctype,
+                HtmlDomParserRule.XmlHeader,
                 HtmlDomParserRule.StyleElement,
                 HtmlDomParserRule.MetaElement,
                 HtmlDomParserRule.LinkElement,
-            });
-        public static List<HtmlDomParserRule> Rules
-        {
-            get { return HtmlDomParser.rules; }
-        }
+            };
 
         #endregion
 
@@ -54,22 +52,18 @@ namespace MaxLib.Data.HtmlDom
 
         public static void ParseHtml(HtmlDomDocument document, string html)
         {
+            var parser = new RealParser2(new System.IO.MemoryStream(DefaultEncoding.GetBytes(html)), false);
             document.Elements.Clear();
-            document.Elements.AddRange(new RealParser
-            {
-                Document = document,
-                Stream = new System.IO.MemoryStream(DefaultEncoding.GetBytes(html))
-            }.Build());
+            document.Elements.AddRange(parser.Build());
+            document.errors.AddRange(parser.Errors);
         }
 
         public static void ParseHtml(HtmlDomDocument document, System.IO.Stream stream)
         {
+            var parser = new RealParser2(stream, false);
             document.Elements.Clear();
-            document.Elements.AddRange(new RealParser
-            {
-                Document = document,
-                Stream = stream
-            }.Build());
+            document.Elements.AddRange(parser.Build());
+            document.errors.AddRange(parser.Errors);
         }
 
         #endregion
@@ -585,7 +579,7 @@ namespace MaxLib.Data.HtmlDom
                                 if (cc != ' ' || pr.Text != "") pr.Text += cc;
                                 if (!ignorerules)
                                 {
-                                    if ((activerule = rules.Find((r) => r.StartCode != null &&( r.StartCode.ToLower() == '<' + pr.Text.ToLower()))) != null)
+                                    if ((activerule = Rules.Find((r) => r.StartCode != null &&( r.StartCode.ToLower() == '<' + pr.Text.ToLower()))) != null)
                                     {
                                         if (activerule.DontParseContent || activerule.DontParseElement)
                                         {
@@ -612,7 +606,7 @@ namespace MaxLib.Data.HtmlDom
                                 if (cc == 0) return false;
                                 if (!ignorerules)
                                 {
-                                    activerule = rules.Find((r) => r.Name.ToLower() == pr.Text.ToLower());
+                                    activerule = Rules.Find((r) => r.Name.ToLower() == pr.Text.ToLower());
                                     if (activerule != null)
                                     {
                                         if (activerule.DontParseElement)
@@ -996,6 +990,923 @@ namespace MaxLib.Data.HtmlDom
             #endregion
         }
 
+        /// <summary>
+        /// Version 2 of <see cref="RealParser"/>
+        /// </summary>
+        class RealParser2
+        {
+            public System.IO.Stream Stream { get; private set; }
+
+            public bool IgnoreRules { get; private set; }
+
+            public List<HtmlDomParserError> Errors { get; private set; }
+
+            public RealParser2(System.IO.Stream stream, bool ignoreRules)
+            {
+                Stream = stream;
+                IgnoreRules = ignoreRules;
+                Errors = new List<HtmlDomParserError>();
+            }
+
+            struct Position
+            {
+                public long Index { get; set; }
+
+                public int Line { get; set; }
+
+                public int Column { get; set; }
+
+                public override string ToString()
+                {
+                    return $"({Line}, {Column})";
+                }
+            }
+            enum ParseRawType
+            {
+                TagStart,       //Start eines Tags <
+                TagEnd,         //Ende eines Tags >
+                TagCloser,      //Markierer für das Schließen eines Tags /
+                TagName,        //Der Name des Tags
+                AttributeName,  //Der Name eines Attributs
+                AttributeSetter,//Das = Zeichen für ein Attribut
+                AttributeBegin, //Der Start des Attributwerts "
+                AttributeEnd,   //Das Ende eines Attributwerts "
+                AttributeValue, //Der Wert eines Attributs
+                Text,           //Ein einfacher Text
+                Hidden,         //Inhalte, die nicht geparst werden durften
+            }
+            enum ActiveParserType
+            {
+                Text,
+                Tag,
+                AttributeName,
+                AttributeValue,
+                HiddenCode
+            }
+            [Flags]
+            enum CharType
+            {
+                Normal = 0,
+                TagStart = 1,   // <
+                TagEnd = 2,     // >
+                Space = 4,      // \n, \t, space
+                Equal = 8,      // =
+                Ticks = 16,     // ", '
+                NewLine = 32,   // \n
+                Closer = 64,    // /
+            }
+
+            class ElementWrapper
+            {
+                public HtmlDomElement Element;
+                public ElementType Type;
+                /// <summary>
+                /// 2-Closer notwendig; 1-Closer optional; 0-Kein Closer
+                /// </summary>
+                public int CloseLevel = 2; //2-Closer notwendig; 1-Closer optional; 0-Kein Closer
+                public string Content;
+                public Position Pos;
+                public string Name;
+
+                public override string ToString()
+                {
+                    return string.Format("{0}: ({1}) = {2}@{4} => [{3}]", Type, CloseLevel, Name, 
+                        Element == null ? "n" : Element.Elements.Count.ToString(), Pos);
+                }
+            }
+            enum ElementType
+            {
+                ElementHeader,
+                TextContent,
+                HiddenContentByElement,
+                ElementCloser,
+            }
+
+
+            public HtmlDomElement[] Build()
+            {
+                var active = new List<ElementWrapper>();
+                foreach (var current in GetElements())
+                {
+                    switch (current.Type)
+                    {
+                        case ElementType.ElementHeader:
+                        case ElementType.TextContent:
+                            active.Add(current);
+                            break;
+                        case ElementType.HiddenContentByElement:
+                            active[active.Count - 1].Content = current.Content;
+                            SetElementContainer(active[active.Count - 1]);
+                            break;
+                        case ElementType.ElementCloser:
+                            {
+                                var ind = active.FindLastIndex(ew
+                                    => ew.Type == ElementType.ElementHeader 
+                                    && ew.Name == current.Name 
+                                    && ew.CloseLevel > 0);
+                                if (ind == -1)
+                                {
+                                    Errors.Add(new HtmlDomParserError()
+                                    {
+                                        Fatal = false,
+                                        Line = current.Pos.Line,
+                                        Position = current.Pos.Column,
+                                        Name = "undefined closing tag",
+                                        Description = "for this closing tag no opening tags exists",
+                                        ErrorText = "</" + current.Name + '>'
+                                    });
+                                    continue;
+                                }
+                                for (int i = ind + 1; i < active.Count; ++i)
+                                {
+                                    bool setted = false;
+                                    for (int i2 = i - 1; i2 >= ind; --i2)
+                                        if (active[i2].CloseLevel == 2)
+                                        {
+                                            active[i2].Element.Elements.Add(active[i].Element);
+                                            setted = true;
+                                            break;
+                                        }
+                                    if (!setted) active[ind].Element.Elements.Add(active[i].Element);
+                                    if (active[i].CloseLevel == 2)
+                                        Errors.Add(new HtmlDomParserError()
+                                        {
+                                            Fatal = false,
+                                            Line = active[i].Pos.Line,
+                                            Position = active[i].Pos.Column,
+                                            Name = "no closing tag exists",
+                                            Description = "for this tag does not exists a closing tag",
+                                            ErrorText = "<" + active[i].Name + " ..."
+                                        });
+                                }
+                                active[ind].CloseLevel = 0;
+                                if (ind < active.Count - 1) active.RemoveRange(ind + 1, active.Count - ind - 1);
+                            } break;
+                    }
+                }
+                if (active.Count == 0)
+                {
+                    Errors.Add(new HtmlDomParserError()
+                    {
+                        Fatal = false,
+                        Line = 0,
+                        Position = 0,
+                        Name = "no content",
+                        Description = "this file is empty",
+                        ErrorText = ""
+                    });
+                    return new[] { new HtmlDomElementText() { Text = "" } };
+                }
+                bool flush = false;
+                for (int i = 0; i < active.Count; ++i)
+                {
+                    if (active[i].CloseLevel != 2 && !flush) continue;
+                    flush = true;
+                    bool setted = false;
+                    for (int i2 = i - 1; i2 >= 0; --i2)
+                        if (active[i2].CloseLevel == 2)
+                        {
+                            active[i2].Element.Elements.Add(active[i].Element);
+                            setted = true;
+                            break;
+                        }
+                    if (!setted) active[0].Element.Elements.Add(active[i].Element);
+                    if (active[i].CloseLevel == 2)
+                        Errors.Add(new HtmlDomParserError()
+                        {
+                            Fatal = false,
+                            Line = active[i].Pos.Line,
+                            Position = active[i].Pos.Column,
+                            Name = "no closing tag exists",
+                            Description = "for this tag does not exists a closing tag",
+                            ErrorText = "<" + active[i].Name + " ..."
+                        });
+                }
+                active.ForEach(eq =>
+                {
+                    eq.Element.IndentLevel = 0;
+                    eq.Element.Elements.SetIndentLevel(
+                        eq.Name == null || eq.Name.ToLower() == "html" ? 0 : 1
+                    );
+                });
+                return active.ConvertAll((ew) => ew.Element).ToArray();
+            }
+
+            private IEnumerable<ElementWrapper> GetElements()
+            {
+                var rawTypes = GetParseRawTypes().Select(o => new
+                {
+                    Type = o.Item1,
+                    Text = o.Item2,
+                    Pos = o.Item3
+                }).GetEnumerator();
+
+                var t = Next(rawTypes);
+                if (t == null) yield break;
+                do
+                {
+                    switch (t.Type)
+                    {
+                        case ParseRawType.Text:
+                            if (t.Text != "")
+                            {
+                                yield return new ElementWrapper
+                                {
+                                    Type = ElementType.TextContent,
+                                    Element = new HtmlDomElementText { Text = t.Text },
+                                    CloseLevel = 0,
+                                    Name = null,
+                                    Pos = t.Pos
+                                };
+                            }
+                            break;
+                        case ParseRawType.Hidden:
+                            yield return new ElementWrapper
+                            {
+                                Pos = t.Pos,
+                                CloseLevel = 3,
+                                Content = t.Text,
+                                Type = ElementType.HiddenContentByElement
+                            };
+                            break;
+                        case ParseRawType.TagStart:
+                            {
+                                var elementPos = t.Pos;
+                                if ((t = Next(rawTypes)) == null)
+                                {
+                                    Errors.Add(new HtmlDomParserError
+                                    {
+                                        Fatal = false,
+                                        Line = elementPos.Line,
+                                        Position = elementPos.Column,
+                                        Name = "document ended",
+                                        Description = "element node name expected but document ended"
+                                    });
+                                    yield break;
+                                }
+                                switch (t.Type)
+                                {
+                                    case ParseRawType.TagCloser:
+                                        {
+                                            if ((t = Next(rawTypes)) == null)
+                                            {
+                                                Errors.Add(new HtmlDomParserError
+                                                {
+                                                    Fatal = false,
+                                                    Line = elementPos.Line,
+                                                    Position = elementPos.Column,
+                                                    Name = "document ended",
+                                                    Description = "element node name expected but document ended"
+                                                });
+                                                yield break;
+                                            }
+                                            if (t.Type != ParseRawType.TagName)
+                                            {
+                                                Errors.Add(new HtmlDomParserError
+                                                {
+                                                    Fatal = false,
+                                                    Line = t.Pos.Line,
+                                                    Position = t.Pos.Column,
+                                                    Name = "error in parsing progress",
+                                                    Description = $"unexpected data type {t.Type} at node tag",
+                                                    ErrorText = t.Text
+                                                });
+                                                break;
+                                            }
+                                            var tagName = t.Text;
+                                            if ((t = Next(rawTypes)) == null)
+                                            {
+                                                Errors.Add(new HtmlDomParserError
+                                                {
+                                                    Fatal = false,
+                                                    Line = elementPos.Line,
+                                                    Position = elementPos.Column,
+                                                    Name = "document ended",
+                                                    Description = "end of node expected but document ended"
+                                                });
+                                                yield break;
+                                            }
+                                            if (t.Type != ParseRawType.TagEnd)
+                                            {
+                                                Errors.Add(new HtmlDomParserError
+                                                {
+                                                    Fatal = false,
+                                                    Line = t.Pos.Line,
+                                                    Position = t.Pos.Column,
+                                                    Name = "error in parsing progress",
+                                                    Description = $"unexpected data type {t.Type} at node closing",
+                                                    ErrorText = t.Text
+                                                });
+                                                break;
+                                            }
+                                            yield return new ElementWrapper
+                                            {
+                                                Pos = elementPos,
+                                                Type = ElementType.ElementCloser,
+                                                Content = tagName,
+                                                Name = tagName,
+                                                CloseLevel = 3,
+                                            };
+                                        } break;
+                                    case ParseRawType.Hidden:
+                                        yield return new ElementWrapper
+                                        {
+                                            Pos = elementPos,
+                                            CloseLevel = 3,
+                                            Content = t.Text,
+                                            Type = ElementType.HiddenContentByElement
+                                        };
+                                        break;
+                                    case ParseRawType.TagName:
+                                        {
+                                            var result = new ElementWrapper
+                                            {
+                                                Pos = elementPos,
+                                                Name = t.Text,
+                                                Type = ElementType.ElementHeader
+                                            };
+                                            var rule = Rules.Find(r => r.Name?.ToLower() == t.Text.ToLower()
+                                                || r.StartCode?.ToLower() == '<' + t.Text.ToLower());
+                                            if (rule != null)
+                                            {
+                                                if (!rule.NeedEndTag)
+                                                    result.CloseLevel = 1;
+                                                if (rule.ElementType != null)
+                                                    result.Element = Activator.CreateInstance(rule.ElementType) as HtmlDomElement;
+                                                if (rule.DontParseElement)
+                                                {
+                                                    result.Content = (t = Next(rawTypes)).Text;
+                                                    result.CloseLevel = 0;
+                                                    SetElementContainer(result);
+                                                    yield return result;
+                                                    break;
+                                                }
+                                            }
+                                            if (result.Element == null) result.Element = new HtmlDomElement(result.Name);
+                                            else result.Element.ElementName = result.Name;
+                                            //finish of tag
+                                            //set all attributes
+                                            bool valid = false;
+                                            while ((t = Next(rawTypes)) != null && t.Type == ParseRawType.AttributeName)
+                                            {
+                                                var attribute = new HtmlDomAttribute(t.Text, null);
+                                                result.Element.Attributes.Add(attribute);
+                                                if ((t = Next(rawTypes)) == null || t.Type != ParseRawType.AttributeSetter) break;
+                                                if ((t = Next(rawTypes)) == null) break;
+                                                valid = false;
+                                                switch (t.Type)
+                                                {
+                                                    case ParseRawType.AttributeBegin:
+                                                        if ((t = Next(rawTypes)) == null) break;
+                                                        switch (t.Type)
+                                                        {
+                                                            case ParseRawType.AttributeValue:
+                                                                attribute.Value = t.Text;
+                                                                if ((t = Next(rawTypes)) == null || t.Type != ParseRawType.AttributeEnd)
+                                                                    break;
+                                                                valid = true;
+                                                                break;
+                                                            case ParseRawType.AttributeEnd:
+                                                                attribute.Value = "";
+                                                                valid = true;
+                                                                break;
+                                                        }
+                                                        break;
+                                                    case ParseRawType.AttributeValue:
+                                                        attribute.Value = "";
+                                                        valid = true;
+                                                        break;
+                                                }
+                                                if (!valid) break;
+                                            }
+                                            if (t != null)
+                                            {
+                                                switch (t.Type)
+                                                {
+                                                    case ParseRawType.TagCloser:
+                                                        result.CloseLevel = 0;
+                                                        if ((t = Next(rawTypes)) == null) break;
+                                                        if (t.Type != ParseRawType.TagEnd)
+                                                        {
+                                                            Errors.Add(new HtmlDomParserError
+                                                            {
+                                                                Fatal = false,
+                                                                Line = t.Pos.Line,
+                                                                Position = t.Pos.Column,
+                                                                Name = "missing tag end",
+                                                                Description = "the end of the tag was expected but more attributes are found",
+                                                                ErrorText = t.Text
+                                                            });
+                                                            while ((t = Next(rawTypes)) != null && t.Type != ParseRawType.TagEnd) ;
+                                                        }
+                                                        valid = true;
+                                                        break;
+                                                    case ParseRawType.TagEnd:
+                                                        valid = true;
+                                                        break;
+                                                }
+                                            }
+                                            if (!valid)
+                                            {
+                                                if (t == null)
+                                                    Errors.Add(new HtmlDomParserError
+                                                    {
+                                                        Fatal = false,
+                                                        Line = elementPos.Line,
+                                                        Position = elementPos.Column,
+                                                        Name = "document ended",
+                                                        Description = "the attribute list for this node is not complete"
+                                                    });
+                                                else Errors.Add(new HtmlDomParserError
+                                                {
+                                                    Fatal = false,
+                                                    Line = t.Pos.Line,
+                                                    Position = t.Pos.Column,
+                                                    Name = "invalid input",
+                                                    Description = $"at the specified position is {t.Type} not expected for an argument list",
+                                                    ErrorText = t.Text
+                                                });
+                                            }
+                                            //finish of attributes
+                                            yield return result;
+                                        } break;
+                                    default:
+                                        Errors.Add(new HtmlDomParserError
+                                        {
+                                            Fatal = false,
+                                            Line = t.Pos.Line,
+                                            Position = t.Pos.Column,
+                                            Name = "error in parsing progress",
+                                            Description = $"unexpected data type {t.Type} at node tag",
+                                            ErrorText = t.Text
+                                        });
+                                        break;
+                                }
+                            } break; 
+                        default:
+                            Errors.Add(new HtmlDomParserError
+                            {
+                                Fatal = false,
+                                Line = t.Pos.Line,
+                                Position = t.Pos.Column,
+                                Name = "error in parsing progress",
+                                Description = $"unexpected data type {t.Type} at element node level",
+                                ErrorText = t.Text
+                            });
+                            break;
+                    }
+                }
+                while ((t = Next(rawTypes)) != null);
+            }
+
+            void SetElementContainer(ElementWrapper ew)
+            {
+                if (ew == null || ew.Element == null) return;
+                var type = ew.Element.GetType();
+                foreach (var method in type.GetMethods(System.Reflection.BindingFlags.Instance |
+                    System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public |
+                    System.Reflection.BindingFlags.NonPublic))
+                {
+                    var att = method.GetCustomAttributes(typeof(HtmlParserHelperAttribute), true);
+                    foreach (HtmlParserHelperAttribute a in att)
+                    {
+                        if (a.HelperType == HtmlParserHelperType.ContentTarget)
+                            method.Invoke(ew.Element, new object[] { ew.Content });
+                        if (a.HelperType == HtmlParserHelperType.NameTarget)
+                            method.Invoke(ew.Element, new object[] { ew.Name });
+                    }
+                }
+            }
+
+            private T Next<T>(IEnumerator<T> enumerator)
+                where T : class
+            {
+                if (!enumerator.MoveNext())
+                    return null;
+                else return enumerator.Current;
+            }
+
+            private IEnumerable<Tuple<ParseRawType, string, Position>> GetParseRawTypes()
+            {
+                var active = ActiveParserType.Text;
+                var text = "";
+                Position? start = null;
+                bool skipSpace = true;
+                HtmlDomParserRule rule = null;
+                bool ignoreRules = false;
+                char? ticks = null;
+                Position[] posBuffer = null;
+                foreach (var cp in GetTypedCharStream())
+                {
+                    var c = cp.Item1;
+                    var type = cp.Item2;
+                    var pos = cp.Item3;
+                    switch (active)
+                    {
+                        case ActiveParserType.Text:
+                            {
+                                if (type.HasFlag(CharType.TagStart))
+                                {
+                                    if (text != "" && start != null)
+                                        yield return new Tuple<ParseRawType, string, Position>(ParseRawType.Text, text, start.Value);
+                                    yield return new Tuple<ParseRawType, string, Position>(ParseRawType.TagStart, "<", pos);
+                                    active = ActiveParserType.Tag;
+                                    text = "";
+                                    start = null;
+                                    skipSpace = true;
+                                }
+                                else if (type.HasFlag(CharType.NewLine))
+                                {
+                                    if (!skipSpace)
+                                        text += c;
+                                    skipSpace = true;
+                                }
+                                else if (type.HasFlag(CharType.Space))
+                                {
+                                    if (!skipSpace)
+                                        text += c;
+                                }
+                                else
+                                {
+                                    skipSpace = false;
+                                    text += c;
+                                    if (start == null)
+                                        start = pos;
+                                }
+                            } break;
+                        case ActiveParserType.Tag:
+                            {
+                                if (type.HasFlag(CharType.Space))
+                                {
+                                    if (!skipSpace)
+                                    {
+                                        if (!IgnoreRules && !ignoreRules && (rule = Rules.Find(r => r.Name?.ToLower() == text.ToLower())) != null)
+                                        {
+                                            if (!rule.DontParseContent)
+                                                rule = null;
+                                        }
+                                        if (text != null && start != null)
+                                            yield return new Tuple<ParseRawType, string, Position>(ParseRawType.TagName, text, start.Value);
+                                        active = ActiveParserType.AttributeName;
+                                        text = "";
+                                        start = null;
+                                        skipSpace = true;
+                                    }
+                                }
+                                else if (type.HasFlag(CharType.TagEnd))
+                                {
+                                    if (!IgnoreRules && !ignoreRules && (rule = Rules.Find(r => r.Name?.ToLower() == text.ToLower())) != null)
+                                    {
+                                        if (!rule.DontParseContent)
+                                            rule = null;
+                                    }
+                                    if (text != null && start != null)
+                                        yield return new Tuple<ParseRawType, string, Position>(ParseRawType.TagName, text, start.Value);
+                                    yield return new Tuple<ParseRawType, string, Position>(ParseRawType.TagEnd, ">", pos);
+                                    active = rule != null ? ActiveParserType.HiddenCode : ActiveParserType.Text;
+                                    text = "";
+                                    start = null;
+                                    skipSpace = true;
+                                    ignoreRules = false;
+                                }
+                                else if (type.HasFlag(CharType.Closer))
+                                {
+                                    if (text != null && start != null)
+                                        yield return new Tuple<ParseRawType, string, Position>(ParseRawType.TagName, text, start.Value);
+                                    yield return new Tuple<ParseRawType, string, Position>(ParseRawType.TagCloser, "/", pos);
+                                    text = "";
+                                    start = null;
+                                    skipSpace = true;
+                                }
+                                else
+                                {
+                                    text += c;
+                                    if (start == null)
+                                        start = pos;
+                                    skipSpace = false;
+
+                                    if (!IgnoreRules && !ignoreRules && (rule = Rules.Find(r => r.StartCode?.ToLower() == '<' + text.ToLower())) != null)
+                                    {
+                                        if (rule.DontParseElement)
+                                        {
+                                            yield return new Tuple<ParseRawType, string, Position>(ParseRawType.TagName, text, start.Value);
+                                            active = ActiveParserType.HiddenCode;
+                                            text = "";
+                                            start = null;
+                                            skipSpace = true;
+                                        }
+                                        else rule = null;
+                                    }
+                                }
+                            } break;
+                        case ActiveParserType.AttributeName:
+                            {
+                                if (type.HasFlag(CharType.Space))
+                                {
+                                    if (!skipSpace)
+                                    {
+                                        if (text != "" && start != null)
+                                            yield return new Tuple<ParseRawType, string, Position>(ParseRawType.AttributeName, text, start.Value);
+                                        text = "";
+                                        start = null;
+                                        skipSpace = true;
+                                    }
+                                }
+                                else if (type.HasFlag(CharType.Equal))
+                                {
+                                    if (text != "" && start != null)
+                                        yield return new Tuple<ParseRawType, string, Position>(ParseRawType.AttributeName, text, start.Value);
+                                    yield return new Tuple<ParseRawType, string, Position>(ParseRawType.AttributeSetter, "=", pos);
+                                    active = ActiveParserType.AttributeValue;
+                                    text = "";
+                                    start = null;
+                                    skipSpace = true;
+                                    ticks = null;
+                                }
+                                else if (type.HasFlag(CharType.TagEnd))
+                                {
+                                    if (text != "" && start != null)
+                                        yield return new Tuple<ParseRawType, string, Position>(ParseRawType.AttributeName, text, start.Value);
+                                    yield return new Tuple<ParseRawType, string, Position>(ParseRawType.TagEnd, ">", pos);
+                                    active = rule != null ? ActiveParserType.HiddenCode : ActiveParserType.Text;
+                                    text = "";
+                                    start = null;
+                                    skipSpace = true;
+                                    ignoreRules = false;
+                                }
+                                else if (type.HasFlag(CharType.Closer))
+                                {
+                                    if (text != "" && start != null)
+                                        yield return new Tuple<ParseRawType, string, Position>(ParseRawType.AttributeName, text, start.Value);
+                                    yield return new Tuple<ParseRawType, string, Position>(ParseRawType.TagCloser, "/", pos);
+                                    text = "";
+                                    start = null;
+                                    skipSpace = true;
+                                }
+                                else
+                                {
+                                    text += c;
+                                    if (start == null)
+                                        start = pos;
+                                    skipSpace = false;
+                                }
+                            } break;
+                        case ActiveParserType.AttributeValue:
+                            {
+                                if (type.HasFlag(CharType.Space))
+                                {
+                                    if (!skipSpace)
+                                    {
+                                        text += c;
+                                        if (start == null)
+                                            start = pos;
+                                    }
+                                }
+                                else if (type.HasFlag(CharType.Closer))
+                                {
+                                    if (ticks == null)
+                                    {
+                                        if (text != "" && start != null)
+                                            yield return new Tuple<ParseRawType, string, Position>(ParseRawType.AttributeValue, text, start.Value);
+                                        yield return new Tuple<ParseRawType, string, Position>(ParseRawType.TagCloser, "/", pos);
+                                        active = ActiveParserType.AttributeName;
+                                        text = "";
+                                        start = null;
+                                        skipSpace = true;
+                                    }
+                                    else
+                                    {
+                                        text += c;
+                                        if (start == null)
+                                            start = pos;
+                                    }
+                                }
+                                else if (type.HasFlag(CharType.TagEnd))
+                                {
+                                    if (ticks == null)
+                                    {
+                                        if (text != "" && start != null)
+                                            yield return new Tuple<ParseRawType, string, Position>(ParseRawType.AttributeValue, text, start.Value);
+                                        yield return new Tuple<ParseRawType, string, Position>(ParseRawType.AttributeEnd, ">", pos);
+                                        active = rule != null ? ActiveParserType.HiddenCode : ActiveParserType.Text;
+                                        text = "";
+                                        start = null;
+                                        skipSpace = true;
+                                        ignoreRules = false;
+                                    }
+                                    else
+                                    {
+                                        text += c;
+                                        if (start == null)
+                                            start = pos;
+                                    }
+                                }
+                                else if (type.HasFlag(CharType.Ticks))
+                                {
+                                    if (ticks == null)
+                                    {
+                                        ticks = c;
+                                        yield return new Tuple<ParseRawType, string, Position>(ParseRawType.AttributeBegin, c.ToString(), pos);
+                                    }
+                                    else if (ticks == c)
+                                    {
+                                        yield return new Tuple<ParseRawType, string, Position>(ParseRawType.AttributeValue, text, start ?? pos);
+                                        yield return new Tuple<ParseRawType, string, Position>(ParseRawType.AttributeEnd, c.ToString(), pos);
+                                        active = ActiveParserType.AttributeName;
+                                        text = "";
+                                        start = null;
+                                    }
+                                    else
+                                    {
+                                        text += c;
+                                        if (start == null)
+                                            start = pos;
+                                    }
+                                    skipSpace = false;
+                                }
+                                else
+                                {
+                                    text += c;
+                                    if (start == null)
+                                        start = pos;
+                                    skipSpace = false;
+                                }
+                            } break;
+                        case ActiveParserType.HiddenCode:
+                            {
+                                if (rule.EndCode != null)
+                                {
+                                    text += c;
+                                    if (start == null)
+                                        start = pos;
+                                    if (text.EndsWith(rule.EndCode, StringComparison.InvariantCultureIgnoreCase))
+                                    {
+                                        text = text.Remove(text.Length - rule.EndCode.Length);
+                                        yield return new Tuple<ParseRawType, string, Position>(ParseRawType.Hidden, text, start.Value);
+                                        active = ActiveParserType.Text;
+                                        text = "";
+                                        start = null;
+                                        skipSpace = true;
+                                        rule = null;
+                                    }
+                                }
+                                else
+                                {
+                                    text += c;
+                                    if (start == null)
+                                        start = pos;
+                                    if (posBuffer == null)
+                                        posBuffer = new Position[rule.Name.Length + 2];
+                                    for (int i = 1; i < posBuffer.Length; ++i)
+                                        posBuffer[i - 1] = posBuffer[i];
+                                    posBuffer[posBuffer.Length - 1] = pos;
+                                    if (text.EndsWith("</" + rule.Name, StringComparison.InvariantCultureIgnoreCase))
+                                    {
+                                        text = text.Remove(text.Length - posBuffer.Length);
+                                        yield return new Tuple<ParseRawType, string, Position>(ParseRawType.Hidden, text, start.Value);
+                                        yield return new Tuple<ParseRawType, string, Position>(ParseRawType.TagStart, "<", posBuffer[0]);
+                                        yield return new Tuple<ParseRawType, string, Position>(ParseRawType.TagCloser, "/", posBuffer[1]);
+                                        active = ActiveParserType.Tag;
+                                        text = rule.Name;
+                                        start = posBuffer[2];
+                                        skipSpace = true;
+                                        rule = null;
+                                        ignoreRules = true;
+                                    }
+                                }
+                            } break;
+                    }
+                }
+                if (text != "" && start != null)
+                    switch (active)
+                    {
+                        case ActiveParserType.Text:
+                            yield return new Tuple<ParseRawType, string, Position>(ParseRawType.Text, text, start.Value);
+                            break;
+                        case ActiveParserType.Tag:
+                            yield return new Tuple<ParseRawType, string, Position>(ParseRawType.TagName, text, start.Value);
+                            break;
+                        case ActiveParserType.AttributeName:
+                            yield return new Tuple<ParseRawType, string, Position>(ParseRawType.AttributeName, text, start.Value);
+                            break;
+                        case ActiveParserType.AttributeValue:
+                            yield return new Tuple<ParseRawType, string, Position>(ParseRawType.AttributeValue, text, start.Value);
+                            break;
+                        case ActiveParserType.HiddenCode:
+                            yield return new Tuple<ParseRawType, string, Position>(ParseRawType.Hidden, text, start.Value);
+                            break;
+                    }
+            }
+
+            private IEnumerable<Tuple<T, T>> GetPeekable1<T>(IEnumerable<T> collection)
+                where T : class
+            {
+                T last = null;
+                foreach (var item in collection)
+                {
+                    if (last != null)
+                        yield return new Tuple<T, T>(last, item);
+                    last = item;
+                }
+                if (last != null)
+                    yield return new Tuple<T, T>(last, null);
+            }
+
+            private IEnumerable<Tuple<char, CharType, Position>> GetTypedCharStream()
+            {
+                bool masked = false;
+                foreach (var cp in GetPositionedCharStream())
+                {
+                    var type = CharType.Normal;
+                    if (masked)
+                        masked = false;
+                    else
+                        switch (cp.Item1)
+                        {
+                            case '<': type |= CharType.TagStart; break;
+                            case '>': type |= CharType.TagEnd; break;
+                            case '\n': type |= CharType.Space | CharType.NewLine; break;
+                            case '\t': type |= CharType.Space; break;
+                            case ' ': type |= CharType.Space; break;
+                            case '=': type |= CharType.Equal; break;
+                            case '"': type |= CharType.Ticks; break;
+                            case '\'': type |= CharType.Ticks; break;
+                            case '/': type |= CharType.Closer; break;
+                            case '\\': masked = true; break;
+                        }
+                    yield return new Tuple<char, CharType, Position>(cp.Item1, type, cp.Item2);
+                }
+            }
+
+            private IEnumerable<Tuple<char, Position>> GetPositionedCharStream()
+            {
+                int line = 1;
+                long index = 0;
+                int column = 0;
+                bool isNewLine = false;
+                Position? PrevPos = null;
+                bool ignore = false;
+                foreach (var c in GetBasicCharStream())
+                {
+                    index++;
+                    column++;
+                    var pos = new Position
+                    {
+                        Index = index,
+                        Column = column,
+                        Line = line
+                    };
+                    switch (c)
+                    {
+                        case '\r':
+                            if (isNewLine)
+                            {
+                                if (PrevPos != null)
+                                    yield return new Tuple<char, Position>('\n', PrevPos.Value);
+                                line++;
+                                column = 0;
+                            }
+                            isNewLine = true;
+                            ignore = true;
+                            break;
+                        case '\n':
+                            isNewLine = false;
+                            line++;
+                            column = 1;
+                            break;
+                        default:
+                            if (isNewLine)
+                            {
+                                if (PrevPos != null)
+                                    yield return new Tuple<char, Position>('\n', PrevPos.Value);
+                                line++;
+                                column = 0;
+                                isNewLine = false;
+                            }
+                            break;
+                    }
+                    if (ignore) ignore = false;
+                    else yield return new Tuple<char, Position>(c, pos);
+                    PrevPos = pos;
+                }
+            }
+
+            private IEnumerable<char> GetBasicCharStream()
+            {
+                using (var reader = new System.IO.StreamReader(Stream, DefaultEncoding, true, 128, true))
+                {
+                    var buffer = new char[1];
+                    while (!reader.EndOfStream)
+                    {
+                        if (reader.Read(buffer, 0, 1) > 0)
+                        {
+                            yield return buffer[0];
+                        }
+                    }
+                }
+            }
+        }
+
         #endregion
     }
 
@@ -1014,13 +1925,21 @@ namespace MaxLib.Data.HtmlDom
 
         public HtmlDomParserRule()
         {
-            Name = "";
+            Name = null;
             StartCode = EndCode = null;
             DontParseContent = DontParseElement = false;
             NeedEndTag = true;
             ElementType = null;
         }
 
+        public override string ToString()
+        {
+            if (DontParseElement)
+                return $"{{ {StartCode} * {EndCode} }} - {ElementType?.FullName}";
+            if (DontParseContent)
+                return $"{{ <{Name} *> * </{Name}> }} - {ElementType?.FullName}";
+            return $"[{Name}] - RequireEndTag: {NeedEndTag} Object: {(ElementType ?? typeof(HtmlDomElement)).FullName}";
+        }
         public static HtmlDomParserRule BreakElement
         { get { return new HtmlDomParserRule() { Name = "br", NeedEndTag = false }; } }
 
@@ -1037,6 +1956,9 @@ namespace MaxLib.Data.HtmlDom
 
         public static HtmlDomParserRule Doctype
         { get { return new HtmlDomParserRule() { StartCode = "<!DOCTYPE", EndCode = ">", DontParseContent = true, DontParseElement = true, NeedEndTag = false, ElementType = typeof(HtmlDomElementDoctype) }; } }
+
+        public static HtmlDomParserRule XmlHeader
+            => new HtmlDomParserRule { Name = "?xml", NeedEndTag = false, ElementType = typeof(HtmlDomElementXmlHeader) };
 
         public static HtmlDomParserRule StyleElement
         {
@@ -1094,7 +2016,7 @@ namespace MaxLib.Data.HtmlDom
     #region Basis Element
 
     [Serializable]
-    public class HtmlDomBasicElement
+    public class HtmlDomBasicElement : IEnumerable<HtmlDomElement>
     {
         /// <summary>
         /// Setzt oder ruft den inneren Html-Code ab.
@@ -1142,6 +2064,16 @@ namespace MaxLib.Data.HtmlDom
             var doc = new HtmlDomDocument();
             doc.Elements.AddRange(Elements);
             return doc;
+        }
+
+        IEnumerator<HtmlDomElement> IEnumerable<HtmlDomElement>.GetEnumerator()
+        {
+            return Elements.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable<HtmlDomElement>)this).GetEnumerator();
         }
 
         internal List<HtmlDomParserError> errors = new List<HtmlDomParserError>();
@@ -1290,7 +2222,7 @@ namespace MaxLib.Data.HtmlDom
         public void AddToParent(HtmlDomElement parent)
         {
             if (parent == null) throw new ArgumentNullException("parent");
-            Parent.Elements.Add(this);
+            parent.Elements.Add(this);
         }
 
         public bool InsertAfter(HtmlDomElement element)
@@ -1330,6 +2262,11 @@ namespace MaxLib.Data.HtmlDom
         }
 
         #endregion
+
+        public override string ToString()
+        {
+            return $"<{ElementName} {string.Join(' ', Attributes)}>{{{Elements.Count}}}</{ElementName}>";
+        }
     }
 
     #region Erweiterte Dom Elemente
@@ -1417,6 +2354,11 @@ namespace MaxLib.Data.HtmlDom
             }
             return sb.ToString();
         }
+
+        public override string ToString()
+        {
+            return Text;
+        }
     }
 
     [Serializable]
@@ -1445,6 +2387,11 @@ namespace MaxLib.Data.HtmlDom
             sb.AppendLine("-->");
             return sb.ToString();
         }
+
+        public override string ToString()
+        {
+            return $"<!-- {Comment} -->";
+        }
     }
 
     [Serializable]
@@ -1467,6 +2414,30 @@ namespace MaxLib.Data.HtmlDom
             sb.AppendLine(">");
             return sb.ToString();
         }
+
+        public override string ToString()
+        {
+            return $"<!DOCTYPE{Doctype}>";
+        }
+    }
+
+    [Serializable]
+    public class HtmlDomElementXmlHeader : HtmlDomElement
+    {
+        public override string GetOuterHtml()
+        {
+            var sb = new StringBuilder();
+            sb.Append(' ', 2 * IndentLevel);
+            sb.Append("<?xml");
+            foreach (var header in this.Attributes)
+                if (header.Key != "?")
+                    sb.Append($" {header.Key}=\"{header.Value}\"");
+            sb.AppendLine("?>");
+            return sb.ToString();
+        }
+
+        public override string ToString()
+            => GetOuterHtml().TrimStart();
     }
 
     #endregion
@@ -1650,8 +2621,11 @@ namespace MaxLib.Data.HtmlDom
             });
         }
 
+        public const int MaxIndentRecursion = 100;
+
         public void SetIndentLevel(int level)
         {
+            if (level > MaxIndentRecursion) return;
             elements.ForEach((e) =>
             {
                 if (e != null)
