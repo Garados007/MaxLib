@@ -2265,7 +2265,7 @@ namespace MaxLib.Data.HtmlDom
 
         public override string ToString()
         {
-            return $"<{ElementName} {string.Join(' ', Attributes)}>{{{Elements.Count}}}</{ElementName}>";
+            return $"<{ElementName} {string.Join(" ", Attributes)}>{{{Elements.Count}}}</{ElementName}>";
         }
     }
 
