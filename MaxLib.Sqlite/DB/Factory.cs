@@ -287,6 +287,10 @@ namespace MaxLib.DB
                     {
                         sb.Append(GetMod(k.Comp));
                         sb.Append(k.Key);
+                        if (k.Value is DateTime)
+                            sb.Append("+d");
+                        if (k.Value is null)
+                            sb.Append("+n");
                     }
                 var key = sb.ToString();
                 if (cont.QueryBuffer.ContainsKey(key))
@@ -532,9 +536,27 @@ namespace MaxLib.DB
                 for (int i = 0; i < keys.Length; ++i)
                 {
                     if (i != 0) sb.Append(" AND ");
-                    sb.Append(keys[i].Key);
-                    sb.Append(GetMod(keys[i].Comp));
-                    sb.Append("?");
+                    if (keys[i].Value is DateTime dateTime)
+                    {
+                        sb.Append($"julianday({keys[i].Key})");
+                        sb.Append(GetMod(keys[i].Comp));
+                        sb.Append("julianday(?)");
+                    }
+                    else if (keys[i].Value is null)
+                    {
+                        switch (keys[i].Comp)
+                        {
+                            case DbComp.eq: sb.Append($"{keys[i].Key} is ?"); break;
+                            case DbComp.neq: sb.Append($"not({keys[i].Key} is ?)"); break;
+                            default: sb.Append("false"); break;
+                        }
+                    }
+                    else
+                    {
+                        sb.Append(keys[i].Key);
+                        sb.Append(GetMod(keys[i].Comp));
+                        sb.Append("?");
+                    }
                 }
                 if (keys.Length == 0) sb.Append('1');
                 return sb.ToString();
