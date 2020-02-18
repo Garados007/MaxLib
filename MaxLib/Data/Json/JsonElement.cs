@@ -335,6 +335,16 @@ namespace MaxLib.Data.Json
             return (T)Elements[name];
         }
 
+        public JsonObject Remove(string name)
+        {
+            if (name == null) throw new ArgumentNullException(nameof(name));
+            lock (lockObject)
+            {
+                Elements.Remove(name);
+            }
+            return this;
+        }
+
         public bool Contains(string name)
         {
             return Elements.ContainsKey(name);
@@ -438,6 +448,13 @@ namespace MaxLib.Data.Json
         {
             if (index < 0 || index >= ChildCount) throw new ArgumentOutOfRangeException("index");
             return (T)Elements[index];
+        }
+
+        public JsonArray RemoveLast()
+        {
+            if (Elements.Count > 0)
+                Elements.RemoveAt(Elements.Count - 1);
+            return this;
         }
 
         public JsonElement this[int index]
