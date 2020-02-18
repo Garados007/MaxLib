@@ -25,6 +25,7 @@ namespace MaxLib.Data.Config
             if (names == null) throw new ArgumentNullException(nameof(names));
             if (names.Length == 0) throw new ArgumentException("no name given", nameof(names));
             Category = names.Take(names.Length - 1).ToArray();
+            Name = names.Last();
         }
 
         /// <summary>

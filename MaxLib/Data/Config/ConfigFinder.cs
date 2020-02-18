@@ -40,7 +40,7 @@ namespace MaxLib.Data.Config
 
         private bool CreateableConfig(Type config)
         {
-            return config.GetConstructor(Type.EmptyTypes) != null;
+            return config.GetConstructor(Type.EmptyTypes) != null && !config.IsAbstract;
         }
 
         private ConfigAttribute ReadAttribute(Type config)
@@ -74,7 +74,7 @@ namespace MaxLib.Data.Config
         /// </summary>
         /// <typeparam name="T">the type of the config to add</typeparam>
         /// <returns>true if it could successfully added</returns>
-        public bool AddType<T>() where T : ConfigBase
+        public bool AddType<T>() where T : ConfigBase, new()
         {
             return AddType(typeof(T));
         }
@@ -86,7 +86,7 @@ namespace MaxLib.Data.Config
         /// <param name="name">the name of the config</param>
         /// <param name="categories">the names of the category path</param>
         /// <returns>true if it could successfully added</returns>
-        public bool AddType<T>(string name, params string[] categories) where T : ConfigBase
+        public bool AddType<T>(string name, params string[] categories) where T : ConfigBase, new()
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));

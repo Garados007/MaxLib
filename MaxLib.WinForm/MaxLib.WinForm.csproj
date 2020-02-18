@@ -64,6 +64,18 @@
     <Compile Include="Console\ExtendedConsole\Windows\MainTargetWindow.cs" />
     <Compile Include="Console\ExtendedConsole\Windows\TaskBar.cs" />
     <Compile Include="Console\ExtendedConsole\Windows\WindowsCore.cs" />
+    <Compile Include="Data\Config\ConfigEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Data\Config\ConfigEditor.Designer.cs">
+      <DependentUpon>ConfigEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Config\ConfigEditorSettings.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Data\Config\ConfigEditorSettings.Designer.cs">
+      <DependentUpon>ConfigEditorSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Config\ConfigFinderComponent.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -121,6 +133,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Console\ExtendedConsole\ExtendedConsoleForm.resx">
       <DependentUpon>ExtendedConsoleForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Data\Config\ConfigEditor.resx">
+      <DependentUpon>ConfigEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WinForms\DigitList.resx">
       <DependentUpon>DigitList.cs</DependentUpon>

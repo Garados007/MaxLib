@@ -47,17 +47,33 @@ namespace MaxLib.Data.Config
         /// The text format for the <see cref="ToolStripItem.Text"/> to show a category name.
         /// The "{0}" defines the placeholder for the name itself.
         /// </summary>
+        [Category("Text")]
         public string CategoryTextFormat { get; set; } = "{0}";
 
         /// <summary>
         /// The text format for the <see cref="ToolStripItem.Text"/> to show a config name.
         /// The "{0}" defines the placeholder for the name itself.
         /// </summary>
+        [Category("Text")]
         public string AddConfigTextFormat { get; set; } = "add {0}";
+
+        /// <summary>
+        /// The text that should be shown if the node has no items to show.
+        /// </summary>
+        [Category("Text")]
+        public string EmptyNodeText { get; set; } = "(empty)";
+
+        /// <summary>
+        /// If true a Tool Tip will be show when hovered over a config button. This tooltip will 
+        /// contains informations like Name, Variable names, ...
+        /// </summary>
+        [Category("Behaviour")]
+        public bool ShowToolTip { get; set; } = false;
 
         /// <summary>
         /// This event will be raised if the user has a <see cref="ConfigBase"/> selected.
         /// </summary>
+        [Category("Action")]
         public event EventHandler<ConfigBase> ConfigSelected;
 
         private ToolStripMenuItem rootItem = null;
@@ -65,18 +81,25 @@ namespace MaxLib.Data.Config
         /// The root <see cref="ToolStripMenuItem"/> that will host the complete set of 
         /// entrys from the <see cref="ConfigFinder"/>.
         /// </summary>
+        [Category("Behaviour")]
         public ToolStripMenuItem RootItem
         {
             get => rootItem;
             set
             {
-                rootItem.DropDownOpening -= RootItem_DropDownOpening;
-                rootItem.DropDownClosed -= RootItem_DropDownClosed;
+                if (rootItem != null)
+                {
+                    rootItem.DropDownOpening -= RootItem_DropDownOpening;
+                    rootItem.DropDownClosed -= RootItem_DropDownClosed;
+                }
                 rootItem = value;
-                rootItem.DropDownOpening += RootItem_DropDownOpening;
-                rootItem.DropDownClosed += RootItem_DropDownClosed;
-                rootItem.DropDownItems.Clear();
-                rootItem.DropDownItems.Add("... load data ...");
+                if (rootItem != null)
+                {
+                    rootItem.DropDownOpening += RootItem_DropDownOpening;
+                    rootItem.DropDownClosed += RootItem_DropDownClosed;
+                    rootItem.DropDownItems.Clear();
+                    rootItem.DropDownItems.Add("... load data ...");
+                }
             }
         }
 
@@ -123,8 +146,20 @@ namespace MaxLib.Data.Config
                     if (config != null)
                         ConfigSelected?.Invoke(this, config);
                 };
+                if (ShowToolTip)
+                {
+                    var config = ConfigFinder.CreateConfig(name, categories);
+                    var sb = new StringBuilder();
+                    sb.AppendLine($"Name: {name}");
+                    sb.Append($"Variables: {string.Join(", ", config.GetConfigs().Select((v) => v.Name))}");
+                    node.ToolTipText = sb.ToString();
+                    if (config is IDisposable disposable)
+                        disposable.Dispose();
+                }
                 item.DropDownItems.Add(node);
             }
+            if (nodes.Count() + configs.Count() == 0)
+                item.DropDownItems.Add(EmptyNodeText);
         }
     }
 }
