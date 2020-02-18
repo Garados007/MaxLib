@@ -2264,9 +2264,7 @@ namespace MaxLib.Data.HtmlDom
         #endregion
 
         public override string ToString()
-        {
-            return $"<{ElementName} {string.Join(' ', Attributes)}>{{{Elements.Count}}}</{ElementName}>";
-        }
+            => $"<{ElementName} {string.Join(" ", Attributes)}>{{{Elements.Count}}}</{ElementName}>";
     }
 
     #region Erweiterte Dom Elemente
