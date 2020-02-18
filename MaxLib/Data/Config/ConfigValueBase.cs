@@ -29,6 +29,18 @@ namespace MaxLib.Data.Config
         /// The value of this configurable value
         /// </summary>
         object Value { get; set; }
+
+        /// <summary>
+        /// Save the value property to an ini source (see <see cref="OptionsLoader"/>).
+        /// </summary>
+        /// <param name="option">the target key that should contains the value</param>
+        void SaveValue(OptionsKey option);
+
+        /// <summary>
+        /// Load the value property from an ini source (see <see cref="OptionsLoader"/>).
+        /// </summary>
+        /// <param name="option">the source key that contains the value</param>
+        void LoadValue(OptionsKey option);
     }
 
     /// <summary>

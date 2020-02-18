@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MaxLib.Data.IniFiles;
 
 namespace MaxLib.Data.Config
 {
@@ -43,6 +44,40 @@ namespace MaxLib.Data.Config
                     updater(configValue.Value);
             };
             return configValue;
+        }
+
+        /// <summary>
+        /// Save the config to an ini source (see <see cref="OptionsLoader"/>).
+        /// </summary>
+        /// <param name="option">the target group in that the values will be stored.</param>
+        public void SaveValue(OptionsGroup option)
+        {
+            if (option == null) throw new ArgumentNullException(nameof(option));
+            foreach (var config in GetConfigs())
+            {
+                var key = option.Options.FindName(config.Name);
+                if (key == null)
+                {
+                    key = new OptionsKey(config.Name, "");
+                    option.Options.Add(key);
+                }
+                config.SaveValue(key);
+            }
+        }
+
+        /// <summary>
+        /// Load the config from an ini source (see <see cref="OptionsLoader"/>).
+        /// </summary>
+        /// <param name="option">the source group that contains the stored values.</param>
+        public void LoadValue(OptionsGroup option)
+        {
+            if (option == null) throw new ArgumentNullException(nameof(option));
+            foreach (var config in GetConfigs())
+            {
+                var key = option.Options.FindName(config.Name);
+                if (key != null)
+                    config.LoadValue(key);
+            }
         }
     }
 }
