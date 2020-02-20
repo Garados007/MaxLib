@@ -109,10 +109,10 @@ namespace MaxLib.Data.Config
             {
                 var control = new NumericUpDown
                 {
-                    Value = config.Value,
                     Minimum = config.Minimum,
-                    Maximum = config.Maximum
+                    Maximum = config.Maximum,
                 };
+                control.Value = config.Value;
                 control.ValueChanged += (s, e) => config.Value = (int)control.Value;
                 control.Validating += (s, e) =>
                 {
