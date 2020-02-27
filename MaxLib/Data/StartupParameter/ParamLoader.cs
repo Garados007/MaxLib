@@ -41,7 +41,7 @@ namespace MaxLib.Data.StartupParameter
                     if (ind == -1)
                     {
                         if (i < args.Length - 1 && !IsStart(args[i + 1]))
-                            Options[args[i]] = Options[args[++i]];
+                            Options[args[i]] = args[++i];
                         else Options[args[i]] = null;
                     }
                     else

@@ -34,6 +34,7 @@ namespace MaxLib.Tools.Watchers
 
         public void Dispose()
         {
+            Process.Dispose();
             total_cpu.Dispose();
             process_cpu.Dispose();
         }
