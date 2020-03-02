@@ -129,6 +129,30 @@ namespace MaxLib.Data.Config
                 };
                 return control;
             });
+            AddEditor<ConfigLongValue>((error, config) =>
+            {
+                var control = new NumericUpDown
+                {
+                    Minimum = config.Minimum,
+                    Maximum = config.Maximum,
+                };
+                control.Value = config.Value;
+                control.ValueChanged += (s, e) => config.Value = (long)control.Value;
+                control.Validating += (s, e) =>
+                {
+                    if (!config.Validate())
+                    {
+                        e.Cancel = true;
+                        control.Select(0, control.Text.Length);
+                        error.SetError(control, $"Value should be between {config.Minimum:#,#0} and {config.Maximum:#,#0}.");
+                    }
+                };
+                control.Validated += (s, e) =>
+                {
+                    error.SetError(control, "");
+                };
+                return control;
+            });
             AddEditor<ConfigStringValue>((error, config) =>
             {
                 var control = new TextBox

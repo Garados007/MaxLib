@@ -41,12 +41,12 @@ namespace MaxLib.Data.StartupParameter
                     if (ind == -1)
                     {
                         if (i < args.Length - 1 && !IsStart(args[i + 1]))
-                            Options[args[i]] = args[++i];
-                        else Options[args[i]] = null;
+                            Options[args[i].Substring(1)] = args[++i];
+                        else Options[args[i].Substring(1)] = null;
                     }
                     else
                     {
-                        var name = args[i].Remove(ind);
+                        var name = args[i].Substring(1, ind - 1);
                         var value = args[i].Substring(ind + 1);
                         Options[name] = value;
                     }
