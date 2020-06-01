@@ -8,6 +8,7 @@ using System.Net.Sockets;
 
 namespace MaxLib.Net.ServerClient.Connectors
 {
+    [Obsolete]
     public class DataTransport : Connector
     {
         public DataTransport(bool runAsServer)

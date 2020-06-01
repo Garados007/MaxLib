@@ -70,6 +70,7 @@ namespace MaxLib.Data.HtmlDom
 
         #region ParserKlassen - Hier erfolgt das eigentliche Parsing
 
+        [Obsolete]
         class RealParser
         {
             internal HtmlDomDocument Document = null;

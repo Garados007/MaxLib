@@ -5,6 +5,7 @@ using System.Net.Sockets;
 
 namespace MaxLib.Net.ServerClient.Connectors
 {
+    [Obsolete]
     public class LoginServer : Connector
     {
         public LoginServer(Connection MainConnection)
@@ -108,6 +109,7 @@ namespace MaxLib.Net.ServerClient.Connectors
         }
     }
 
+    [Obsolete]
     public class LoginClient : Connector
     {
         public LoginClient()
@@ -207,7 +209,9 @@ namespace MaxLib.Net.ServerClient.Connectors
         }
     }
 
+    [Obsolete]
     public delegate void GetUserConnectionHandler(User user, out Connection connection, out int connector);
+    [Obsolete]
     public delegate void ConnectedHandler(Connection targetConnection);
 
     public enum LoginState

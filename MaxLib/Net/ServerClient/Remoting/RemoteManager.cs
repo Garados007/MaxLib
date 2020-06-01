@@ -118,15 +118,15 @@ namespace MaxLib.Net.ServerClient.Remoting
 
         public bool IsLoginServer
         {
-            get { return MainObject is LoginServer; }
+            get { return MainObject is LoginServer2; }
         }
         public bool IsLoginClient
         {
-            get { return MainObject is LoginClient; }
+            get { return MainObject is LoginClient2; }
         }
         public bool IsDataTransport
         {
-            get { return MainObject is DataTransport; }
+            get { return MainObject is DataTransport2; }
         }
         public bool IsFileTransport
         {

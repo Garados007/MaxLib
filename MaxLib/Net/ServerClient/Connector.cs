@@ -563,11 +563,11 @@ namespace MaxLib.Net.ServerClient
             ConnectionLost?.Invoke(this, argument);
             if (argument.Retry)
             {
-                if (DefaultLogin == null || !(DefaultLogin is Connectors.LoginClient)) return;
+                if (DefaultLogin == null || !(DefaultLogin is Connectors.LoginClient2)) return;
                 var t = new System.Threading.Tasks.Task(() =>
                 {
                     System.Threading.Thread.Sleep(AutoReconectTime);
-                    var login = DefaultLogin as Connectors.LoginClient;
+                    var login = DefaultLogin as Connectors.LoginClient2;
                     login.Connect(login.ConnectTo);
                 });
                 t.Start();
