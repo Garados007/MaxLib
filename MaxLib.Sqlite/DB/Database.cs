@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data.SQLite;
+using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace MaxLib.DB
 {
@@ -54,8 +56,10 @@ namespace MaxLib.DB
 
         void CreateTables(string createSql)
         {
+            int result;
             using (var query = Create(createSql))
-                query.ExecuteNonQuery();
+                result = query.ExecuteNonQuery();
+            Debug.Print($"result: {result}");
         }
 
         public Query Create(string sql)
@@ -86,7 +90,8 @@ namespace MaxLib.DB
                     using (var transaction = Connection.BeginTransaction())
                     {
                         method();
-                        if (doCommit) transaction.Commit();
+                        if (doCommit && BigTransaction != null) 
+                            transaction.Commit();
                     }
                 else method();
             }

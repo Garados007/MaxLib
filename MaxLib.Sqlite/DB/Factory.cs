@@ -108,6 +108,7 @@ namespace MaxLib.DB
 
 
         Dictionary<Type, InfoContainer> storedTypes = new Dictionary<Type, InfoContainer>();
+        readonly object lockStoredTypes = new object();
         Database db;
         lcComp lccomp = new lcComp();
 
@@ -324,7 +325,9 @@ namespace MaxLib.DB
             if (reader == null) throw new ArgumentNullException("reader");
             if (prefix == null) prefix = "";
             var type = typeof(T);
-            if (!storedTypes.ContainsKey(type)) LoadInfo(type);
+            lock (lockStoredTypes)
+                if (!storedTypes.ContainsKey(type)) 
+                    LoadInfo(type);
             var cont = storedTypes[type];
             cont.LoadedCount++;
 
@@ -424,7 +427,9 @@ namespace MaxLib.DB
         {
             if (keys == null) throw new ArgumentNullException("keys");
             var type = typeof(T);
-            if (!storedTypes.ContainsKey(type)) LoadInfo(type);
+            lock (lockStoredTypes)
+                if (!storedTypes.ContainsKey(type)) 
+                    LoadInfo(type);
             var cont = storedTypes[type];
             if (!cont.ClassAttribute.EnableSingleInstances)
                 throw new NotSupportedException("the fetch of single instances is not allowed");
@@ -488,7 +493,9 @@ namespace MaxLib.DB
         public IEnumerable<T> LoadAll<T>() where T:new()
         {
             var type = typeof(T);
-            if (!storedTypes.ContainsKey(type)) LoadInfo(type);
+            lock (lockStoredTypes)
+                if (!storedTypes.ContainsKey(type)) 
+                    LoadInfo(type);
             var cont = storedTypes[type];
             cont.LoadAll++;
             
@@ -506,7 +513,9 @@ namespace MaxLib.DB
         {
             if (keys == null) throw new ArgumentNullException("keys");
             var type = typeof(T);
-            if (!storedTypes.ContainsKey(type)) LoadInfo(type);
+            lock (lockStoredTypes)
+                if (!storedTypes.ContainsKey(type)) 
+                    LoadInfo(type);
             var cont = storedTypes[type];
             cont.LoadMatch++;
 
@@ -582,7 +591,9 @@ namespace MaxLib.DB
         {
             if (keys == null) throw new ArgumentNullException("keys");
             var type = typeof(T);
-            if (!storedTypes.ContainsKey(type)) LoadInfo(type);
+            lock (lockStoredTypes)
+                if (!storedTypes.ContainsKey(type)) 
+                    LoadInfo(type);
             var cont = storedTypes[type];
             cont.Count++;
 
@@ -629,7 +640,9 @@ namespace MaxLib.DB
         {
             if (value == null) throw new ArgumentNullException("value");
             var type = typeof(T);
-            if (!storedTypes.ContainsKey(type)) LoadInfo(type);
+            lock (lockStoredTypes)
+                if (!storedTypes.ContainsKey(type)) 
+                    LoadInfo(type);
             var cont = storedTypes[type];
             cont.Update++;
 
@@ -664,7 +677,9 @@ namespace MaxLib.DB
         {
             if (value == null) throw new ArgumentNullException("value");
             var type = typeof(T);
-            if (!storedTypes.ContainsKey(type)) LoadInfo(type);
+            lock (lockStoredTypes)
+                if (!storedTypes.ContainsKey(type)) 
+                    LoadInfo(type);
             var cont = storedTypes[type];
             cont.Add++;
 
@@ -690,7 +705,9 @@ namespace MaxLib.DB
         {
             if (keys == null) throw new ArgumentNullException("keys");
             var type = typeof(T);
-            if (!storedTypes.ContainsKey(type)) LoadInfo(type);
+            lock (lockStoredTypes)
+                if (!storedTypes.ContainsKey(type))
+                    LoadInfo(type);
             var cont = storedTypes[type];
             cont.Delete++;
 
@@ -814,6 +831,24 @@ namespace MaxLib.DB
         {
             return new KeyValuePair<string, object>(dbValue.Key, dbValue.Value);
         }
+
+        public static DbValue Eq(string key, object value)
+            => new DbValue(key, value, DbComp.eq);
+
+        public static DbValue Gt(string key, object value)
+            => new DbValue(key, value, DbComp.gt);
+
+        public static DbValue Geq(string key, object value)
+            => new DbValue(key, value, DbComp.gteq);
+
+        public static DbValue Lt(string key, object value)
+            => new DbValue(key, value, DbComp.lt);
+
+        public static DbValue Leq(string key, object value)
+            => new DbValue(key, value, DbComp.lteq);
+
+        public static DbValue Neq(string key, object value)
+            => new DbValue(key, value, DbComp.neq);
     }
 
     public interface IDbLoader

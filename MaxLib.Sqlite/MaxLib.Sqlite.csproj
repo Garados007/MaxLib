@@ -19,7 +19,7 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.Data.SQLite" Version="1.0.111" />
+    <PackageReference Include="System.Data.SQLite" Version="1.0.113" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MaxLib\MaxLib.csproj" />
