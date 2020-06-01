@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MaxLib.Data.Bits
+namespace MaxLib.Data.BitData
 {
     public struct Bit : IComparable, IComparable<Bit>, IConvertible, IEquatable<Bit>, IFormattable
     {

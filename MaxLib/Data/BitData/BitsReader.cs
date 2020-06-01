@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-namespace MaxLib.Data.Bits
+namespace MaxLib.Data.BitData
 {
     public class BitsReader : IDisposable
     {
