@@ -30,18 +30,22 @@ namespace MaxLib.Net.ServerClient.Connectors.Sync
             if (message.Type==SyncFileMessageType.Connect)
             {
                 var d = message.ClientData.GetSerializeAble<SyncFileData>();
-                var sf = new SyncFile();
-                sf.Task = new FileTransportTask();
-                sf.Task.ID = message.TaskID;
-                sf.Task.Size = d.Size;
-                sf.Manager = this;
-                sf.SendData = false;
-                sf.AccessID = d.AccessID;
-                sf.OwnerID = message.OwnerID;
+                var sf = new SyncFile
+                {
+                    Task = new FileTransportTask
+                    {
+                        ID = message.TaskID,
+                        Size = d.Size
+                    },
+                    Manager = this,
+                    SendData = false,
+                    AccessID = d.AccessID,
+                    OwnerID = message.OwnerID
+                };
                 sf.Task.TargetUser = Manager.Users.GetUserFromId(message.MessageRoot.RemoteId);
                 Files.Add(sf);
                 sf.SendInfo(SyncFileMessageType.ConnectionSuccess, null);
-                if (SyncFileAdded != null) SyncFileAdded(this, sf);
+                SyncFileAdded?.Invoke(this, sf);
             }
             else
             {
@@ -66,7 +70,7 @@ namespace MaxLib.Net.ServerClient.Connectors.Sync
 
         public event Action<object, SyncFile> SyncFileAdded;
 
-        List<SyncFile> Files = new List<SyncFile>();
+        readonly List<SyncFile> Files = new List<SyncFile>();
 
         [Obsolete("Use Syncronize(User, int, GetFileData, int)")]
         public SyncFile Syncronize(User TargetUser, byte[] Data, int AccessID)
@@ -119,16 +123,18 @@ namespace MaxLib.Net.ServerClient.Connectors.Sync
 
         public int AccessID { get; internal set; }
 
-        internal void ReceiveData(SyncFileMessage message)
+        internal void ReceiveData()
         {
 
         }
 
         internal void Send()
         {
-            var d = new SyncFileData();
-            d.Size = Task.Size;
-            d.AccessID = AccessID;
+            var d = new SyncFileData
+            {
+                Size = Task.Size,
+                AccessID = AccessID
+            };
             OwnerID = Manager.Manager.CurrentId.Id;
             SendInfo(SyncFileMessageType.Connect, d);
         }
@@ -141,7 +147,7 @@ namespace MaxLib.Net.ServerClient.Connectors.Sync
 
         void Task_DatasetReceived(FileTransportTask task, int index, byte[] data)
         {
-            if (DatasetReceived != null) DatasetReceived(task, index, data);
+            DatasetReceived?.Invoke(task, index, data);
         }
 
         void Task_ServerStateUpdated()
@@ -149,31 +155,33 @@ namespace MaxLib.Net.ServerClient.Connectors.Sync
             switch (Task.State)
             {
                 case FileTransportState.CompressBytes:
-                    if (CompressBytes != null) CompressBytes(this, EventArgs.Empty);
+                    CompressBytes?.Invoke(this, EventArgs.Empty);
                     break;
                 case FileTransportState.ConnectToServer:
-                    if (ConnectToServer != null) ConnectToServer(this, EventArgs.Empty);
+                    ConnectToServer?.Invoke(this, EventArgs.Empty);
                     break;
                 case FileTransportState.DecompressBytes:
-                    if (DecompressBytes != null) DecompressBytes(this, EventArgs.Empty);
+                    DecompressBytes?.Invoke(this, EventArgs.Empty);
                     break;
                 case FileTransportState.Finished:
-                    if (Finished != null) Finished(this, Task.Data);
+#pragma warning disable CS0618 // Typ oder Element ist veraltet
+                    Finished?.Invoke(this, Task.Data);
+#pragma warning restore CS0618 // Typ oder Element ist veraltet
                     break;
                 case FileTransportState.Transport:
-                    if (Transport != null) Transport(this, Task.TransportedBytes, Task.Size);
+                    Transport?.Invoke(this, Task.TransportedBytes, Task.Size);
                     break;
                 case FileTransportState.WaitForLocalConnector:
-                    if (WaitForLocalConnector != null) WaitForLocalConnector(this, EventArgs.Empty);
+                    WaitForLocalConnector?.Invoke(this, EventArgs.Empty);
                     break;
                 case FileTransportState.WaitForRemoteConnector:
-                    if (WaitForRemoteConnector != null) WaitForRemoteConnector(this, EventArgs.Empty);
+                    WaitForRemoteConnector?.Invoke(this, EventArgs.Empty);
                     break;
                 case FileTransportState.Waiting:
-                    if (Waiting != null) Waiting(this, Task.RestUserToWait);
+                    Waiting?.Invoke(this, Task.RestUserToWait);
                     break;
             }
-            if (StateChanged != null) StateChanged(this, EventArgs.Empty);
+            StateChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler CompressBytes, ConnectToServer, DecompressBytes, WaitForLocalConnector, 
@@ -185,10 +193,12 @@ namespace MaxLib.Net.ServerClient.Connectors.Sync
 
         internal void SendInfo(SyncFileMessageType type, object data)
         {
-            var sfm = new SyncFileMessage();
-            sfm.Type = type;
-            sfm.TaskID = Task.ID;
-            sfm.OwnerID = OwnerID;
+            var sfm = new SyncFileMessage
+            {
+                Type = type,
+                TaskID = Task.ID,
+                OwnerID = OwnerID
+            };
             sfm.MessageRoot.Connection = Task.TargetUser.DefaultConnection;
             sfm.MessageRoot.Connector = Task.TargetUser.DefaultConnector;
             sfm.MessageRoot.RemoteId = Task.TargetUser.Id;
@@ -199,8 +209,10 @@ namespace MaxLib.Net.ServerClient.Connectors.Sync
                 else if (data is byte[]) sfm.ClientData.SetBinary(data as byte[]);
                 else sfm.ClientData.SetSerializeAble(data);
             }
-            var pm = new PrimaryMessage();
-            pm.MessageType = PrimaryMessageType.SyncFile;
+            var pm = new PrimaryMessage
+            {
+                MessageType = PrimaryMessageType.SyncFile
+            };
             pm.ClientData.SetMessage(sfm);
             Manager.Manager.SendMessage(pm);
         }

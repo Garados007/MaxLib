@@ -27,10 +27,11 @@ namespace MaxLib.Data.ZipStream
         }
 
         internal Action<Stream> newStream;
-        Stream output;
+        readonly Stream output;
         ulong offset;
-        object lockAllHeader = new object(), lockWrite = new object();
-        List<FileHeader> allHeader = new List<FileHeader>();
+        private readonly object lockAllHeader = new object();
+        private readonly object lockWrite = new object();
+        readonly List<FileHeader> allHeader = new List<FileHeader>();
 
         ushort MadeBy()
         {
@@ -114,22 +115,7 @@ namespace MaxLib.Data.ZipStream
             };
             var enc = new UTF8Encoding(false);
             var commentb = enc.GetBytes(comment ?? "");
-            var eod = new EndOfCentralDirectory
-            {
-                DiskCentralDirStarts = 0,
-                NumberOfCentralDirRecOnThisDisk = (ushort)ahc,
-                //NumberOfCentralDirRecOnThisDisk = unchecked((ushort)0xFFFF),
-                NumberOfThisDisk = 0,
-                //OffsetStartCentralDirToStartDisk = (uint)fh,
-                OffsetStartCentralDirToStartDisk = (uint)Math.Min(0xFFFFFFFF, fh),
-                //SizeOfCentralDir = (uint)(offset - fh),
-                SizeOfCentralDir = (uint)Math.Min(0xFFFFFFFF, offset - fh),
-                TotalNumberOfCentralDirRec = (ushort)allHeader.Count,
-                //TotalNumberOfCentralDirRec = unchecked((ushort)0xFFFF),
-                ZipFileCommentLength = (ushort)commentb.Length,
-                ZipFileComment = commentb
-            };
-            eod = new EndOfCentralDirectory
+            EndOfCentralDirectory eod = new EndOfCentralDirectory
             {
                 DiskCentralDirStarts = 0xFFFF,
                 NumberOfCentralDirRecOnThisDisk = 0xFFFF,
@@ -260,13 +246,6 @@ namespace MaxLib.Data.ZipStream
             var nameb = enc.GetBytes(name ?? "");
             var commentb = enc.GetBytes(comment ?? "");
             GetDosDateTime(mod, out ushort date, out ushort time);
-            var z64flag = new Zip64ExtendedInformation
-            {
-                CompressedSize = (ulong)data.Length,
-                UncompressedSize = (ulong)data.Length,
-                NumberOfDiskWhichThisFileStarts = 1,
-                OffsetLocalHeaderRecord = offset
-            };
             byte[] field;
             using (var m = new MemoryStream())
             {
@@ -387,11 +366,11 @@ namespace MaxLib.Data.ZipStream
             {
                 return 0;
                 //w.Write(Signature);
-                w.Write(Crc);
-                w.Write(CompressedSize);
-                w.Write(UncompressedSize);
-                w.Flush();
-                return 20;
+                //w.Write(Crc);
+                //w.Write(CompressedSize);
+                //w.Write(UncompressedSize);
+                //w.Flush();
+                //return 20;
             }
         }
     }
@@ -730,12 +709,11 @@ namespace MaxLib.Data.ZipStream
         {
             ushort Polynom = 0xA001;
             ushort Register = 0xFFFF;
-            ushort temp = 0x00;
 
             // loop through the entire array of bytes
             for (int i = 0; i < Data.Length; i++)
             {
-                temp = Data[i];
+                ushort temp = Data[i];
 
                 // shift all 8 data bits once
                 for (int y = 0; y < 8; y++)
@@ -977,7 +955,7 @@ namespace MaxLib.Data.ZipStream
         internal ZipStreamCreator creator;
         internal Queue<Stream> outputBuffer = new Queue<Stream>();
         internal Semaphore semaphore = new Semaphore(4, 4);
-        int runningTaskCounter = 0;
+        readonly int runningTaskCounter = 0;
 
         internal object lockQueue = new object(), lockOutputBuffer = new object(),
             lockRunningTaskCounter = new object();
@@ -991,8 +969,10 @@ namespace MaxLib.Data.ZipStream
                 Handler = initHandler
             });
 
-            creator = new ZipStreamCreator();
-            creator.newStream = NewStream;
+            creator = new ZipStreamCreator
+            {
+                newStream = NewStream
+            };
         }
 
         private void NewStream(Stream stream)

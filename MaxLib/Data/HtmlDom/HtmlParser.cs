@@ -72,8 +72,8 @@ namespace MaxLib.Data.HtmlDom
 
         class RealParser
         {
-            internal HtmlDomDocument Document;
-            internal System.IO.Stream Stream;
+            internal HtmlDomDocument Document = null;
+            internal System.IO.Stream Stream = null;
 
             public void Test()
             {
@@ -507,8 +507,7 @@ namespace MaxLib.Data.HtmlDom
             ActiveParserType ActiveType = ActiveParserType.Text;
             bool AttributeStarted = false, nomoreentrys = false, ignorerules = false, SingleQuotedAttribute;
             HtmlDomParserRule activerule = null;
-
-            Queue<ParseRaw> ParseRawQueue = new Queue<ParseRaw>();
+            readonly Queue<ParseRaw> ParseRawQueue = new Queue<ParseRaw>();
 
             ParseRaw GetNextSingleRaw()
             {
@@ -1798,20 +1797,6 @@ namespace MaxLib.Data.HtmlDom
                     }
             }
 
-            private IEnumerable<Tuple<T, T>> GetPeekable1<T>(IEnumerable<T> collection)
-                where T : class
-            {
-                T last = null;
-                foreach (var item in collection)
-                {
-                    if (last != null)
-                        yield return new Tuple<T, T>(last, item);
-                    last = item;
-                }
-                if (last != null)
-                    yield return new Tuple<T, T>(last, null);
-            }
-
             private IEnumerable<Tuple<char, CharType, Position>> GetTypedCharStream()
             {
                 bool masked = false;
@@ -2597,7 +2582,7 @@ namespace MaxLib.Data.HtmlDom
     {
         #region Datenquelle
 
-        List<HtmlDomElement> elements = new List<HtmlDomElement>();
+        readonly List<HtmlDomElement> elements = new List<HtmlDomElement>();
 
         internal HtmlDomElement Parent;
 

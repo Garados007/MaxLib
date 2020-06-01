@@ -77,15 +77,17 @@ namespace MaxLib.Net.ServerClient.Connectors
                 {
                     case FileTransportType.WantSendFile:
                         {
-                            var task = new FileTransportTask();
-                            task.ID = ftd.TransportID;
-                            task.State = FileTransportState.WaitForLocalConnector;
-                            task.TargetUser = Manager.Users.GetUserFromId(message.MessageRoot.RemoteId);
-                            task.Size = ftd.Size;
-                            task.DatasetCount = ftd.Datasets;
-                            task.Connection = ftd.Connection;
+                            var task = new FileTransportTask
+                            {
+                                ID = ftd.TransportID,
+                                State = FileTransportState.WaitForLocalConnector,
+                                TargetUser = Manager.Users.GetUserFromId(message.MessageRoot.RemoteId),
+                                Size = ftd.Size,
+                                DatasetCount = ftd.Datasets,
+                                Connection = ftd.Connection
+                            };
                             Tasks.Add(task);
-                            if (RemoteTaskAdded != null) RemoteTaskAdded(task);
+                            RemoteTaskAdded?.Invoke(task);
                             Connection con = null;
                             if (Role != ServerClientRole.Client)
                             {
@@ -93,9 +95,11 @@ namespace MaxLib.Net.ServerClient.Connectors
                                 userwait++;
                                 while (con == null)
                                 {
-                                    var pm = new PrimaryMessage();
-                                    pm.MessageRoot = message.MessageRoot;
-                                    pm.MessageType = PrimaryMessageType.FileTransportClientToServer;
+                                    var pm = new PrimaryMessage
+                                    {
+                                        MessageRoot = message.MessageRoot,
+                                        MessageType = PrimaryMessageType.FileTransportClientToServer
+                                    };
                                     ftd.UserWait = task.RestUserToWait = userwait;
                                     ftd.Type = FileTransportType.WaitToGetPort;
                                     pm.ClientData.SetSerializeAble(ftd);
@@ -107,9 +111,11 @@ namespace MaxLib.Net.ServerClient.Connectors
                                 userwait--;
                                 task.Connection = con;
                             }
-                            var rm = new PrimaryMessage();
-                            rm.MessageRoot = message.MessageRoot;
-                            rm.MessageType = PrimaryMessageType.FileTransportClientToServer;
+                            var rm = new PrimaryMessage
+                            {
+                                MessageRoot = message.MessageRoot,
+                                MessageType = PrimaryMessageType.FileTransportClientToServer
+                            };
                             ftd.Type = FileTransportType.CouldSendFile;
                             ftd.Connection = con;
                             rm.ClientData.SetSerializeAble(ftd);
@@ -118,8 +124,7 @@ namespace MaxLib.Net.ServerClient.Connectors
                             task.State = FileTransportState.Transport;
                             task.OnServerStateUpdated();
                             TcpListener tcplist = null;
-                            TcpClient tcp = null;
-
+                            TcpClient tcp;
                             if (Role == ServerClientRole.Client)
                             {
                                 tcp = new TcpClient(task.Connection.Target, task.Connection.Port);
@@ -203,7 +208,9 @@ namespace MaxLib.Net.ServerClient.Connectors
 
                             task.State = FileTransportState.DecompressBytes;
                             task.OnServerStateUpdated();
+#pragma warning disable CS0618 // Typ oder Element ist veraltet
                             if (CompressBytes && task.DatasetCount == 0)
+#pragma warning restore CS0618 // Typ oder Element ist veraltet
                             {
                                 using (var m = new MemoryStream(task.CompressedBytes))
                                 using (var defl = new DeflateStream(m, CompressionMode.Decompress))
@@ -212,14 +219,18 @@ namespace MaxLib.Net.ServerClient.Connectors
                                 {
                                     defl.CopyTo(m2);
                                     m2.Position = 0;
+#pragma warning disable CS0618 // Typ oder Element ist veraltet
                                     task.Data = r.ReadBytes((int)m2.Length);
+#pragma warning restore CS0618 // Typ oder Element ist veraltet
                                 }
                             }
+#pragma warning disable CS0618 // Typ oder Element ist veraltet
                             else task.Data = task.CompressedBytes;
+#pragma warning restore CS0618 // Typ oder Element ist veraltet
 
                             task.State = FileTransportState.Finished;
                             task.OnServerStateUpdated();
-                            if (RemoteTaskFinished != null) RemoteTaskFinished(task);
+                            RemoteTaskFinished?.Invoke(task);
                             Tasks.Remove(task);
                             SetUsedState(con, false);
                         }
@@ -236,7 +247,9 @@ namespace MaxLib.Net.ServerClient.Connectors
             var t = new Task(() =>
             {
                 #region Daten verkleinern nur ohne Datasets
+#pragma warning disable CS0618 // Typ oder Element ist veraltet
                 if (CompressBytes && task.DatasetCount == 0)
+#pragma warning restore CS0618 // Typ oder Element ist veraltet
                 {
                     task.State = FileTransportState.CompressBytes;
                     using (var m = new MemoryStream())
@@ -244,12 +257,16 @@ namespace MaxLib.Net.ServerClient.Connectors
                     using (var r = new BinaryReader(m))
                     using (var w = new BinaryWriter(comp))
                     {
+#pragma warning disable CS0618 // Typ oder Element ist veraltet
                         w.Write(task.Data);
+#pragma warning restore CS0618 // Typ oder Element ist veraltet
                         m.Position = 0;
                         task.CompressedBytes = r.ReadBytes((int)m.Length);
                     }
                 }
+#pragma warning disable CS0618 // Typ oder Element ist veraltet
                 else task.CompressedBytes = task.Data;
+#pragma warning restore CS0618 // Typ oder Element ist veraltet
                 task.Size = task.CompressedBytes.Length;
                 #endregion
                 //Verbinden
@@ -332,13 +349,15 @@ namespace MaxLib.Net.ServerClient.Connectors
                 });
                 task.ServerStateUpdated += act;
                 var mes = new PrimaryMessage();
-                var ftd = new FileTransportData();
-                ftd.TransportID = task.ID;
-                ftd.SenderID = Manager.CurrentId.Id;
-                ftd.Type = FileTransportType.WantSendFile;
-                ftd.Size = task.Size;
-                ftd.Datasets = task.DatasetCount;
-                ftd.Connection = task.Connection;
+                var ftd = new FileTransportData
+                {
+                    TransportID = task.ID,
+                    SenderID = Manager.CurrentId.Id,
+                    Type = FileTransportType.WantSendFile,
+                    Size = task.Size,
+                    Datasets = task.DatasetCount,
+                    Connection = task.Connection
+                };
                 mes.ClientData.SetSerializeAble(ftd);
                 mes.MessageType = PrimaryMessageType.FileTransportServerToClient;
                 mes.MessageRoot.Connection = task.TargetUser.DefaultConnection;
@@ -352,7 +371,9 @@ namespace MaxLib.Net.ServerClient.Connectors
         public FileTransport()
         {
             Tasks = new List<FileTransportTask>();
+#pragma warning disable CS0618 // Typ oder Element ist veraltet
             CompressBytes = false;
+#pragma warning restore CS0618 // Typ oder Element ist veraltet
             base.Connections.MainProtocol = ConnectorProtocol.TCP;
             base.CanChangeProtocol = false;
             Role = ServerClientRole.Undefined;
@@ -408,10 +429,10 @@ namespace MaxLib.Net.ServerClient.Connectors
         internal event Action ServerStateUpdated;
         internal void OnServerStateUpdated()
         {
-            if (ServerStateUpdated != null) ServerStateUpdated();
+            ServerStateUpdated?.Invoke();
             var t = new Task(() =>
                 {
-                    if (Updated != null) Updated();
+                    Updated?.Invoke();
                 });
             t.Start();
         }
@@ -421,7 +442,7 @@ namespace MaxLib.Net.ServerClient.Connectors
         public FileTransportTask()
         {
             DatasetCount = 0;
-            ID = (lastid = lastid + 1);
+            ID = lastid += 1;
             State = FileTransportState.Waiting;
             Connection = null;
             CompressedBytes = new byte[0];
