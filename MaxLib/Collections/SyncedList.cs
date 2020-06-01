@@ -8,9 +8,9 @@ namespace MaxLib.Collections
     {
         #region local values
 
-        private List<T> list;
-        private object lockList;
-        private bool ReadOnly;
+        private readonly List<T> list;
+        private readonly object lockList;
+        private readonly bool ReadOnly;
 
         #endregion
 

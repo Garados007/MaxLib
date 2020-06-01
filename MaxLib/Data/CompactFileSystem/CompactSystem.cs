@@ -22,8 +22,8 @@ namespace MaxLib.Data.CompactFileSystem
         /// </summary>
         public CompactPointerSize PointerSize
         {
-            get { return (CompactPointerSize)((byte)Flag & 7); }
-            set { Flag = (CompactSystemFlags)(((byte)Flag & ~7) | (byte)value); }
+            get => (CompactPointerSize)((byte)Flag & 7);
+            set => Flag = (CompactSystemFlags)(((byte)Flag & ~7) | (byte)value);
         }
         /// <summary>
         /// Die Größe eines Blocks in der Datei. Wenn <see cref="Flag"/> den Wert
@@ -70,12 +70,12 @@ namespace MaxLib.Data.CompactFileSystem
         internal ulong StartMFTBlock, FreeSpaceBlock;
         private byte version;
 
-        private Stream FileStream;
-        private BinaryReader Reader;
-        private BinaryWriter Writer;
-        private object lockFileStream = new object();
+        private readonly Stream FileStream;
+        private readonly BinaryReader Reader;
+        private readonly BinaryWriter Writer;
+        private readonly object lockFileStream = new object();
 
-        private byte[] systemkey = Encoding.UTF8.GetBytes("COMPFS  ");
+        private readonly byte[] systemkey = Encoding.UTF8.GetBytes("COMPFS  ");
         /// <summary>
         /// Gibt alle verwendeten Ressourcen, wie den Basisstream, wieder frei.
         /// </summary>
@@ -111,7 +111,7 @@ namespace MaxLib.Data.CompactFileSystem
             for (int i = pd.Length-1; i>=0; --i)
             {
                 pd[i] = (byte)(p & 0xFF);
-                p = p >> 8;
+                p >>= 8;
             }
             Writer.Write(pd);
         }
@@ -552,7 +552,7 @@ namespace MaxLib.Data.CompactFileSystem
         
         byte[] buffer;
         int blockIndex;
-        List<BlockMeasures> blockMeasures = new List<BlockMeasures>();
+        readonly List<BlockMeasures> blockMeasures = new List<BlockMeasures>();
         ulong bufferOffset, bufferStart;
 
         internal void DestroyAllBlocks()
@@ -671,11 +671,11 @@ namespace MaxLib.Data.CompactFileSystem
         /// <exception cref="NotSupportedException"/>
         public override long Position
         {
-            get { return position; }
+            get => position;
             set
             {
                 if (value < 0) throw new ArgumentOutOfRangeException("Position");
-                if (value>=Length)
+                if (value >= Length)
                 {
                     if (!CanWrite) throw new NotSupportedException("Stream is readonly");
                     else SetLength(position);
@@ -782,7 +782,6 @@ namespace MaxLib.Data.CompactFileSystem
                     var dif = (ulong)(Length - value);
                     if (dif > last.Size)
                     {
-                        dif = last.Size;
                         System.FreeSpace.AddFreeBlock(System.ToBlockPointer(last.Position));
                         var l = blockMeasures[blockMeasures.Count - 2];
                         l.NextBlock = 0;
@@ -954,7 +953,7 @@ namespace MaxLib.Data.CompactFileSystem
             position = targetpos;
             ulong compsize = rawind==0?0:blockMeasures[rawind-1].CompleteSize;
             for (var i = rawind; i < blockMeasures.Count; ++i)
-                blockMeasures[i].CompleteSize = compsize = compsize + blockMeasures[i].Size;
+                blockMeasures[i].CompleteSize = compsize += blockMeasures[i].Size;
             UpdateBuffer(true);
         }
 
@@ -1033,7 +1032,7 @@ namespace MaxLib.Data.CompactFileSystem
     {
         public CompactEntry Entry { get; private set; }
 
-        private CompactBlockStream Stream;
+        private readonly CompactBlockStream Stream;
 
         internal CompactContentStream(CompactEntry entry)
         {
@@ -1075,10 +1074,7 @@ namespace MaxLib.Data.CompactFileSystem
 
         public override long Position
         {
-            get
-            {
-                return Stream.Position;
-            }
+            get => Stream.Position;
 
             set
             {
@@ -1138,7 +1134,7 @@ namespace MaxLib.Data.CompactFileSystem
         string name;
         public string Name
         {
-            get { return name; }
+            get => name;
             set
             {
                 if (Entry.IsProtected) throw new InvalidOperationException("entry is protected");
@@ -1149,7 +1145,7 @@ namespace MaxLib.Data.CompactFileSystem
                 var b = Encoding.UTF8.GetBytes(value);
                 Stream.Position = 0;
                 Stream.Write(b, 0, Math.Min(namesize, b.Length));
-                if (namesize>b.Length)
+                if (namesize > b.Length)
                 {
                     b = new byte[namesize - b.Length];
                     Stream.Write(b, 0, b.Length);
@@ -1163,8 +1159,8 @@ namespace MaxLib.Data.CompactFileSystem
             }
         }
 
-        private CompactBlockStream Stream;
-        private int namesize;
+        private readonly CompactBlockStream Stream;
+        private readonly int namesize;
 
         internal CompactOffStream(CompactEntry entry, ulong pointer)
         {
@@ -1212,10 +1208,7 @@ namespace MaxLib.Data.CompactFileSystem
 
         public override long Position
         {
-            get
-            {
-                return Stream.Position - namesize;
-            }
+            get => Stream.Position - namesize;
 
             set
             {
@@ -1338,7 +1331,7 @@ namespace MaxLib.Data.CompactFileSystem
         /// <exception cref="InvalidOperationException" />
         public bool IsHidden
         {
-            get { return (Flag & CompactEntryFlags.Hidden) == CompactEntryFlags.Hidden; }
+            get => (Flag & CompactEntryFlags.Hidden) == CompactEntryFlags.Hidden;
             set
             {
                 if ((System.Flag & CompactSystemFlags.CompactMode) == CompactSystemFlags.CompactMode)
@@ -1358,7 +1351,7 @@ namespace MaxLib.Data.CompactFileSystem
         /// <exception cref="InvalidOperationException" />
         public bool IsProtected
         {
-            get { return (Flag & CompactEntryFlags.Protected) == CompactEntryFlags.Protected; }
+            get => (Flag & CompactEntryFlags.Protected) == CompactEntryFlags.Protected;
             set
             {
                 if ((System.Flag & CompactSystemFlags.CompactMode) == CompactSystemFlags.CompactMode)
@@ -1511,7 +1504,7 @@ namespace MaxLib.Data.CompactFileSystem
             OffstreamPointer.RemoveAt(index);
             new CompactBlockStream(System, p).DestroyAllBlocks();
             if (OffstreamPointer.Count == 0)
-                Flag = Flag & ~CompactEntryFlags.ContainsOffstreams;
+                Flag &= ~CompactEntryFlags.ContainsOffstreams;
             CallChange();
         }
         /// <summary>
@@ -1693,12 +1686,12 @@ namespace MaxLib.Data.CompactFileSystem
             for (int i = pd.Length - 1; i >= 0; --i)
             {
                 pd[i] = (byte)(p & 0xFF);
-                p = p >> 8;
+                p >>= 8;
             }
             w.Write(pd);
         }
 
-        private bool constructMode = true;
+        private readonly bool constructMode = true;
         internal void CallChange()
         {
             if (!constructMode) System.FileTable.EntryChanged(this);
@@ -1759,12 +1752,12 @@ namespace MaxLib.Data.CompactFileSystem
     /// </summary>
     public class CompactFreeSpaceRegistry : IExtendedFreeSpaceRegistry, IExtendedHiddenBlockStream
     {
-        private List<ulong> FreeBlocks = new List<ulong>();
-        private object lockList = new object();
+        private readonly List<ulong> FreeBlocks = new List<ulong>();
+        private readonly object lockList = new object();
 
-        private CompactBlockStream Stream;
-        private BinaryReader Reader;
-        private BinaryWriter Writer;
+        private readonly CompactBlockStream Stream;
+        private readonly BinaryReader Reader;
+        private readonly BinaryWriter Writer;
 
         private void SaveBlockList()
         {
@@ -1818,7 +1811,6 @@ namespace MaxLib.Data.CompactFileSystem
             if (FreeBlocks.Count == 0) return;
             var ss = ((IExtendedSystem)System).GetBaseStreamLength();
             var mp = System.ToBlockPointer(ss - 1);
-            var bs = (System.Flag & CompactSystemFlags.ReferenceByBlock) == CompactSystemFlags.ReferenceByBlock ? 1 : System.BlockSize;
             var l = new List<ulong>();
             var id = mp;
             lock (lockList)
@@ -1895,11 +1887,11 @@ namespace MaxLib.Data.CompactFileSystem
         /// </summary>
         public CompactSystem System { get; private set; }
 
-        private Dictionary<ulong, CompactEntry> Entrys = new Dictionary<ulong, CompactEntry>();
-        private Dictionary<string, CompactEntry> EntrysByPath = new Dictionary<string, CompactEntry>();
-        private List<CompactEntry> RootEntrys = new List<CompactEntry>();
+        private readonly Dictionary<ulong, CompactEntry> Entrys = new Dictionary<ulong, CompactEntry>();
+        private readonly Dictionary<string, CompactEntry> EntrysByPath = new Dictionary<string, CompactEntry>();
+        private readonly List<CompactEntry> RootEntrys = new List<CompactEntry>();
 
-        private CompactBlockStream Stream;
+        private readonly CompactBlockStream Stream;
 
         internal CompactFileTable(CompactSystem system)
         {
@@ -2217,25 +2209,25 @@ namespace MaxLib.Data.CompactFileSystem
             public CompactSystem System { get; private set; }
 
             private ulong lastGroupId = 0;
-            private SyncedList<PartitionGroup> groups;
+            private readonly SyncedList<PartitionGroup> groups;
             /// <summary>
             /// Die Eintragsgruppen innerhalb von <see cref="System"/>. Sie kann mehrere Partitionen 
             /// enthalten und muss nicht einem <see cref="CompactEntry"/> entsprechen.
             /// </summary>
-            public SyncedList<PartitionGroup> Groups { get; private set; }
+            public SyncedList<PartitionGroup> Groups { get; }
 
-            private SyncedList<PartitionEntry> entrys;
+            private readonly SyncedList<PartitionEntry> entrys;
             /// <summary>
             /// Alle Einträge und Partitionen in <see cref="System"/>. Jeder Eintrag stellt genau 
             /// einen Speicherbereich dar. Mehrere Einträge können zu einer Gruppe zusammengeschlossen 
             /// sein um ein Stream (z.B. für <see cref="CompactEntry"/>) zu repräsentieren.
             /// </summary>
-            public SyncedList<PartitionEntry> Entrys { get; private set; }
+            public SyncedList<PartitionEntry> Entrys { get; }
             /// <summary>
             /// Die maximale Anzahl der Einträge die herausgesucht werden soll. Dies soll zu lange 
             /// Suchen verhindern.
             /// </summary>
-            public int MaxEntryCount { get; private set; }
+            public int MaxEntryCount { get; }
             /// <summary>
             /// Ermöglicht die Darstellung der Partionen und Verteilung dieser in einem 
             /// <see cref="CompactSystem"/>. Die Einträge werden noch nicht sofort abgerufen 
@@ -2288,7 +2280,7 @@ namespace MaxLib.Data.CompactFileSystem
             private bool CreateEntry(PartitionGroup group, ulong blockPointer, ulong blockIndex,
                 ulong filledSize, ulong blockSize)
             {
-                return CreateEntry(group, blockPointer, blockIndex, filledSize, blockSize, out PartitionEntry entry);
+                return CreateEntry(group, blockPointer, blockIndex, filledSize, blockSize, out _);
             }
 
             private PartitionGroup CreateGroup(PartitionType type, CompactEntry entry = null, 

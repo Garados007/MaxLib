@@ -14,7 +14,7 @@ namespace MaxLib.Maths
         /// </summary>
         public double Real
         {
-            get { return real; }
+            get => real;
             set
             {
                 real = value;
@@ -26,7 +26,7 @@ namespace MaxLib.Maths
         /// </summary>
         public double Imaginary
         {
-            get { return imag; }
+            get => imag;
             set
             {
                 imag = value;
@@ -38,7 +38,7 @@ namespace MaxLib.Maths
         /// </summary>
         public double Radius
         {
-            get { return rad; }
+            get => rad;
             set
             {
                 rad = value;
@@ -50,10 +50,10 @@ namespace MaxLib.Maths
         /// </summary>
         public double Angle
         {
-            get { return ang; }
+            get => ang;
             set
             {
-                value = value % (2 * Math.PI);
+                value %= 2 * Math.PI;
                 if (value < 0) value += 2 * Math.PI;
                 ang = value;
                 SetArithmView();

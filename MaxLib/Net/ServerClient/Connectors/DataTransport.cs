@@ -13,8 +13,8 @@ namespace MaxLib.Net.ServerClient.Connectors
         public DataTransport(bool runAsServer)
         {
             RunAsServer = runAsServer;
-            base.Connections.MainProtocol = ConnectorProtocol.TCP;
-            base.CanChangeProtocol = false;
+            Connections.MainProtocol = ConnectorProtocol.TCP;
+            CanChangeProtocol = false;
             base.MaxConnectionsCount = int.MaxValue;
         }
 
@@ -29,12 +29,14 @@ namespace MaxLib.Net.ServerClient.Connectors
 
         protected override void ConnectionAdded(Connection connection)
         {
-            var d = new data();
-            d.con = connection;
-            d.Manager = Manager;
-            d.datatr = this;
-            d.connector = ConnectorId;
-            d.id = Manager.Users.Users.Find((u) => u.DefaultConnection == connection).Id;
+            var d = new Data
+            {
+                con = connection,
+                Manager = Manager,
+                datatr = this,
+                connector = ConnectorId,
+                id = Manager.Users.Users.Find((u) => u.DefaultConnection == connection).Id
+            };
             d.task = new Task(new Action(() =>
                 {
                     if (RunAsServer) d.RunAsServer();
@@ -61,12 +63,12 @@ namespace MaxLib.Net.ServerClient.Connectors
             datas.Find((d) => d.con == message.MessageRoot.Connection).messages.Enqueue(message);
         }
 
-        List<data> datas = new List<data>();
+        readonly List<Data> datas = new List<Data>();
         public bool RunAsServer { get; private set; }
 
         public event Action<LogoutUser> UserLogedOut;
 
-        private void DoConnectionLost(ConnectionLostEventArgument argument, data sender)
+        private void DoConnectionLost(ConnectionLostEventArgument argument, Data sender)
         {
             var rest = new List<PrimaryMessage>();
             DoConnectionLost(argument);
@@ -99,7 +101,7 @@ namespace MaxLib.Net.ServerClient.Connectors
             }
         }
 
-        class data
+        class Data
         {
             public Task task;
             public DataTransport datatr;
@@ -118,7 +120,7 @@ namespace MaxLib.Net.ServerClient.Connectors
                 tcpserv.Start();
                 var tcp = tcpserv.AcceptTcpClient();
                 tcpserv.Stop();
-                doConct(tcp);
+                DoConct(tcp);
                 tcp.Close();
                 if (cl != null) datatr.DoConnectionLost(cl, this);
             }
@@ -128,7 +130,7 @@ namespace MaxLib.Net.ServerClient.Connectors
                 var tcp = new TcpClient();
                 Thread.Sleep(10);
                 tcp.Connect(new IPEndPoint(IPAddress.Parse(con.Target), con.Port));
-                doConct(tcp);
+                DoConct(tcp);
                 tcp.Close();
                 if (cl != null) datatr.DoConnectionLost(cl, this);
             }
@@ -140,14 +142,16 @@ namespace MaxLib.Net.ServerClient.Connectors
                 if (Environment.TickCount - lastPing >= Manager.DefaultPingTime)
                 {
                     lastPing = Environment.TickCount;
-                    var pm = new PrimaryMessage();
-                    pm.MessageType = PrimaryMessageType.Ping;
+                    var pm = new PrimaryMessage
+                    {
+                        MessageType = PrimaryMessageType.Ping
+                    };
                     pm.ClientData.SetBinary(BitConverter.GetBytes(Environment.TickCount));
                     messages.Enqueue(pm);
                 }
             }
 
-            void doConct(TcpClient tcp)
+            void DoConct(TcpClient tcp)
             {
                 using (var stream = tcp.GetStream())
                     while (active)

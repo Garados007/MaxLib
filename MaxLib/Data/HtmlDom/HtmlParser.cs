@@ -75,20 +75,6 @@ namespace MaxLib.Data.HtmlDom
             internal HtmlDomDocument Document = null;
             internal System.IO.Stream Stream = null;
 
-            public void Test()
-            {
-                //var l = new List<ParseRaw>();
-                //ParseRaw test;
-                //do l.Add(test = GetNextSingleRaw());
-                //while (test != null);
-                //var l = new List<ElementWrapper>();
-                //ElementWrapper test;
-                //do l.Add(test = GetNextElement());
-                //while (test != null);
-                var e = Build();
-                var html = e.ToList().ConvertAll((hde) => hde.GetOuterHtml());
-            }
-
             public HtmlDomElement[] Build()
             {
                 var active = new List<ElementWrapper>();
@@ -918,13 +904,8 @@ namespace MaxLib.Data.HtmlDom
                         Stream.Read(buf, 1, 1);
                         length++;
                     }
-                    //if (buf[0]==195)
-                    //{
-                    //    Stream.Read(buf, buf.Length - 1, 1);
-                    //    length++;
-                    //}
                 }
-                var s = DefaultEncoding.GetString(buf, 0, length); //195,182;;195,188;195,159
+                var s = DefaultEncoding.GetString(buf, 0, length);
                 if (s=="\n")
                 {
                     Line++;
@@ -2008,10 +1989,7 @@ namespace MaxLib.Data.HtmlDom
         /// </summary>
         public string Html
         {
-            get
-            {
-                return GetHtml();
-            }
+            get => GetHtml();
             set
             {
                 var doc = HtmlDomParser.ParseHtml(value);
@@ -2081,7 +2059,7 @@ namespace MaxLib.Data.HtmlDom
         {
             Attributes = new List<HtmlDomAttribute>();
             Class = new HtmlDomClass(this);
-            base.Elements.Parent = this;
+            Elements.Parent = this;
         }
         public HtmlDomElement(string name) : this()
         {
@@ -2123,14 +2101,8 @@ namespace MaxLib.Data.HtmlDom
 
         public string Id
         {
-            get
-            {
-                return GetAttribute("id", true)[0].Value;
-            }
-            set
-            {
-                SetAttribute("id", value);
-            }
+            get => GetAttribute("id", true)[0].Value;
+            set => SetAttribute("id", value);
         }
 
         public HtmlDomClass Class { get; private set; }
@@ -2259,8 +2231,8 @@ namespace MaxLib.Data.HtmlDom
     {
         public string Src
         {
-            get { return GetAttribute("src", true)[0].Value; }
-            set { SetAttribute("src", value); }
+            get => GetAttribute("src", true)[0].Value;
+            set => SetAttribute("src", value);
         }
     }
 
@@ -2514,10 +2486,7 @@ namespace MaxLib.Data.HtmlDom
 
         public string this[int index]
         {
-            get
-            {
-                return GetTiles()[index];
-            }
+            get => GetTiles()[index];
             set
             {
                 var list = GetTiles();
@@ -2692,14 +2661,8 @@ namespace MaxLib.Data.HtmlDom
 
         public HtmlDomElement this[int index]
         {
-            get
-            {
-                return elements[index];
-            }
-            set
-            {
-                elements[index] = value;
-            }
+            get => elements[index];
+            set => elements[index] = value;
         }
 
         public void Add(HtmlDomElement item)

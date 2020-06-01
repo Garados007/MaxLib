@@ -2,23 +2,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MaxLib.Collections
 {
     public class PriorityList<Priority, Element> : IList<Element>
         where Priority : IComparable
     {
-        private SortedDictionary<Priority, List<Element>> dict;
-        private object syncObject = new object();
-        private int count = 0;
+        private readonly SortedDictionary<Priority, List<Element>> dict;
+        private readonly object syncObject = new object();
 
         public Element this[int index]
         {
             get
             {
-                if (index < 0 || index >= count)
+                if (index < 0 || index >= Count)
                     throw new ArgumentOutOfRangeException("index");
                 lock (syncObject)
                     foreach (var c in dict)
@@ -29,7 +26,7 @@ namespace MaxLib.Collections
             }
             set
             {
-                if (index < 0 || index >= count)
+                if (index < 0 || index >= Count)
                     throw new ArgumentOutOfRangeException("index");
                 lock (syncObject)
                     foreach (var c in dict)
@@ -41,8 +38,8 @@ namespace MaxLib.Collections
                         else index -= c.Value.Count;
             }
         }
-        
-        public int Count => count;
+
+        public int Count { get; private set; } = 0;
 
         public bool IsReadOnly => false;
 
@@ -58,7 +55,7 @@ namespace MaxLib.Collections
                 if (!dict.ContainsKey(priority))
                     dict.Add(priority, new List<Element>());
                 dict[priority].Add(item);
-                count++;
+                Count++;
             }
         }
 
@@ -67,7 +64,7 @@ namespace MaxLib.Collections
             lock (syncObject)
             {
                 dict.Clear();
-                count = 0;
+                Count = 0;
             }
         }
 
@@ -85,7 +82,7 @@ namespace MaxLib.Collections
         public void CopyTo(Element[] array, int arrayIndex)
         {
             if (array == null) throw new ArgumentNullException("array");
-            if (arrayIndex < 0 || arrayIndex + count > array.Length) throw new ArgumentOutOfRangeException("arrayIndex");
+            if (arrayIndex < 0 || arrayIndex + Count > array.Length) throw new ArgumentOutOfRangeException("arrayIndex");
 
             lock (syncObject)
             {
@@ -128,7 +125,7 @@ namespace MaxLib.Collections
                 foreach (var d in dict)
                     if (d.Value.Remove(item))
                     {
-                        count--;
+                        Count--;
                         if (d.Value.Count == 0)
                             dict.Remove(d.Key);
                         return true;
@@ -139,7 +136,7 @@ namespace MaxLib.Collections
 
         public void RemoveAt(int index)
         {
-            if (index < 0 || index >= count) throw new ArgumentOutOfRangeException("index");
+            if (index < 0 || index >= Count) throw new ArgumentOutOfRangeException("index");
             lock (syncObject)
             {
                 foreach (var d in dict)
@@ -151,7 +148,7 @@ namespace MaxLib.Collections
                         break;
                     }
                     else index -= d.Value.Count;
-                count--;
+                Count--;
             }
         }
 
@@ -184,7 +181,7 @@ namespace MaxLib.Collections
         {
             lock (syncObject)
             {
-                var a = new Element[count];
+                var a = new Element[Count];
                 CopyTo(a, 0);
                 return a;
             }
@@ -217,7 +214,7 @@ namespace MaxLib.Collections
                 foreach (var e in this)
                     if (match(e))
                         return e;
-            return default(Element);
+            return default;
         }
     }
 }

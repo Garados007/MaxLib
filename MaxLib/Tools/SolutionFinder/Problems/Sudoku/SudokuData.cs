@@ -1,9 +1,8 @@
-﻿using System;
+﻿using MaxLib.Tools.SolutionFinder.Actions;
+using MaxLib.Tools.SolutionFinder.Strategies;
+using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Linq;
-using MaxLib.Tools.SolutionFinder.Actions;
-using MaxLib.Tools.SolutionFinder.Strategies;
 
 namespace MaxLib.Tools.SolutionFinder.Problems.Sudoku
 {

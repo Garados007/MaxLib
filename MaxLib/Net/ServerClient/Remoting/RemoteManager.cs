@@ -6,14 +6,14 @@ namespace MaxLib.Net.ServerClient.Remoting
 {
     public class RemoteManager : RemoteObject<ConnectionManager>
     {
-        protected ConnectionManager manager
+        protected ConnectionManager Manager
         {
             get { return MainObject; }
         }
 
         public RemoteUserCollection GetUsers()
         {
-            return new RemoteUserCollection(manager.Users);
+            return new RemoteUserCollection(Manager.Users);
         }
 
         public RemoteIdentification GetCurrentId()
@@ -23,30 +23,30 @@ namespace MaxLib.Net.ServerClient.Remoting
 
         public RemoteConnector GetDefaultLogin()
         {
-            if (manager.DefaultLogin != null)
-                return new RemoteConnector(manager.DefaultLogin);
+            if (Manager.DefaultLogin != null)
+                return new RemoteConnector(Manager.DefaultLogin);
             else return null;
         }
         public RemoteConnector GetDefaultDataTransport()
         {
-            if (manager.DefaultDataTransport != null)
-                return new RemoteConnector(manager.DefaultDataTransport);
+            if (Manager.DefaultDataTransport != null)
+                return new RemoteConnector(Manager.DefaultDataTransport);
             else return null;
         }
         public RemoteConnector GetDefaultFileTransport()
         {
-            if (manager.DefaultFileTransport != null)
-                return new RemoteConnector(manager.DefaultFileTransport);
+            if (Manager.DefaultFileTransport != null)
+                return new RemoteConnector(Manager.DefaultFileTransport);
             else return null;
         }
 
         public RemoteManager(ConnectionManager manager) 
             : base(manager)
         {
-            manager.PushMessageReceived += manager_PushMessageReceived;
+            manager.PushMessageReceived += Manager_PushMessageReceived;
         }
 
-        void manager_PushMessageReceived(Message message)
+        void Manager_PushMessageReceived(Message message)
         {
             pushMessageReceived.ForEach((re) => re.Invoke(message));
         }
@@ -62,15 +62,15 @@ namespace MaxLib.Net.ServerClient.Remoting
 
         public void SendPushMessage(Message message)
         {
-            manager.SendPushMessage(message);
+            Manager.SendPushMessage(message);
         }
 
         public void SendMessage(PrimaryMessage message)
         {
-            manager.SendMessage(message);
+            Manager.SendMessage(message);
         }
 
-        List<RemoteEvent<MessageReceivedHandle>> pushMessageReceived = new List<RemoteEvent<MessageReceivedHandle>>();
+        readonly List<RemoteEvent<MessageReceivedHandle>> pushMessageReceived = new List<RemoteEvent<MessageReceivedHandle>>();
 
         public void AddPushMessageReceivedEvent(RemoteEvent<MessageReceivedHandle> handle)
         {
@@ -83,15 +83,17 @@ namespace MaxLib.Net.ServerClient.Remoting
         }
 
         [field: NonSerialized]
-        List<RemoteConnectorIntegration> connectors = new List<RemoteConnectorIntegration>();
+        readonly List<RemoteConnectorIntegration> connectors = new List<RemoteConnectorIntegration>();
 
         public void AddConnector(RemoteConnectorHelper connector)
         {
-            var con = new RemoteConnectorIntegration();
-            con.helper = connector;
+            var con = new RemoteConnectorIntegration
+            {
+                helper = connector
+            };
             connectors.Add(con);
             connector.integr = con;
-            manager.AddConnector(con);
+            Manager.AddConnector(con);
         }
 
         public void RemoveConnector(RemoteConnectorHelper connector)
@@ -99,12 +101,12 @@ namespace MaxLib.Net.ServerClient.Remoting
             var con = connectors.Find((rci) => rci.helper == connector);
             if (con == null) return;
             connectors.Remove(con);
-            manager.RemoveConnector(con);
+            Manager.RemoveConnector(con);
         }
 
         internal void RecData(PrimaryMessage message)
         {
-            manager.ReceiveMessage(message);
+            Manager.ReceiveMessage(message);
         }
     }
 
@@ -171,10 +173,10 @@ namespace MaxLib.Net.ServerClient.Remoting
             : base (con)
         {
             Owner = man;
-            con._MesRec += con__MesRec;
+            con.MesRec += Con__MesRec;
         }
 
-        void con__MesRec(PrimaryMessage obj)
+        void Con__MesRec(PrimaryMessage obj)
         {
             obj.MessageRoot.Connector = MainObject.ConnectorId;
             Owner.RecData(obj);
@@ -233,10 +235,7 @@ namespace MaxLib.Net.ServerClient.Remoting
 
         public override int ConnectorId
         {
-            get
-            {
-                return base.ConnectorId;
-            }
+            get => base.ConnectorId;
             internal set
             {
                 base.ConnectorId = value;
@@ -246,14 +245,8 @@ namespace MaxLib.Net.ServerClient.Remoting
 
         public override int MaxConnectionsCount
         {
-            get
-            {
-                return helper.GetMaxConCount();
-            }
-            protected set
-            {
-                helper.SetMaxConCount(value);
-            }
+            get => helper.GetMaxConCount();
+            protected set => helper.SetMaxConCount(value);
         }
 
         public override void SendMessage(PrimaryMessage message)

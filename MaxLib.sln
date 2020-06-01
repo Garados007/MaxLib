@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29201.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaxLib", "MaxLib\MaxLib.csproj", "{D53BE740-579B-412D-9FA8-3505A12E958D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MaxLib", "MaxLib\MaxLib.csproj", "{D53BE740-579B-412D-9FA8-3505A12E958D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaxLib.Sqlite", "MaxLib.Sqlite\MaxLib.Sqlite.csproj", "{38B41E90-CAF4-4E9B-9065-56282F23664F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MaxLib.Sqlite", "MaxLib.Sqlite\MaxLib.Sqlite.csproj", "{38B41E90-CAF4-4E9B-9065-56282F23664F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaxLib.SystemDrawing", "MaxLib.SystemDrawing\MaxLib.SystemDrawing.csproj", "{604C9820-2353-4044-89CD-2CBB48806B3B}"
 EndProject
@@ -13,7 +13,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaxLib.WinForm", "MaxLib.Wi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaxLib.Js", "MaxLib.Js\MaxLib.Js.csproj", "{C1595273-71FF-4AAD-857B-A9F6EBF1E096}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaxLib.Test", "MaxLib.Test\MaxLib.Test.csproj", "{9893849D-BFD5-4233-A920-D7CE5629E332}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MaxLib.Test", "MaxLib.Test\MaxLib.Test.csproj", "{9893849D-BFD5-4233-A920-D7CE5629E332}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6A6EF534-6907-4B3B-A4CB-197B234E1EEA}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

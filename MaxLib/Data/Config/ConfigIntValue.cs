@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using MaxLib.Data.IniFiles;
+﻿using MaxLib.Data.IniFiles;
+using System;
 
 namespace MaxLib.Data.Config
 {

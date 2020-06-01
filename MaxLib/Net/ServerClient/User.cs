@@ -18,15 +18,15 @@ namespace MaxLib.Net.ServerClient
         private int defaultConnector = -1;
         public int DefaultConnector
         {
-            get { return defaultConnector; }
-            set { defaultConnector = value; }
+            get => defaultConnector;
+            set => defaultConnector = value;
         }
 
         private Connection defaultConnection = null;
         public Connection DefaultConnection
         {
-            get { return defaultConnection; }
-            set { defaultConnection = value; }
+            get => defaultConnection;
+            set => defaultConnection = value;
         }
 
         public T As<T>() where T:User

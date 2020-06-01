@@ -10,17 +10,19 @@ namespace MaxLib.Net.ServerClient.Connectors
         public LoginServer(Connection MainConnection)
         {
             if (MainConnection.Protocol != ConnectorProtocol.UDP) throw new WrongProtocolException();
-            base.Connections.MainProtocol = ConnectorProtocol.UDP;
-            base.CanChangeProtocol = false;
+            Connections.MainProtocol = ConnectorProtocol.UDP;
+            CanChangeProtocol = false;
             base.MaxConnectionsCount = 1;
-            base.Connections.Add(MainConnection);
-            base.Connections[MainConnection] = true;
+            Connections.Add(MainConnection);
+            Connections[MainConnection] = true;
         }
 
         public override void StartProgress()
         {
-            checker = new Thread(RunLoop);
-            checker.Name = "LoginServer - ID=" + base.ConnectorId.ToString();
+            checker = new Thread(RunLoop)
+            {
+                Name = "LoginServer - ID=" + base.ConnectorId.ToString()
+            };
             checker.Start();
         }
 
@@ -55,14 +57,14 @@ namespace MaxLib.Net.ServerClient.Connectors
                                 continue;
                             }
                             var id = m.ClientData.GetLoadSaveAble<CurrentIdentification>();
-                            var cid = base.Manager.CurrentId;
+                            var cid = Manager.CurrentId;
                             if (id.StaticIdentification!=cid.StaticIdentification||id.Version!=cid.Version)
                             {
                                 b = CreateFail(PrimaryMessageType.ConnectFailed_WrongKey).Save();
                                 udp.Send(b, b.Length, ep);
                                 continue;
                             }
-                            if (base.Manager.Users.Count>=base.Manager.Users.MaxCount)
+                            if (Manager.Users.Count>= Manager.Users.MaxCount)
                             {
                                 b = CreateFail(PrimaryMessageType.ConnectFailed_FullServer).Save();
                                 udp.Send(b, b.Length, ep);
@@ -84,9 +86,11 @@ namespace MaxLib.Net.ServerClient.Connectors
                             }
                             user.DefaultConnection = con;
                             user.DefaultConnector = ctr;
-                            var pm = new PrimaryMessage();
-                            pm.MessageType = PrimaryMessageType.ConnectAllowed;
-                            pm.ClientData.SetSerializeAble(con);
+                        var pm = new PrimaryMessage
+                        {
+                            MessageType = PrimaryMessageType.ConnectAllowed
+                        };
+                        pm.ClientData.SetSerializeAble(con);
                             b = pm.Save();
                             udp.Send(b, b.Length, ep);
                         //}
@@ -98,15 +102,17 @@ namespace MaxLib.Net.ServerClient.Connectors
                         //}
                     }
 
-                    if (base.ProgressRun) Thread.Sleep(10);
+                    if (ProgressRun) Thread.Sleep(10);
                 }
 
         }
 
         PrimaryMessage CreateFail(PrimaryMessageType reason)
         {
-            var pm = new PrimaryMessage();
-            pm.MessageType = reason;
+            var pm = new PrimaryMessage
+            {
+                MessageType = reason
+            };
             return pm;
         }
     }
@@ -115,15 +121,17 @@ namespace MaxLib.Net.ServerClient.Connectors
     {
         public LoginClient()
         {
-            base.Connections.MainProtocol = ConnectorProtocol.UDP;
-            base.CanChangeProtocol = false;
+            Connections.MainProtocol = ConnectorProtocol.UDP;
+            CanChangeProtocol = false;
             State = LoginState.Wait;
         }
 
         public override void StartProgress()
         {
-            checker = new Thread(RunLoop);
-            checker.Name = "LoginClient - ID=" + base.ConnectorId.ToString();
+            checker = new Thread(RunLoop)
+            {
+                Name = "LoginClient - ID=" + base.ConnectorId.ToString()
+            };
             checker.Start();
             base.MaxConnectionsCount = 0;
         }
@@ -149,14 +157,16 @@ namespace MaxLib.Net.ServerClient.Connectors
 
         void RunLoop()
         {
-            while (base.ProgressRun)
+            while (ProgressRun)
             {
                 if (State == LoginState.IsConnecting)
                     try
                     {
                         var ip = new IPEndPoint(IPAddress.Parse(ConnectTo), ServerPort);
-                        var pm = new PrimaryMessage();
-                        pm.MessageType = PrimaryMessageType.WantToConnect;
+                        var pm = new PrimaryMessage
+                        {
+                            MessageType = PrimaryMessageType.WantToConnect
+                        };
                         pm.ClientData.SetLoadSaveAble(Manager.CurrentId);
                         using (var udp = new UdpClient())
                         {
@@ -179,29 +189,29 @@ namespace MaxLib.Net.ServerClient.Connectors
                                 user.DefaultConnection = con;
                                 user.DefaultConnector = Manager.DefaultDataTransport != null ? 
                                     Manager.DefaultDataTransport.ConnectorId : -1;
-                                if (Connected != null) Connected(con);
+                                Connected?.Invoke(con);
                             }
                             else if (pm.MessageType == PrimaryMessageType.ConnectFailed_FullServer)
                             {
                                 State = LoginState.ServerFull;
-                                if (ServerFull != null) ServerFull();
+                                ServerFull?.Invoke();
                             }
                             else if (pm.MessageType == PrimaryMessageType.ConnectFailed_WrongKey)
                             {
                                 State = LoginState.WrongID;
-                                if (ErrorWhileConnection != null) ErrorWhileConnection();
+                                ErrorWhileConnection?.Invoke();
                             }
                             else
                             {
                                 State = LoginState.NotConnectable;
-                                if (ErrorWhileConnection != null) ErrorWhileConnection();
+                                ErrorWhileConnection?.Invoke();
                             }
                         }
                     }
                     catch
                     {
                         State = LoginState.NotConnectable;
-                        if (ErrorWhileConnection != null) ErrorWhileConnection();
+                        ErrorWhileConnection?.Invoke();
                     }
                 Thread.Sleep(10);
             }

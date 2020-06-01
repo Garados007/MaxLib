@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 
 namespace MaxLib.Collections
 {
     public class KeyedCache<Key, Value> : IEnumerable<KeyValuePair<Key, Value>>
     {
-        bool[] used;
-        Key[] keys;
-        Value[] values;
+        readonly bool[] used;
+        readonly Key[] keys;
+        readonly Value[] values;
         uint[] usage;
         uint nextId;
 
@@ -22,16 +21,14 @@ namespace MaxLib.Collections
         public KeyedCache(int bufferSize, Func<Key, Value> createValue, Action<Key, Value> disposeValue)
         {
             if (bufferSize < 0) throw new ArgumentOutOfRangeException(nameof(bufferSize));
-            if (createValue == null) throw new ArgumentNullException(nameof(createValue));
-            if (disposeValue == null) throw new ArgumentNullException(nameof(disposeValue));
 
             used = new bool[bufferSize];
             keys = new Key[bufferSize];
             values = new Value[bufferSize];
             usage = new uint[bufferSize];
 
-            CreateValue = createValue;
-            DisposeValue = disposeValue;
+            CreateValue = createValue ?? throw new ArgumentNullException(nameof(createValue));
+            DisposeValue = disposeValue ?? throw new ArgumentNullException(nameof(disposeValue));
             BufferSize = bufferSize;
         }
 

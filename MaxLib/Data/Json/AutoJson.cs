@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MaxLib.Data.Json.Auto
 {
@@ -14,10 +11,10 @@ namespace MaxLib.Data.Json.Auto
     /// </summary>
     public class AutoJson
     {
-        Dictionary<Type, Func<object, JsonElement>> FiniteParser;
-        Dictionary<Type, Func<object, Dictionary<string, object>>> ObjectParser;
-        Dictionary<Type, Func<object, IEnumerable<object>>> ListParser;
-        List<Tuple<Func<object, bool>, Func<object,object>>> SpecialPurposeParser;
+        readonly Dictionary<Type, Func<object, JsonElement>> FiniteParser;
+        readonly Dictionary<Type, Func<object, Dictionary<string, object>>> ObjectParser;
+        readonly Dictionary<Type, Func<object, IEnumerable<object>>> ListParser;
+        readonly List<Tuple<Func<object, bool>, Func<object,object>>> SpecialPurposeParser;
 
         public AutoJson()
         {

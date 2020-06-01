@@ -12,7 +12,7 @@ namespace MaxLib.Net.ServerClient
 
         public virtual int MaxConnectionsCount
         {
-            get { return Connections.MaxCount; }
+            get => Connections.MaxCount;
             protected set
             {
                 if (value < 0) throw new ArgumentOutOfRangeException("MaxConnectionsCount");
@@ -23,8 +23,8 @@ namespace MaxLib.Net.ServerClient
 
         protected bool CanChangeProtocol
         {
-            get { return Connections.CanChangeProtocol; }
-            set { Connections.CanChangeProtocol = value; }
+            get => Connections.CanChangeProtocol;
+            set => Connections.CanChangeProtocol = value;
         }
 
         public Connector()
@@ -60,10 +60,10 @@ namespace MaxLib.Net.ServerClient
         {
             message.MessageRoot.Connector = ConnectorId;
             if (Manager != null) Manager.ReceiveMessage(message);
-            if (_MesRec != null) _MesRec(message);
+            MesRec?.Invoke(message);
         }
 
-        internal event Action<PrimaryMessage> _MesRec;
+        internal event Action<PrimaryMessage> MesRec;
 
         protected void SetUsedState(Connection con, bool used)
         {
@@ -74,7 +74,7 @@ namespace MaxLib.Net.ServerClient
 
         protected ConnectionLostEventArgument DoConnectionLost(ConnectionLostEventArgument argument)
         {
-            if (ConnectionLost != null) ConnectionLost(this, argument);
+            ConnectionLost?.Invoke(this, argument);
             if (Manager != null) Manager.DoConnectionLost(argument);
             return argument;
         }
@@ -152,8 +152,8 @@ namespace MaxLib.Net.ServerClient
 
         public static bool operator ==(Connection c1, Connection c2)
         {
-            if ((object)c1 == null && (object)c2 == null) return true;
-            if ((object)c1 == null || (object)c2 == null) return false;
+            if (c1 is null && c2 is null) return true;
+            if (c1 is null || c2 is null) return false;
             return c1.Port == c2.Port && c1.Protocol == c2.Protocol && c1.Target == c2.Target;
         }
 
@@ -219,11 +219,8 @@ namespace MaxLib.Net.ServerClient
         private ConnectorProtocol mainProtocol = ConnectorProtocol.Unknown;
         public ConnectorProtocol MainProtocol
         {
-            get { return mainProtocol; }
-            set
-            {
-                SetProtocol(value, true);
-            }
+            get => mainProtocol;
+            set => SetProtocol(value, true);
         }
         internal event Action<Connection> ConAdd, ConRem;
 
@@ -288,10 +285,7 @@ namespace MaxLib.Net.ServerClient
 
         internal bool this[Connection key]
         {
-            get
-            {
-                return connections[key];
-            }
+            get => connections[key];
             set
             {
                 if (isReadOnly) throw new AccessViolationException();
@@ -336,8 +330,8 @@ namespace MaxLib.Net.ServerClient
         bool isReadOnly = false;
         public bool IsReadOnly
         {
-            get { return isReadOnly; }
-            set { isReadOnly = value; }
+            get => isReadOnly;
+            set => isReadOnly = value;
         }
 
         public bool Remove(KeyValuePair<Connection, bool> item)
@@ -393,7 +387,7 @@ namespace MaxLib.Net.ServerClient
 
     public class ConnectionManager : EventArgs
     {
-        List<Connector> connectors = new List<Connector>();
+        readonly List<Connector> connectors = new List<Connector>();
 
         int FindFreeId()
         {
@@ -431,22 +425,22 @@ namespace MaxLib.Net.ServerClient
         private Connector defaultLogin = null;
         public Connector DefaultLogin
         {
-            get { return defaultLogin; }
-            set { defaultLogin = value; }
+            get => defaultLogin;
+            set => defaultLogin = value;
         }
 
         private Connector defaultFileTransport = null;
         public Connector DefaultFileTransport
         {
-            get { return defaultFileTransport; }
-            set { defaultFileTransport = value; }
+            get => defaultFileTransport;
+            set => defaultFileTransport = value;
         }
 
         private Connector defaultDataTransport = null;
         public Connector DefaultDataTransport
         {
-            get { return defaultDataTransport; }
-            set { defaultDataTransport = value; }
+            get => defaultDataTransport;
+            set => defaultDataTransport = value;
         }
 
         internal Connectors.Sync.SyncFileManager SyncFile = null;
@@ -454,8 +448,10 @@ namespace MaxLib.Net.ServerClient
 
         public void SendPushMessage(Message message)
         {
-            var pm = new PrimaryMessage();
-            pm.MessageType = PrimaryMessageType.NormalPush;
+            var pm = new PrimaryMessage
+            {
+                MessageType = PrimaryMessageType.NormalPush
+            };
             pm.ClientData.SetMessage(message);
             SendMessage(pm);
         }
@@ -474,8 +470,7 @@ namespace MaxLib.Net.ServerClient
                     switch (message.MessageType)
                     {
                         case PrimaryMessageType.NormalPush:
-                            if (PushMessageReceived != null)
-                                PushMessageReceived(message.ClientData.GetMessage<Message>());
+                            PushMessageReceived?.Invoke(message.ClientData.GetMessage<Message>());
                             break;
                         case PrimaryMessageType.Pipeline:
                             var pipe = MessagePipelines.Find((mp) => mp.GlobalId == message.ClientData.GetMessage<PipelineMessage>().ID);
@@ -525,7 +520,7 @@ namespace MaxLib.Net.ServerClient
 
         public UserCollection Users { get; private set; }
 
-        public List<iMessagePipeline> MessagePipelines { get; private set; }
+        public List<IMessagePipeline> MessagePipelines { get; private set; }
 
         public CurrentIdentification CurrentId { get; private set; }
 
@@ -534,17 +529,14 @@ namespace MaxLib.Net.ServerClient
         private Proxy proxy;
         public Proxy Proxy
         {
-            get { return proxy; }
-            set
-            {
-                proxy = value ?? throw new ArgumentNullException("Proxy");
-            }
+            get => proxy;
+            set => proxy = value ?? throw new ArgumentNullException("Proxy");
         }
 
         private int defaultPingTime = 1000;
         public int DefaultPingTime
         {
-            get { return defaultPingTime; }
+            get => defaultPingTime;
             set
             {
                 if (value <= 0) throw new ArgumentOutOfRangeException();
@@ -558,7 +550,7 @@ namespace MaxLib.Net.ServerClient
 
         public int AutoReconectTime
         {
-            get { return autoReconectTime; }
+            get => autoReconectTime;
             set
             {
                 if (value <= 0) throw new ArgumentOutOfRangeException();
@@ -568,7 +560,7 @@ namespace MaxLib.Net.ServerClient
 
         internal void DoConnectionLost(ConnectionLostEventArgument argument)
         {
-            if (ConnectionLost != null) ConnectionLost(this, argument);
+            ConnectionLost?.Invoke(this, argument);
             if (argument.Retry)
             {
                 if (DefaultLogin == null || !(DefaultLogin is Connectors.LoginClient)) return;
@@ -602,7 +594,7 @@ namespace MaxLib.Net.ServerClient
         public ConnectionManager()
         {
             Users = new UserCollection();
-            MessagePipelines = new List<iMessagePipeline>();
+            MessagePipelines = new List<IMessagePipeline>();
             CurrentId = new CurrentIdentification();
             Proxy = new Proxy(this);
         }

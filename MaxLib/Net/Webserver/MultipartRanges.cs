@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver
 {
@@ -44,11 +43,11 @@ namespace MaxLib.Net.Webserver
             }
         }
 
-        List<HttpDataSource> streams = new List<HttpDataSource>();
-        Stream baseStream;
-        HttpDocument document;
+        readonly List<HttpDataSource> streams = new List<HttpDataSource>();
+        readonly Stream baseStream;
+        readonly HttpDocument document;
         List<Range> ranges = new List<Range>();
-        string mime;
+        readonly string mime;
 
         public MultipartRanges(Stream stream, HttpDocument document, string mime)
         {

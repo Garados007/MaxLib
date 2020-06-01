@@ -43,12 +43,14 @@ namespace MaxLib.Net.ServerClient.AutoSync
             var max = (int)Math.Ceiling(b.Count / (16 * 1024f));
             for (int i = 0; i<max; ++i)
             {
-                var dat = new SyncMessageData();
-                dat.SyncManagerId = Manager.Id;
-                dat.SyncClassId = GlobalId;
-                dat.MaxDataset = max;
-                dat.CurrentDataset = i + 1;
-                dat.DatasetBytes = b.GetRange(i * 16 * 1024, (i + 1) * 16 * 1024 >= b.Count ? b.Count - i * 16 * 1024 : 16 * 1024).ToArray();
+                var dat = new SyncMessageData
+                {
+                    SyncManagerId = Manager.Id,
+                    SyncClassId = GlobalId,
+                    MaxDataset = max,
+                    CurrentDataset = i + 1,
+                    DatasetBytes = b.GetRange(i * 16 * 1024, (i + 1) * 16 * 1024 >= b.Count ? b.Count - i * 16 * 1024 : 16 * 1024).ToArray()
+                };
                 var sm = new SyncMessage();
                 sm.ClientData.SetSerializeAble(dat);
                 sm.Type = SyncMessageType.SingleDatasetChanged;
@@ -58,7 +60,7 @@ namespace MaxLib.Net.ServerClient.AutoSync
         protected abstract byte[] GetData();
         protected abstract void SetData(byte[] data);
 
-        Dictionary<User, List<byte>> ReceivedBytes = new Dictionary<User, List<byte>>();
+        readonly Dictionary<User, List<byte>> ReceivedBytes = new Dictionary<User, List<byte>>();
 
         internal void MessageReceived(SyncMessage message)
         {
@@ -86,9 +88,10 @@ namespace MaxLib.Net.ServerClient.AutoSync
     public sealed class SyncManager : IDisposable
     {
         //Liste aller registrierten SyncClass zur Syncronisation
-        List<SyncClass> Registred = new List<SyncClass>();
+        readonly List<SyncClass> Registred = new List<SyncClass>();
+
         //Buffert leer gewordene Einträge zwischen
-        Queue<int> EmptyEntries = new Queue<int>();
+        readonly Queue<int> EmptyEntries = new Queue<int>();
 
         /// <summary>
         /// Fügt einen neuen Eintrag hinzu.
@@ -185,8 +188,8 @@ namespace MaxLib.Net.ServerClient.AutoSync
     {
         public SyncMessageType Type
         {
-            get { return (SyncMessageType)Reason; }
-            set { Reason = (int)value; }
+            get => (SyncMessageType)Reason;
+            set => Reason = (int)value;
         }
     }
 

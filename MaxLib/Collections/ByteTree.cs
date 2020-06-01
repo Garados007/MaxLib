@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MaxLib.Collections
 {
     public class ByteTree<T> : ICollection<T>
     {
-        T NodeValue = default(T);
+        T NodeValue = default;
         bool ContainsNodeValue = false;
         ByteTree<T>[] Nodes = new ByteTree<T>[256];
         int count = 0;
@@ -25,7 +22,7 @@ namespace MaxLib.Collections
 
         public void Clear()
         {
-            NodeValue = default(T);
+            NodeValue = default;
             ContainsNodeValue = false;
             Nodes = new ByteTree<T>[256];
         }
@@ -113,7 +110,7 @@ namespace MaxLib.Collections
             }
             else
             {
-                value = default(T);
+                value = default;
                 return false;
             }
         }
@@ -134,7 +131,7 @@ namespace MaxLib.Collections
             var node = Nodes[path[offset]];
             if (node == null)
             {
-                value = default(T);
+                value = default;
                 return false;
             }
             else return node.TryGet(path, offset + 1, out value);
@@ -155,7 +152,7 @@ namespace MaxLib.Collections
         {
             if (ContainsNodeValue && Equals(item, NodeValue))
             {
-                NodeValue = default(T);
+                NodeValue = default;
                 ContainsNodeValue = false;
                 count--;
                 return true;
@@ -206,7 +203,7 @@ namespace MaxLib.Collections
             {
                 count--;
                 ContainsNodeValue = false;
-                NodeValue = default(T);
+                NodeValue = default;
                 return true;
             }
             else return false;

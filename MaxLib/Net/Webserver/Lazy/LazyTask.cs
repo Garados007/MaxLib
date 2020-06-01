@@ -3,17 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver.Lazy
 {
     [Serializable]
     public class LazyTask
     {
-        [NonSerialized]
-        private WebServer server;
-
-        public WebServer Server => server;
+        public WebServer Server { get; }
 
         public HttpSession Session { get; private set; }
 
@@ -23,14 +19,14 @@ namespace MaxLib.Net.Webserver.Lazy
         
         public object this[object identifer]
         {
-            get { return Information[identifer]; }
-            set { Information[identifer] = value; }
-        }     
+            get => Information[identifer];
+            set => Information[identifer] = value;
+        }
 
         public LazyTask(WebProgressTask task)
         {
             if (task == null) throw new ArgumentNullException("task");
-            server = task.Server;
+            Server = task.Server;
             Session = task.Session;
             Header = task.Document.RequestHeader;
             Information = task.Document.Information;
@@ -50,12 +46,12 @@ namespace MaxLib.Net.Webserver.Lazy
 
         public LazyEventHandler Handler { get; private set; }
 
-        LazyTask task;
+        readonly LazyTask task;
         HttpDataSource[] list;
 
         public IEnumerable<HttpDataSource> GetAllSources()
         {
-            return list != null ? list : Handler(task);
+            return list ?? Handler(task);
         }
 
         public override long AproximateLength()

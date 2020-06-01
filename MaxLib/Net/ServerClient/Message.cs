@@ -15,8 +15,10 @@ namespace MaxLib.Net.ServerClient
         public Message()
         {
             MessageRoot = new MessageRootCookie();
-            ClientData = new MessageClientData();
-            ClientData.Owner = this;
+            ClientData = new MessageClientData
+            {
+                Owner = this
+            };
             HeaderBytes = new byte[0];
         }
 
@@ -142,8 +144,10 @@ namespace MaxLib.Net.ServerClient
 
         public byte[] Save()
         {
-            var l = new List<byte>(BinaryBytes.Length + 1);
-            l.Add((byte)Type);
+            var l = new List<byte>(BinaryBytes.Length + 1)
+            {
+                (byte)Type
+            };
             l.AddRange(BinaryBytes);
             return l.ToArray();
         }
@@ -166,14 +170,14 @@ namespace MaxLib.Net.ServerClient
     {
         public PrimaryMessageType MessageType
         {
-            get { return (PrimaryMessageType)base.Reason; }
-            set { base.Reason = (int)value; }
+            get => (PrimaryMessageType)Reason;
+            set => Reason = (int)value;
         }
 
         public byte[] SenderID
         {
-            get { return base.HeaderBytes; }
-            set { base.HeaderBytes = value; }
+            get => HeaderBytes;
+            set => HeaderBytes = value;
         }
 
         public bool IgnoreProxy { get; set; }
@@ -206,13 +210,13 @@ namespace MaxLib.Net.ServerClient
         ProxySendList
     }
 
-    public interface iMessagePipeline
+    public interface IMessagePipeline
     {
         int GlobalId { get; }
 
         ConnectionManager Manager { get; set; }
 
-        iMessagePipeline Owner { get; set; }
+        IMessagePipeline Owner { get; set; }
 
         void ComputeMessage(Message message);
 
@@ -228,10 +232,7 @@ namespace MaxLib.Net.ServerClient
 
         public int ID
         {
-            get
-            {
-                return BitConverter.ToInt32(HeaderBytes, 0);
-            }
+            get => BitConverter.ToInt32(HeaderBytes, 0);
             set
             {
                 var l = new List<byte>();
@@ -241,35 +242,29 @@ namespace MaxLib.Net.ServerClient
             }
         }
 
-        public bool more
+        public bool More
         {
-            get
-            {
-                return BitConverter.ToBoolean(HeaderBytes, 4);
-            }
-            set
-            {
-                HeaderBytes[4] = BitConverter.GetBytes(value)[0];
-            }
+            get => BitConverter.ToBoolean(HeaderBytes, 4);
+            set => HeaderBytes[4] = BitConverter.GetBytes(value)[0];
         }
     }
 
-    public abstract class MessagePipelineBase : iMessagePipeline
+    public abstract class MessagePipelineBase : IMessagePipeline
     {
         public int GlobalId { get; protected set; }
 
         public ConnectionManager Manager { get; set; }
 
-        public iMessagePipeline Owner { get; set; }
+        public IMessagePipeline Owner { get; set; }
 
-        public List<iMessagePipeline> Clients { get; private set; }
+        public List<IMessagePipeline> Clients { get; private set; }
 
         public void ComputeMessage(Message message)
         {
             if (message is PipelineMessage)
             {
                 var ppm = message as PipelineMessage;
-                if (ppm.more)
+                if (ppm.More)
                 {
                     var ps = ppm.ClientData.GetMessage<PipelineMessage>();
                     var cl = Clients.Find((mp) => mp.GlobalId == ps.ID);
@@ -286,10 +281,12 @@ namespace MaxLib.Net.ServerClient
 
         public void SendMessage(Message message)
         {
-            var ppm = new PipelineMessage();
-            ppm.more = message is PipelineMessage;
-            ppm.ID = GlobalId;
-            ppm.MessageRoot = message.MessageRoot;
+            var ppm = new PipelineMessage
+            {
+                More = message is PipelineMessage,
+                ID = GlobalId,
+                MessageRoot = message.MessageRoot
+            };
             ppm.ClientData.SetMessage(message);
             if (Owner!=null)
             {
@@ -297,9 +294,11 @@ namespace MaxLib.Net.ServerClient
             }
             else
             {
-                var pm = new PrimaryMessage();
-                pm.MessageType = PrimaryMessageType.Pipeline;
-                pm.SenderID = Manager.CurrentId.Id;
+                var pm = new PrimaryMessage
+                {
+                    MessageType = PrimaryMessageType.Pipeline,
+                    SenderID = Manager.CurrentId.Id
+                };
                 pm.ClientData.SetMessage(ppm);
                 pm.MessageRoot = message.MessageRoot;
                 Manager.SendMessage(pm);
@@ -310,7 +309,7 @@ namespace MaxLib.Net.ServerClient
 
         public MessagePipelineBase()
         {
-            Clients = new List<iMessagePipeline>();
+            Clients = new List<IMessagePipeline>();
         }
     }
 }

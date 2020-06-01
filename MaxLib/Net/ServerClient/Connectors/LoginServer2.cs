@@ -14,17 +14,19 @@ namespace MaxLib.Net.ServerClient.Connectors
         {
             if (MainConnection.Protocol != ConnectorProtocol.TCP)
                 throw new WrongProtocolException();
-            base.Connections.MainProtocol = ConnectorProtocol.TCP;
-            base.CanChangeProtocol = false;
+            Connections.MainProtocol = ConnectorProtocol.TCP;
+            CanChangeProtocol = false;
             base.MaxConnectionsCount = 1;
-            base.Connections.Add(MainConnection);
-            base.Connections[MainConnection] = true;
+            Connections.Add(MainConnection);
+            Connections[MainConnection] = true;
         }
 
         public override void StartProgress()
         {
-            searcher = new Thread(RunLoop);
-            searcher.Name = "LoginServer2 - ID=" + base.ConnectorId.ToString();
+            searcher = new Thread(RunLoop)
+            {
+                Name = "LoginServer2 - ID=" + base.ConnectorId.ToString()
+            };
             searcher.Start();
         }
 
@@ -70,7 +72,7 @@ namespace MaxLib.Net.ServerClient.Connectors
             }
             // ---- Überprüfe die Identifikation des Clienten ----
             var id = m.ClientData.GetLoadSaveAble<CurrentIdentification>();
-            var cid = base.Manager.CurrentId;
+            var cid = Manager.CurrentId;
             if (id.StaticIdentification!=cid.StaticIdentification||
                 id.Version!=cid.Version)
             {
@@ -80,7 +82,7 @@ namespace MaxLib.Net.ServerClient.Connectors
                 return;
             }
             // ---- Überprüfe den Platz auf dem Server ----
-            if (base.Manager.Users.Count>=base.Manager.Users.MaxCount)
+            if (Manager.Users.Count >= Manager.Users.MaxCount)
             {
                 ConnectionHelper.Send2(stream,
                     CreateFail(PrimaryMessageType.ConnectFailed_FullServer));
@@ -92,23 +94,25 @@ namespace MaxLib.Net.ServerClient.Connectors
             Connection con = new Connection(ConnectorProtocol.TCP, 
                 (tcp.Client.LocalEndPoint as IPEndPoint).Port);
             int ctr = Manager.DefaultDataTransport.ConnectorId;
-            if (GetUserConnection != null)
-                GetUserConnection(user, ref con, ref ctr);
+            GetUserConnection?.Invoke(user, ref con, ref ctr);
             user.DefaultConnection = con;
             user.DefaultConnector = ctr;
             if (AddConnection != null) AddConnection(tcp, con);
             else (Manager.DefaultDataTransport as DataTransport2).AddConnection(tcp, con);
             // ==== 2. Nachricht - Die Verbindung wurde stattgegeben ====
-            var pm = new PrimaryMessage();
-            pm.MessageType = PrimaryMessageType.ConnectAllowed;
+            var pm = new PrimaryMessage
+            {
+                MessageType = PrimaryMessageType.ConnectAllowed
+            };
             ConnectionHelper.Send2(stream, pm);
         }
 
         PrimaryMessage CreateFail(PrimaryMessageType reason)
         {
-            var pm = new PrimaryMessage();
-            pm.MessageType = reason;
-            return pm;
+            return new PrimaryMessage
+            {
+                MessageType = reason
+            };
         }
     }
 
@@ -116,15 +120,17 @@ namespace MaxLib.Net.ServerClient.Connectors
     {
         public LoginClient2()
         {
-            base.Connections.MainProtocol = ConnectorProtocol.TCP;
-            base.CanChangeProtocol = false;
+            Connections.MainProtocol = ConnectorProtocol.TCP;
+            CanChangeProtocol = false;
             State = LoginState.Wait;
         }
 
         public override void StartProgress()
         {
-            searcher = new Thread(RunLoop);
-            searcher.Name = "LoginClient2 - ID=" + base.ConnectorId.ToString();
+            searcher = new Thread(RunLoop)
+            {
+                Name = "LoginClient2 - ID=" + base.ConnectorId.ToString()
+            };
             searcher.Start();
             base.MaxConnectionsCount = 0;
         }
@@ -149,15 +155,17 @@ namespace MaxLib.Net.ServerClient.Connectors
 
         void RunLoop()
         {
-            while (base.ProgressRun)
+            while (ProgressRun)
             {
                 if (State == LoginState.IsConnecting)
                     try
                     {
                         var ip = new IPEndPoint(IPAddress.Parse(ConnectTo),
                             ServerPort);
-                        var pm = new PrimaryMessage();
-                        pm.MessageType = PrimaryMessageType.WantToConnect;
+                        var pm = new PrimaryMessage
+                        {
+                            MessageType = PrimaryMessageType.WantToConnect
+                        };
                         pm.ClientData.SetLoadSaveAble(Manager.CurrentId);
                         var tcp = new TcpClient();
                         tcp.Connect(ip);
@@ -176,31 +184,31 @@ namespace MaxLib.Net.ServerClient.Connectors
                             user.DefaultConnection = con;
                             user.DefaultConnector = Manager.DefaultDataTransport != null ?
                                 Manager.DefaultDataTransport.ConnectorId : -1;
-                            if (Connected != null) Connected(user);
+                            Connected?.Invoke(user);
                             if (AddConnection != null) AddConnection(tcp, con);
                             else (Manager.DefaultDataTransport as DataTransport2).AddConnection(tcp, con);
                         }
                         else if (pm.MessageType == PrimaryMessageType.ConnectFailed_FullServer)
                         {
                             State = LoginState.ServerFull;
-                            if (ServerFull != null) ServerFull();
+                            ServerFull?.Invoke();
                         }
                         else if (pm.MessageType == PrimaryMessageType.ConnectFailed_WrongKey)
                         {
                             State = LoginState.WrongID;
                             ExceptedId = pm.ClientData.GetLoadSaveAble<CurrentIdentification>();
-                            if (ErrorWhileConnection != null) ErrorWhileConnection();
+                            ErrorWhileConnection?.Invoke();
                         }
                         else
                         {
                             State = LoginState.NotConnectable;
-                            if (ErrorWhileConnection != null) ErrorWhileConnection();
+                            ErrorWhileConnection?.Invoke();
                         }
                     }
                     catch
                     {
                         State = LoginState.NotConnectable;
-                        if (ErrorWhileConnection != null) ErrorWhileConnection();
+                        ErrorWhileConnection?.Invoke();
                     }
                 Thread.Sleep(10);
             }

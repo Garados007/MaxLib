@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MaxLib.Data.IniFiles;
-using System.IO;
+﻿using MaxLib.Data.IniFiles;
+using System;
 using System.Net;
-using System.Net.Sockets;
 using System.Net.Security;
-using System.Threading;
+using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver.SSL
 {
@@ -34,8 +30,10 @@ namespace MaxLib.Net.Webserver.SSL
             ServerExecution = true;
             SecureListener = new TcpListener(new IPEndPoint(Settings.IPFilter, SecureSettings.SecurePort));
             SecureListener.Start();
-            SecureServerThread = new Thread(SecureMainTask);
-            SecureServerThread.Name = "SecureServerThread - Port: " + SecureSettings.SecurePort.ToString();
+            SecureServerThread = new Thread(SecureMainTask)
+            {
+                Name = "SecureServerThread - Port: " + SecureSettings.SecurePort.ToString()
+            };
             SecureServerThread.Start();
         }
 

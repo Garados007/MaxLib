@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MaxLib.Tools.SolutionFinder
+﻿namespace MaxLib.Tools.SolutionFinder
 {
     /// <summary>
     /// Detects if the current problem is finished and there could not any good solution found

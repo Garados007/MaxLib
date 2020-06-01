@@ -182,7 +182,7 @@ namespace MaxLib.Maths
 
         public static bool operator !=(MatrixBase<T> m1, MatrixBase<T> m2)
         {
-            return !m2.Equals(m2);
+            return !m1.Equals(m2);
         }
 
         #endregion

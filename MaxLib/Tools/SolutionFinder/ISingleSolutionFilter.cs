@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MaxLib.Tools.SolutionFinder
+﻿namespace MaxLib.Tools.SolutionFinder
 {
     /// <summary>
     /// Determines if a solution can be applied for a specific problems.

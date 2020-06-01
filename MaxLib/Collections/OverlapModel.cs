@@ -5,8 +5,8 @@ namespace MaxLib.Collections
 {
     public class OverlapModel<T>
     {
-        List<OverlapEntry<T>> currentConfig = new List<OverlapEntry<T>>();
-        List<OverlapEntry<T>> newConfig = new List<OverlapEntry<T>>();
+        readonly List<OverlapEntry<T>> currentConfig = new List<OverlapEntry<T>>();
+        readonly List<OverlapEntry<T>> newConfig = new List<OverlapEntry<T>>();
 
         public OverlapEntry<T>[] CurrentConfig => currentConfig.ToArray();
         public OverlapEntry<T>[] NewConfig => newConfig.ToArray();

@@ -138,7 +138,7 @@ namespace MaxLib.Data.Json
                                 var name = pb.Text;
                                 if (name.StartsWith("\"")) name = name.Substring(1);
                                 if (name.EndsWith("\"")) name = name.Remove(name.Length - 1);
-                                pb = GetNextBase(); //Zuweisung
+                                _ = GetNextBase(); //Zuweisung
                                 obj.Add(name, ParseElement());
                                 pb = GetNextBase(); //Trenner
                                 if (pb.Type == ParserBaseType.ObjectClose) break;
@@ -149,7 +149,7 @@ namespace MaxLib.Data.Json
                         {
                             var arr = new JsonArray();
                             var pos = StorePos();
-                            while((pb=GetNextBase()).Type!=ParserBaseType.ArrayClose)
+                            while(GetNextBase().Type!=ParserBaseType.ArrayClose)
                             {
                                 RestorePos(pos);
                                 arr.Add(ParseElement());
@@ -204,30 +204,31 @@ namespace MaxLib.Data.Json
                         {
                             pb.Type = ParserBaseType.Value;
                             if (c == '"') isLiteral = true;
-                            var lc = c;
-                            var rp = StorePos();
+                            _ = StorePos();
                             bool first = true;
                             bool mask = false;
+                            char lc;
+                            Tuple<int, int, int> rp;
                             do
                             {
                                 if (!first) pb.Text += c;
                                 first = false;
-                                lc = c; 
-                                rp = StorePos(); 
+                                lc = c;
+                                rp = StorePos();
                                 c = GetNextChar();
                                 if (c == '"' && isLiteral)
                                 {
                                     pb.Text += c;
                                     first = true;
                                 }
-                                else if (c=='\\' && isLiteral)
+                                else if (c == '\\' && isLiteral)
                                 {
                                     mask = lc != '\\';
                                 }
                             }
-                            while (c != 0 && 
-                                (isLiteral ? 
-                                    (c != '"' || (lc == '\\' && mask)) : 
+                            while (c != 0 &&
+                                (isLiteral ?
+                                    (c != '"' || (lc == '\\' && mask)) :
                                     (c != ' ' && c != '\t' && c != '}' && c != ']' && c != ',')));
                             if (c == 0) return pb;
                             if (!isLiteral) RestorePos(rp);
@@ -315,8 +316,7 @@ namespace MaxLib.Data.Json
     public class JsonObject : JsonElement, IEnumerable<KeyValuePair<string, JsonElement>>
     {
         internal Dictionary<string, JsonElement> Elements = new Dictionary<string, JsonElement>();
-
-        object lockObject = new object();
+        readonly object lockObject = new object();
         public JsonObject Add<T>(string name, T element) where T : JsonElement
         {
             if (name == null) throw new ArgumentNullException("name");
@@ -352,8 +352,8 @@ namespace MaxLib.Data.Json
 
         public JsonElement this[string name]
         {
-            get { return Get<JsonElement>(name); }
-            set { Add(name, value); }
+            get => Get<JsonElement>(name);
+            set => Add(name, value);
         }
 
         public override void ToString(JsonParser parser, StringBuilder sb, int depth)
@@ -435,7 +435,7 @@ namespace MaxLib.Data.Json
     [Serializable]
     public class JsonArray: JsonElement, IEnumerable<JsonElement>
     {
-        List<JsonElement> Elements = new List<JsonElement>();
+        readonly List<JsonElement> Elements = new List<JsonElement>();
 
         public JsonArray Add<T>(T element) where T : JsonElement
         {
@@ -459,7 +459,7 @@ namespace MaxLib.Data.Json
 
         public JsonElement this[int index]
         {
-            get { return Elements[index]; }
+            get => Elements[index];
             set
             {
                 if (index < 0 || index > ChildCount) throw new ArgumentOutOfRangeException("index");
@@ -490,7 +490,6 @@ namespace MaxLib.Data.Json
                     for (int i = 0; i < Elements.Count; ++i)
                     {
                         if (i > 0) sb.AppendLine(",");
-                        var kvp = Elements.ElementAt(i);
                         sb.Append(' ', parser.IndentCharCount * (depth + 1));
                         Elements[i].ToString(parser, sb, depth + 1);
                     }
@@ -504,7 +503,6 @@ namespace MaxLib.Data.Json
                 sb.Append('[');
                 for (int i = 0; i < Elements.Count; ++i)
                 {
-                    var kvp = Elements.ElementAt(i);
                     if (i > 0) sb.Append(',');
                     Elements[i].ToString(parser, sb, depth + 1);
                 }
@@ -543,11 +541,8 @@ namespace MaxLib.Data.Json
         private string argumentString = "";
         public string ArgumentString
         {
-            get { return argumentString; }
-            set
-            {
-                argumentString = value ?? throw new ArgumentNullException("ArgumentString");
-            }
+            get => argumentString;
+            set => argumentString = value ?? throw new ArgumentNullException("ArgumentString");
         }
 
         public override int ChildCount

@@ -26,7 +26,7 @@ namespace MaxLib.Console.ConsoleHelper
             writer = new ConsoleWriterAsync(helper);
         }
 
-        ConsoleWriterAsync writer;
+        readonly ConsoleWriterAsync writer;
 
         public void Start()
         {
@@ -55,7 +55,6 @@ namespace MaxLib.Console.ConsoleHelper
             //Text
             for (int i = 0; i<Elements.Count; ++i) if (i>=ListOffset&&i<ListOffset+Height)
                 {
-                    var h = i - ListOffset;
                     var s = Elements[i].ToString();
                     if (s.Length > Width - 2) s = s.Remove(Width - 2);
                     s = s.PadRight(Width - 2, ' ');

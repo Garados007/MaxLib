@@ -1,21 +1,19 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
 using System.Threading;
 
 namespace MaxLib.Collections
 {
     public class SaveDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ICollection<KeyValuePair<TKey, TValue>>, IDictionary, ICollection, IReadOnlyDictionary<TKey, TValue>, IReadOnlyCollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable, ISerializable, IDeserializationCallback, IDisposable
     {
-        Dictionary<TKey, TValue> dict;
+        readonly Dictionary<TKey, TValue> dict;
 
         bool writeAccess = false;
         int readCounter = 0;
-        object changeLock = new object();
-        Semaphore changeMutex = new Semaphore(1, 1);
+        readonly object changeLock = new object();
+        readonly Semaphore changeMutex = new Semaphore(1, 1);
 
         void EnterMode(bool write)
         {
@@ -263,7 +261,7 @@ namespace MaxLib.Collections
 
         public class DictionaryEnumerator : IDictionaryEnumerator
         {
-            IEnumerator<KeyValuePair<TKey, TValue>> en;
+            readonly IEnumerator<KeyValuePair<TKey, TValue>> en;
 
             public object Key => en.Current.Key;
 

@@ -9,7 +9,7 @@ namespace MaxLib
         private int sliceTime = 100;
         public int SliceTime
         {
-            get { return sliceTime; }
+            get => sliceTime;
             set
             {
                 if (sliceTime <= 0) throw new ArgumentOutOfRangeException("SlicedTime");

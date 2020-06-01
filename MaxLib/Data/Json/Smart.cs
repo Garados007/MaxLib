@@ -223,21 +223,21 @@ namespace MaxLib.Data.Json
         public T GetValue<T>()
         {
             var json = Get();
-            if (json == null || json.OwnType != JsonType.Value) return default(T);
+            if (json == null || json.OwnType != JsonType.Value) return default;
             return json.Element.Value.Get<T>();
         }
 
         public T GetValue<T>(int index)
         {
             var json = Get(index);
-            if (json == null || json.OwnType != JsonType.Value) return default(T);
+            if (json == null || json.OwnType != JsonType.Value) return default;
             return json.Element.Value.Get<T>();
         }
 
         public T GetValue<T>(string key)
         {
             var json = Get(key);
-            if (json == null || json.OwnType != JsonType.Value) return default(T);
+            if (json == null || json.OwnType != JsonType.Value) return default;
             return json.Element.Value.Get<T>();
         }
 
@@ -354,14 +354,14 @@ namespace MaxLib.Data.Json
 
         public SmartJson this[int index]
         {
-            get { return Get(index); }
-            set { Set(index, value); }
+            get => Get(index);
+            set => Set(index, value);
         }
 
         public SmartJson this[string key]
         {
-            get { return Get(key); }
-            set { Set(key, value); }
+            get => Get(key);
+            set => Set(key, value);
         }
 
         #endregion

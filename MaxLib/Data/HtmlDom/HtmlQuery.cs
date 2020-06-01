@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace MaxLib.Data.HtmlDom
 {
@@ -189,7 +188,7 @@ namespace MaxLib.Data.HtmlDom
 
             foreach (var t in ts)
             {
-                U result = default(U);
+                U result = default;
                 bool valid = false;
                 try
                 {

@@ -10,21 +10,23 @@ namespace MaxLib.Net.ServerClient.Connectors
     {
         public DataTransport2()
         {
-            base.Connections.MainProtocol = ConnectorProtocol.TCP;
-            base.CanChangeProtocol = false;
+            Connections.MainProtocol = ConnectorProtocol.TCP;
+            CanChangeProtocol = false;
             base.MaxConnectionsCount = int.MaxValue;
         }
 
         public void AddConnection(TcpClient client, Connection connection)
         {
-            base.Connections.Add(connection);
-            var d = new data();
-            d.con = connection;
-            d.Manager = Manager;
-            d.datatr = this;
-            d.connector = ConnectorId;
-            d.id = Manager.Users.Users.Find((u) => u.DefaultConnection == connection).Id;
-            d.tcp = client;
+            Connections.Add(connection);
+            var d = new Data
+            {
+                con = connection,
+                Manager = Manager,
+                datatr = this,
+                connector = ConnectorId,
+                id = Manager.Users.Users.Find((u) => u.DefaultConnection == connection).Id,
+                tcp = client
+            };
             d.task = new Task(d.Run);
             d.task.Start();
             datas.Add(d);
@@ -55,10 +57,10 @@ namespace MaxLib.Net.ServerClient.Connectors
             datas.Find((d) => d.con == message.MessageRoot.Connection).messages.Enqueue(message);
         }
 
-        List<data> datas = new List<data>();
+        readonly List<Data> datas = new List<Data>();
         public event Action<LogoutUser> UserLogedOut;
 
-        private void DoConnectionLost(ConnectionLostEventArgument argument, data sender)
+        private void DoConnectionLost(ConnectionLostEventArgument argument, Data sender)
         {
             var rest = new List<PrimaryMessage>();
             DoConnectionLost(argument);
@@ -81,14 +83,13 @@ namespace MaxLib.Net.ServerClient.Connectors
                     if (argument.UserLogout)
                     {
                         Manager.Users.RemoveUser(user);
-                        if (UserLogedOut != null)
-                            UserLogedOut(new LogoutUser(user, this, argument));
+                        UserLogedOut?.Invoke(new LogoutUser(user, this, argument));
                     }
                 }
             }
         }
 
-        class data
+        class Data
         {
             public Task task;
             public DataTransport2 datatr;
@@ -104,7 +105,7 @@ namespace MaxLib.Net.ServerClient.Connectors
 
             public void Run()
             {
-                doCont();
+                DoCont();
                 tcp.Close();
                 if (cl != null) datatr.DoConnectionLost(cl, this);
             }
@@ -115,14 +116,16 @@ namespace MaxLib.Net.ServerClient.Connectors
                 if (Environment.TickCount - lastPing >= Manager.DefaultPingTime)
                 {
                     lastPing = Environment.TickCount;
-                    var pm = new PrimaryMessage();
-                    pm.MessageType = PrimaryMessageType.Ping;
+                    var pm = new PrimaryMessage
+                    {
+                        MessageType = PrimaryMessageType.Ping
+                    };
                     pm.ClientData.SetBinary(BitConverter.GetBytes(Environment.TickCount));
                     messages.Enqueue(pm);
                 }
             }
 
-            void doCont()
+            void DoCont()
             {
                 using (var stream = tcp.GetStream())
                     while (active)

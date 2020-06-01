@@ -226,13 +226,13 @@ namespace MaxLib.Net.ServerClient.Connectors.Sync
     {
         public SyncFileMessageType Type
         {
-            get { return (SyncFileMessageType)Reason; }
-            set { Reason = (int)value; }
+            get => (SyncFileMessageType)Reason;
+            set => Reason = (int)value;
         }
 
         public long TaskID
         {
-            get { return BitConverter.ToInt64(HeaderBytes, 0); }
+            get => BitConverter.ToInt64(HeaderBytes, 0);
             set
             {
                 var l = new List<byte>();
@@ -244,7 +244,7 @@ namespace MaxLib.Net.ServerClient.Connectors.Sync
 
         public byte[] OwnerID
         {
-            get { return HeaderBytes.ToList().GetRange(8, HeaderBytes.Length - 8).ToArray(); }
+            get => HeaderBytes.ToList().GetRange(8, HeaderBytes.Length - 8).ToArray();
             set
             {
                 var l = new List<byte>();

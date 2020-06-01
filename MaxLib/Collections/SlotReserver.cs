@@ -5,10 +5,10 @@ namespace MaxLib.Collections
 {
     public class SlotReserver<T>
     {
-        Dictionary<T, SlotReserverEntry<T>> list = new Dictionary<T, SlotReserverEntry<T>>();
-        SortedList<int, HashSet<SlotReserverEntry<T>>> levelEntrys = new SortedList<int, HashSet<SlotReserverEntry<T>>>();
-        private Dictionary<T, HashSet<T>> parentList = new Dictionary<T, HashSet<T>>(); // child -> parents
-        private Dictionary<T, HashSet<T>> childList = new Dictionary<T, HashSet<T>>(); // parent -> children
+        readonly Dictionary<T, SlotReserverEntry<T>> list = new Dictionary<T, SlotReserverEntry<T>>();
+        readonly SortedList<int, HashSet<SlotReserverEntry<T>>> levelEntrys = new SortedList<int, HashSet<SlotReserverEntry<T>>>();
+        private readonly Dictionary<T, HashSet<T>> parentList = new Dictionary<T, HashSet<T>>(); // child -> parents
+        private readonly Dictionary<T, HashSet<T>> childList = new Dictionary<T, HashSet<T>>(); // parent -> children
 
         public int ParentCount => parentList.Count;
         public int ChildCount => childList.Count;

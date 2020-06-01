@@ -6,7 +6,7 @@ namespace MaxLib.Net.ServerClient.Remoting
     [Serializable]
     public class RemoteEvent<T> : MarshalByRefObject where T : class
     {
-        List<T> EventHandler = new List<T>();
+        readonly List<T> EventHandler = new List<T>();
 
         public void AddHandler(T Handler)
         {

@@ -49,7 +49,7 @@ namespace MaxLib.Console.ConsoleHelper
 
         internal int width, height;
         internal ConsoleCellData[,] active, buffer;
-        Thread Updater;
+        readonly Thread Updater;
         bool Active = true;
 
         internal void WriteBuffer(ConsoleCellData[,] data)
@@ -65,7 +65,7 @@ namespace MaxLib.Console.ConsoleHelper
         int updateInterval = 200;
         public int UpdateInterval
         {
-            get { return updateInterval; }
+            get => updateInterval;
             set
             {
                 if (value < 0) throw new ArgumentOutOfRangeException("UpdateInterval", value, "Time cant be less 0");
@@ -75,8 +75,8 @@ namespace MaxLib.Console.ConsoleHelper
 
         public string Title
         {
-            get { return Console.Title; }
-            set { Console.Title = value; }
+            get => Console.Title;
+            set => Console.Title = value;
         }
 
         void Updating()
@@ -169,7 +169,7 @@ namespace MaxLib.Console.ConsoleHelper
                 if (WriterLeft >= ConsoleHelper.width)
                 {
                     var t = WriterLeft / ConsoleHelper.width;
-                    WriterLeft = WriterLeft % ConsoleHelper.width;
+                    WriterLeft %= ConsoleHelper.width;
                     WriterTop += t;
                     if (WriterTop == ConsoleHelper.height) WriterTop = 0;
                 }
@@ -252,8 +252,8 @@ namespace MaxLib.Console.ConsoleHelper
 
         public static bool operator ==(ConsoleCellData ccd1, ConsoleCellData ccd2)
         {
-            if ((object)ccd1 == null && (object)ccd2 == null) return true;
-            if ((object)ccd1 == null || (object)ccd2 == null) return false;
+            if (ccd1 is null && ccd2 is null) return true;
+            if (ccd1 is null || ccd2 is null) return false;
             return ccd1.Data == ccd2.Data && ccd1.TextColor == ccd2.TextColor &&
                 ccd1.BackGroundColor == ccd2.BackGroundColor;
         }

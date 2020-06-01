@@ -1303,7 +1303,7 @@ namespace MaxLib.Net.Webserver
         private string httpProtocol = HttpProtocollDefinitions.HttpVersion1_1;
         public string HttpProtocol
         {
-            get { return httpProtocol; }
+            get => httpProtocol;
             set
             {
                 if (string.IsNullOrWhiteSpace(value)) throw new ArgumentException("HttpProtocol cannot contain an empty Protocol", "HttpProtocol");
@@ -1320,7 +1320,7 @@ namespace MaxLib.Net.Webserver
         private string protocolMethod = HttpProtocollMethods.Get;
         public string ProtocolMethod
         {
-            get { return protocolMethod; }
+            get => protocolMethod;
             set
             {
                 if (string.IsNullOrWhiteSpace(value)) throw new ArgumentException("ProtocolMethod cannot be empty", "ProtocolMethod");
@@ -1335,7 +1335,7 @@ namespace MaxLib.Net.Webserver
         private string url = "/";
         public string Url
         {
-            get { return url; }
+            get => url;
             set
             {
                 if (url == null) throw new ArgumentNullException("Url");
@@ -1353,11 +1353,8 @@ namespace MaxLib.Net.Webserver
         private string host = "";
         public string Host
         {
-            get { return host; }
-            set
-            {
-                host = value ?? throw new ArgumentNullException("Host");
-            }
+            get => host;
+            set => host = value ?? throw new ArgumentNullException("Host");
         }
 
         private HttpPost post = new HttpPost("");
@@ -1387,8 +1384,8 @@ namespace MaxLib.Net.Webserver
         private HttpConnectionType fieldConnection = HttpConnectionType.Close;
         public HttpConnectionType FieldConnection
         {
-            get { return fieldConnection; }
-            set { fieldConnection = value; }
+            get => fieldConnection;
+            set => fieldConnection = value;
         }
 
         private HttpCookie cookie = new HttpCookie("");
@@ -1399,8 +1396,8 @@ namespace MaxLib.Net.Webserver
 
         public string FieldUserAgent
         {
-            get { return HeaderParameter["User-Agent"]; }
-            set { HeaderParameter["User-Agent"] = value; }
+            get => HeaderParameter["User-Agent"];
+            set => HeaderParameter["User-Agent"] = value;
         }
     }
 
@@ -1410,32 +1407,32 @@ namespace MaxLib.Net.Webserver
         private HttpStateCode statusCode = HttpStateCode.OK;
         public HttpStateCode StatusCode
         {
-            get { return statusCode; }
-            set { statusCode = value; }
+            get => statusCode;
+            set => statusCode = value;
         }
 
         public string FieldLocation
         {
-            get { return HeaderParameter["Location"]; }
-            set { HeaderParameter["Location"] = value; }
+            get => HeaderParameter["Location"];
+            set => HeaderParameter["Location"] = value;
         }
 
         public string FieldDate
         {
-            get { return HeaderParameter["Date"]; }
-            set { HeaderParameter["Date"] = value; }
+            get => HeaderParameter["Date"];
+            set => HeaderParameter["Date"] = value;
         }
 
         public string FieldLastModified
         {
-            get { return HeaderParameter["Last-Modified"]; }
-            set { HeaderParameter["Last-Modified"] = value; }
+            get => HeaderParameter["Last-Modified"];
+            set => HeaderParameter["Last-Modified"] = value;
         }
 
         public string FieldContentType
         {
-            get { return HeaderParameter["Content-Type"]; }
-            set { HeaderParameter["Content-Type"] = value; }
+            get => HeaderParameter["Content-Type"];
+            set => HeaderParameter["Content-Type"] = value;
         }
 
         public virtual void SetActualDate()
@@ -2198,8 +2195,8 @@ namespace MaxLib.Net.Webserver
         private string primaryEncoding = null;
         public string PrimaryEncoding
         {
-            get { return primaryEncoding; }
-            set { primaryEncoding = value; }
+            get => primaryEncoding;
+            set => primaryEncoding = value;
         }
 
         public HttpRequestHeader RequestHeader { get; set; }
@@ -2214,8 +2211,8 @@ namespace MaxLib.Net.Webserver
 
         public object this[object identifer]
         {
-            get { return Information[identifer]; }
-            set { Information[identifer] = value; }
+            get => Information[identifer];
+            set => Information[identifer] = value;
         }
 
         public HttpSession Session { get; set; }
@@ -2428,7 +2425,7 @@ namespace MaxLib.Net.Webserver
         private string mimeType = MimeTypes.TextHtml;
         public virtual string MimeType
         {
-            get { return mimeType; }
+            get => mimeType;
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
@@ -2486,7 +2483,7 @@ namespace MaxLib.Net.Webserver
         private bool transferCompleteData;
         public virtual bool TransferCompleteData
         {
-            get { return transferCompleteData; }
+            get => transferCompleteData;
             set
             {
                 if (transferCompleteData = value)
@@ -2504,17 +2501,14 @@ namespace MaxLib.Net.Webserver
         private string data = "";
         public string Data
         {
-            get { return data; }
-            set
-            {
-                data = value ?? throw new ArgumentNullException("Data");
-            }
+            get => data;
+            set => data = value ?? throw new ArgumentNullException("Data");
         }
 
         private string encoding;
         public string TextEncoding
         {
-            get { return encoding; }
+            get => encoding;
             set
             {
                 encoding = value;
@@ -2604,7 +2598,7 @@ namespace MaxLib.Net.Webserver
         private string path = null;
         public virtual string Path
         {
-            get { return path; }
+            get => path;
             set
             {
                 if (path == value) return;
@@ -3135,15 +3129,9 @@ namespace MaxLib.Net.Webserver
 
             public override long Position
             {
-                get
-                {
-                    throw new NotSupportedException();
-                }
+                get => throw new NotSupportedException();
 
-                set
-                {
-                    throw new NotSupportedException();
-                }
+                set => throw new NotSupportedException();
             }
 
             public override void Flush()

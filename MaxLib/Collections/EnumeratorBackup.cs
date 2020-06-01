@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace MaxLib.Collections
 {
     public class EnumeratorBackup<T> : IEnumerable<T>, IEnumerator<T>
     {
-        IEnumerator<T> master, backup, current;
+        private readonly IEnumerator<T> master;
+        private readonly IEnumerator<T> backup;
+        private IEnumerator<T> current;
         int state = -2;
-        int threadId;
+        readonly int threadId;
 
         public EnumeratorBackup(IEnumerator<T> master, IEnumerator<T> backup)
         {

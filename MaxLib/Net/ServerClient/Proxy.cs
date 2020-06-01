@@ -168,17 +168,14 @@ namespace MaxLib.Net.ServerClient
     {
         public byte[] TargetId
         {
-            get { return HeaderBytes; }
-            set { HeaderBytes = value; }
+            get => HeaderBytes;
+            set => HeaderBytes = value;
         }
 
         public PrimaryMessage Message
         {
-            get
-            {
-                return ClientData.GetMessage<PrimaryMessage>();
-            }
-            set { ClientData.SetMessage(value); }
+            get => ClientData.GetMessage<PrimaryMessage>();
+            set => ClientData.SetMessage(value);
         }
     }
 

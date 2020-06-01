@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace MaxLib.Collections
@@ -20,7 +18,7 @@ namespace MaxLib.Collections
 
         Queue<StackItem> items = new Queue<StackItem>();
         int state = -2;
-        int threadId;
+        readonly int threadId;
         StackItem current;
 
         public EnumeratorBuilder()

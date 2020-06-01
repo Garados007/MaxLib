@@ -303,10 +303,7 @@ namespace MaxLib.Data.IniFiles
 
         public OptionsGroup this[int index]
         {
-            get
-            {
-                return Groups[index];
-            }
+            get => Groups[index];
             set
             {
                 if (index == 0) throw new NotSupportedException("You can't replace the main group.");
@@ -463,10 +460,7 @@ namespace MaxLib.Data.IniFiles
 
         public IOptionsStreamPart this[int index]
         {
-            get
-            {
-                return StreamParts[index];
-            }
+            get => StreamParts[index];
             set
             {
                 if (!CommentsAllowed && !(value is OptionsKey)) throw new NotSupportedException();
@@ -1338,11 +1332,8 @@ namespace MaxLib.Data.IniFiles
 
         public string Name
         {
-            get { return name; }
-            set
-            {
-                name = value ?? throw new ArgumentNullException("Name");
-            }
+            get => name;
+            set => name = value ?? throw new ArgumentNullException("Name");
         }
 
         public OptionsCollection Options { get; private set; }
@@ -1442,7 +1433,9 @@ namespace MaxLib.Data.IniFiles
 
         public string ValueText { get; private set; }
 
+#pragma warning disable IDE0060 // Nicht verwendete Parameter entfernen
         internal OptionsKey(string name, string valueText, bool internalValue = true)
+#pragma warning restore IDE0060 // Nicht verwendete Parameter entfernen
         {
             Name = name;
             ValueText = valueText;
@@ -1662,7 +1655,7 @@ namespace MaxLib.Data.IniFiles
                         return l.ToArray();
                     }
                 case BinaryParseOption.Base64:
-                    return System.Convert.FromBase64String(ValueText);
+                    return Convert.FromBase64String(ValueText);
                 default: throw new NotImplementedException(option.ToString() + " is not implemented");
             }
         }
@@ -1778,7 +1771,7 @@ namespace MaxLib.Data.IniFiles
                     }
                     break;
                 case BinaryParseOption.Base64:
-                    ValueText = System.Convert.ToBase64String(value);
+                    ValueText = Convert.ToBase64String(value);
                     break;
                 default: throw new NotImplementedException(option.ToString() + " is not implemented");
             }
@@ -1800,7 +1793,7 @@ namespace MaxLib.Data.IniFiles
 
     static class StringFormatter
     {
-        static string[] repl = new[]{
+        static readonly string[] repl = new[]{
                 "\\", "\\\\",
                 "\"", "\\\"",
                 "\t", "\\t",
@@ -1907,8 +1900,8 @@ namespace MaxLib.Data.IniFiles
     {
         public OptionsKey Parse(string source)
         {
-            var key = "";
-            var value = "";
+            string key;
+            string value;
             if (source.StartsWith("\""))
             {
                 var ind = 1;

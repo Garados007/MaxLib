@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MaxLib.Collections
 {
     public class MarshalEnumerator<T> : MarshalByRefObject, IEnumerator<T>
     {
-        IEnumerator<T> source;
+        readonly IEnumerator<T> source;
 
         public MarshalEnumerator(IEnumerator<T> source)
         {
@@ -38,7 +35,7 @@ namespace MaxLib.Collections
 
     public class MarshalEnumerable<T> : MarshalByRefObject, IEnumerable<T>
     {
-        IEnumerable<T> source;
+        readonly IEnumerable<T> source;
 
         public MarshalEnumerable(IEnumerable<T> source)
         {

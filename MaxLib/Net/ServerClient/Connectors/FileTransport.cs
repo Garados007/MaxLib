@@ -131,7 +131,7 @@ namespace MaxLib.Net.ServerClient.Connectors
                             }
                             else
                             {
-                                tcplist = new System.Net.Sockets.TcpListener(new System.Net.IPEndPoint(System.Net.IPAddress.Any, con.Port));
+                                tcplist = new TcpListener(new IPEndPoint(IPAddress.Any, con.Port));
                                 tcplist.Start();
                                 tcp = tcplist.AcceptTcpClient();
                             }
@@ -301,8 +301,8 @@ namespace MaxLib.Net.ServerClient.Connectors
                         }
                         else
                         {
-                            tcp = new System.Net.Sockets.TcpClient();
-                            tcp.Connect(new System.Net.IPEndPoint(System.Net.IPAddress.Parse(task.Connection.Target), task.Connection.Port));
+                            tcp = new TcpClient();
+                            tcp.Connect(new IPEndPoint(IPAddress.Parse(task.Connection.Target), task.Connection.Port));
                         }
                         
                         var stream = tcp.GetStream();
@@ -374,8 +374,8 @@ namespace MaxLib.Net.ServerClient.Connectors
 #pragma warning disable CS0618 // Typ oder Element ist veraltet
             CompressBytes = false;
 #pragma warning restore CS0618 // Typ oder Element ist veraltet
-            base.Connections.MainProtocol = ConnectorProtocol.TCP;
-            base.CanChangeProtocol = false;
+            Connections.MainProtocol = ConnectorProtocol.TCP;
+            CanChangeProtocol = false;
             Role = ServerClientRole.Undefined;
         }
     }
@@ -390,8 +390,8 @@ namespace MaxLib.Net.ServerClient.Connectors
         [Obsolete("Verwenden Sie lieber die Dataset-Technologie. Use the Dataset-Technolgy, please.")]
         public byte[] Data
         {
-            get { return data; }
-            set { data = value; }
+            get => data;
+            set => data = value;
         }
 
         public int DatasetCount { get; set; }

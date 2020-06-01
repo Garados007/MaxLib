@@ -1,11 +1,10 @@
-﻿using System;
+﻿using MaxLib.Collections;
+using MaxLib.Net.Webserver.Lazy;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using IO = System.IO;
-using MaxLib.Net.Webserver.Lazy;
-using MaxLib.Collections;
 
 namespace MaxLib.Net.Webserver.Files
 {
@@ -214,12 +213,12 @@ namespace MaxLib.Net.Webserver.Files
 
     public class IOContentSource : ContentSource
     {
-        string[] rootUrl;
-        bool strict;
-        string localRoot;
+        readonly string[] rootUrl;
+        readonly bool strict;
+
         public override string[] RootUrl => rootUrl;
 
-        public string LocalRoot => localRoot;
+        public string LocalRoot { get; }
 
         public override bool Strict => strict;
 
@@ -229,7 +228,7 @@ namespace MaxLib.Net.Webserver.Files
 
         public override ContentInfo TryGetContent(string[] relativePath, WebProgressTask task)
         {
-            var local = localRoot + "\\" + string.Join("\\", relativePath);
+            var local = LocalRoot + "\\" + string.Join("\\", relativePath);
             if (IO.Directory.Exists(local))
             {
                 var di = new IODirectoryInfo(new IO.DirectoryInfo(local));
@@ -270,7 +269,7 @@ namespace MaxLib.Net.Webserver.Files
         public IOContentSource(string[] rootUrl, string localRoot, bool strict)
         {
             this.rootUrl = rootUrl ?? throw new ArgumentNullException("rootUrl");
-            this.localRoot = localRoot ?? throw new ArgumentNullException("localRoot");
+            this.LocalRoot = localRoot ?? throw new ArgumentNullException("localRoot");
             if (!IO.Directory.Exists(localRoot)) throw new IO.DirectoryNotFoundException("localRoot not found");
             this.strict = strict;
         }
@@ -356,8 +355,8 @@ namespace MaxLib.Net.Webserver.Files
 
         public bool UseDictionary { get; private set; }
 
-        Dictionary<string, VirtualDictInfo> dict;
-        HashSet<string[]> list;
+        readonly Dictionary<string, VirtualDictInfo> dict;
+        readonly HashSet<string[]> list;
 
         public VirtualContentSource Add(params string[] path)
         {
@@ -442,12 +441,13 @@ namespace MaxLib.Net.Webserver.Files
             return this;
         }
 
-        string[] rootUrl;
-        bool strict;
-        public override string[] RootUrl => rootUrl;
-        DateTime access, created = DateTime.Now, modified;
+        public override string[] RootUrl { get; }
 
-        public override bool Strict => strict;
+        private DateTime access;
+        private readonly DateTime created = DateTime.Now;
+        private DateTime modified;
+
+        public override bool Strict { get; }
 
         public override void Dispose()
         {
@@ -540,7 +540,7 @@ namespace MaxLib.Net.Webserver.Files
 
         void Split<T>(IEnumerable<T> e, out T first, out T[] rest)
         {
-            first = default(T);
+            first = default;
             foreach (var f in e)
             {
                 first = f;
@@ -552,8 +552,8 @@ namespace MaxLib.Net.Webserver.Files
         public VirtualContentSource(string[] rootUrl = null, bool strict = false, 
             bool onlyLeaves = false, bool useDictionary = true)
         {
-            this.rootUrl = rootUrl ?? new string[0];
-            this.strict = strict;
+            RootUrl = rootUrl ?? new string[0];
+            Strict = strict;
             OnlyLeaves = onlyLeaves;
             UseDictionary = useDictionary;
             if (UseDictionary) dict = new Dictionary<string, VirtualDictInfo>();
@@ -673,8 +673,8 @@ namespace MaxLib.Net.Webserver.Files
 
         public static bool operator ==(IODirectoryInfo d1, IODirectoryInfo d2)
         {
-            if (ReferenceEquals(d1, null) && ReferenceEquals(d2, null)) return true;
-            if (ReferenceEquals(d1, null) || ReferenceEquals(d2, null)) return false;
+            if (d1 is null && d2 is null) return true;
+            if (d1 is null || d2 is null) return false;
             return d1.Directory.FullName == d2.Directory.FullName;
         }
 
@@ -734,8 +734,8 @@ namespace MaxLib.Net.Webserver.Files
 
         public static bool operator ==(IOFileInfo f1, IOFileInfo f2)
         {
-            if (ReferenceEquals(f1, null) && ReferenceEquals(f2, null)) return true;
-            if (ReferenceEquals(f1, null) || ReferenceEquals(f2, null)) return false;
+            if (f1 is null && f2 is null) return true;
+            if (f1 is null || f2 is null) return false;
             return f1.File.FullName == f2.File.FullName;
         }
 
@@ -1179,15 +1179,15 @@ namespace MaxLib.Net.Webserver.Files
 
         class StyledHtmlClass : ContentViewer
         {
-            string cssCode = Properties.Resources.Net_Webserver_Files_ViewerHtmlCss;
+            readonly string cssCode = Properties.Resources.Net_Webserver_Files_ViewerHtmlCss;
 
             protected override IEnumerable<HttpDataSource> AddStartSequence(ContentResult info,  LazyTask task, SourceProvider source)
             {
                 task["StyledHtmlClass.info"] = info;
-                return AddStartSequenceInternal(info, task, source);
+                return AddStartSequenceInternal(info);
             }
 
-            IEnumerable<HttpDataSource> AddStartSequenceInternal(ContentResult info, LazyTask task, SourceProvider source)
+            IEnumerable<HttpDataSource> AddStartSequenceInternal(ContentResult info)
             {
                 yield return Stringer("<!DOCTYPE html><html><head><meta charset=\"utf-8\" /><title>");
                 if (info.Infos.Length == 0)
@@ -1228,10 +1228,10 @@ namespace MaxLib.Net.Webserver.Files
 
             protected override IEnumerable<HttpDataSource> AddEndSequence(ContentResult info, LazyTask task, SourceProvider source)
             {
-                return AddEndSequenceInternal(info, task, source);
+                return AddEndSequenceInternal();
             }
 
-            IEnumerable<HttpDataSource> AddEndSequenceInternal(ContentResult info, LazyTask task, SourceProvider source)
+            IEnumerable<HttpDataSource> AddEndSequenceInternal()
             {
                 yield return Stringer("</div>", "</body></html>");
             }
@@ -1296,7 +1296,7 @@ namespace MaxLib.Net.Webserver.Files
                                 info.Access.ToString("s"), "\" href=\"", path, 
                                 "\" title=\"", info.Name, "\">",
                                 "<div class=\"content-top\">", "<div class=\"content-icon\">");
-                            foreach (var e in ShowIcon(info.Icon, source))
+                            foreach (var e in ShowIcon(info.Icon))
                                 yield return e;
                             yield return Stringer("</div></div>", "<div class=\"content-description\">",
                                 "<div class=\"content-name\">", info.Name, "</div></div></a>");
@@ -1313,7 +1313,7 @@ namespace MaxLib.Net.Webserver.Files
                                 "\" href=\"", source.NotifyRessource((info as FileInfo).LocalPath),
                                 "\" title=\"", info.Name,
                                 "\">", "<div class=\"content-top\">", "<div class=\"content-icon\">");
-                            foreach (var e in ShowIcon(info.Icon, source))
+                            foreach (var e in ShowIcon(info.Icon))
                                 yield return e;
                             yield return Stringer("</div></div>", "<div class=\"content-description\">",
                                 "<div class=\"content-name\">", info.Name, "</div></div></a>");
@@ -1324,7 +1324,7 @@ namespace MaxLib.Net.Webserver.Files
                     }
                 }
 
-                IEnumerable<HttpDataSource> ShowIcon(IconInfo icon, SourceProvider source)
+                IEnumerable<HttpDataSource> ShowIcon(IconInfo icon)
                 {
                     yield return Stringer("<div class=\"icon\" data-type=\"", icon.Type,
                         "\" data-id=\"", icon.ContentId, "\">");
@@ -1344,7 +1344,7 @@ namespace MaxLib.Net.Webserver.Files
 
     public abstract class SourceProvider : FileSystemService
     {
-        string prefix;
+        readonly string prefix;
 
         public int DefaultIconSize { get; set; }
 
@@ -1478,15 +1478,15 @@ namespace MaxLib.Net.Webserver.Files
 
         public class SimpleIOClass : SourceProvider
         {
-            Dictionary<string, Token> TempTokens = new Dictionary<string, Token>();
-            Dictionary<string, Token> HandleTokens = new Dictionary<string, Token>();
-            HashSet<string> GeneratingTokens = new HashSet<String>();
+            readonly Dictionary<string, Token> TempTokens = new Dictionary<string, Token>();
+            readonly Dictionary<string, Token> HandleTokens = new Dictionary<string, Token>();
+            readonly HashSet<string> GeneratingTokens = new HashSet<String>();
 
             public SimpleIOClass(string[] pathRoot) : base(pathRoot)
             {
             }
 
-            string getId()
+            string GetId()
             {
                 var r = new Random();
                 var b = new byte[16];
@@ -1511,12 +1511,12 @@ namespace MaxLib.Net.Webserver.Files
                 {
                     int next = bytes[ind];
                     ind++;
-                    num = num | (next << bits);
+                    num |= next << bits;
                     bits += 8;
                     while (bits >= 5)
                     {
                         var digit = num & 0x1f;
-                        num = num >> 5;
+                        num >>= 5;
                         bits -= 5;
                         sb.Append(alphabet[digit]);
                     }
@@ -1534,7 +1534,7 @@ namespace MaxLib.Net.Webserver.Files
                 if (HandleTokens.TryGetValue(ressourceHandle, out Token t))
                     return t;
                 string key;
-                do key = getId();
+                do key = GetId();
                 while (!GeneratingTokens.Add(key));
 
                 if (!IO.Directory.Exists("Temp\\ContentProvider"))
