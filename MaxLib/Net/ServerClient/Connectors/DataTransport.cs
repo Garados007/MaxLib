@@ -74,14 +74,6 @@ namespace MaxLib.Net.ServerClient.Connectors
             DoConnectionLost(argument);
             if (argument.Retry) while (sender.messages.Count > 0) rest.Add(sender.messages.Dequeue());
             ConnectionRemoved(sender.con);
-            //if (argument.Retry)
-            //{
-            //    ConnectionAdded(sender.con);
-            //    var d = datas.Find((dt) => dt.con == sender.con);
-            //    if (argument.SendedMessage != null&&argument.SendedMessage is PrimaryMessage) 
-            //        d.messages.Enqueue(argument.SendedMessage as PrimaryMessage);
-            //    for (int i = 0; i < rest.Count; ++i) d.messages.Enqueue(rest[i]);
-            //}
             if (Manager != null)
             {
                 var user = Manager.Users.Users.Find((u) => u.DefaultConnector == base.ConnectorId);

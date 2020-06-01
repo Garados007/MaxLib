@@ -112,8 +112,7 @@ namespace MaxLib.Collections
                     e.Level++;
             }
             entry.Level = perfectLevel;
-            //if (!levelEntrys.ContainsKey(perfectLevel))
-                levelEntrys.Add(perfectLevel, new HashSet<SlotReserverEntry<T>>());
+            levelEntrys.Add(perfectLevel, new HashSet<SlotReserverEntry<T>>());
             levelEntrys[perfectLevel].Add(entry);
         }
 

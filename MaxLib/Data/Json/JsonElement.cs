@@ -44,7 +44,6 @@ namespace MaxLib.Data.Json
         public static string ToLiteral(string input)
         {
             var literal = new StringBuilder(input.Length + 2);
-            //literal.Append("\"");
             foreach (var c in input)
             {
                 switch (c)
@@ -73,7 +72,6 @@ namespace MaxLib.Data.Json
                         break;
                 }
             }
-            //literal.Append("\"");
             return literal.ToString();
         }
         public static string FromLiteral(string input)

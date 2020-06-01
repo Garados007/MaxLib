@@ -83,13 +83,9 @@ namespace MaxLib.Net.Webserver.SSL
 
             void GetFirstByte()
             {
-                //do
-                //{
-                    var b = new byte[1];
-                    BaseStream.Read(b, 0, 1);
-                    firstByte = b[0];
-                //}
-                //while (firstByte < 1);
+                var b = new byte[1];
+                BaseStream.Read(b, 0, 1);
+                firstByte = b[0];
             }
 
             public override int Read(byte[] buffer, int offset, int count)

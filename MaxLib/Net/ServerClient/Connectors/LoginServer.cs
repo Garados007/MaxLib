@@ -45,47 +45,45 @@ namespace MaxLib.Net.ServerClient.Connectors
                     {
                         var ep = new IPEndPoint(IPAddress.Any, 0);
                         var data = udp.Receive(ref ep);
-                        //try
-                        //{
-                            var m = new PrimaryMessage();
-                            m.Load(data);
-                            byte[] b;
-                            if (m.MessageType != PrimaryMessageType.WantToConnect)
-                            {
-                                b = CreateFail(PrimaryMessageType.ConnectFailed_ExpectLogin).Save();
-                                udp.Send(b, b.Length, ep);
-                                continue;
-                            }
-                            var id = m.ClientData.GetLoadSaveAble<CurrentIdentification>();
-                            var cid = Manager.CurrentId;
-                            if (id.StaticIdentification!=cid.StaticIdentification||id.Version!=cid.Version)
-                            {
-                                b = CreateFail(PrimaryMessageType.ConnectFailed_WrongKey).Save();
-                                udp.Send(b, b.Length, ep);
-                                continue;
-                            }
-                            if (Manager.Users.Count>= Manager.Users.MaxCount)
-                            {
-                                b = CreateFail(PrimaryMessageType.ConnectFailed_FullServer).Save();
-                                udp.Send(b, b.Length, ep);
-                                continue;
-                            }
-                            var user = Manager.Users.AddNewUser();
-                            user.GlobalId = id.Id;
-                            Connection con;
-                            int ctr;
-                            if (GetUserConnection!=null)
-                            {
-                                GetUserConnection(user, out con, out ctr);
-                            }
-                            else
-                            {
-                                ctr = Manager.DefaultDataTransport.ConnectorId;
-                                con = Manager.DefaultDataTransport.Connections.GetFree();
-                                Manager.FindConnector(ctr).Connections[con] = true;
-                            }
-                            user.DefaultConnection = con;
-                            user.DefaultConnector = ctr;
+                        var m = new PrimaryMessage();
+                        m.Load(data);
+                        byte[] b;
+                        if (m.MessageType != PrimaryMessageType.WantToConnect)
+                        {
+                            b = CreateFail(PrimaryMessageType.ConnectFailed_ExpectLogin).Save();
+                            udp.Send(b, b.Length, ep);
+                            continue;
+                        }
+                        var id = m.ClientData.GetLoadSaveAble<CurrentIdentification>();
+                        var cid = Manager.CurrentId;
+                        if (id.StaticIdentification!=cid.StaticIdentification||id.Version!=cid.Version)
+                        {
+                            b = CreateFail(PrimaryMessageType.ConnectFailed_WrongKey).Save();
+                            udp.Send(b, b.Length, ep);
+                            continue;
+                        }
+                        if (Manager.Users.Count>= Manager.Users.MaxCount)
+                        {
+                            b = CreateFail(PrimaryMessageType.ConnectFailed_FullServer).Save();
+                            udp.Send(b, b.Length, ep);
+                            continue;
+                        }
+                        var user = Manager.Users.AddNewUser();
+                        user.GlobalId = id.Id;
+                        Connection con;
+                        int ctr;
+                        if (GetUserConnection!=null)
+                        {
+                            GetUserConnection(user, out con, out ctr);
+                        }
+                        else
+                        {
+                            ctr = Manager.DefaultDataTransport.ConnectorId;
+                            con = Manager.DefaultDataTransport.Connections.GetFree();
+                            Manager.FindConnector(ctr).Connections[con] = true;
+                        }
+                        user.DefaultConnection = con;
+                        user.DefaultConnector = ctr;
                         var pm = new PrimaryMessage
                         {
                             MessageType = PrimaryMessageType.ConnectAllowed
@@ -93,13 +91,6 @@ namespace MaxLib.Net.ServerClient.Connectors
                         pm.ClientData.SetSerializeAble(con);
                             b = pm.Save();
                             udp.Send(b, b.Length, ep);
-                        //}
-                        //catch
-                        //{
-                        //    var b = CreateFail(PrimaryMessageType.ConnectFailed).Save();
-                        //    udp.Send(b, b.Length, ep);
-                        //    continue;
-                        //}
                     }
 
                     if (ProgressRun) Thread.Sleep(10);
@@ -152,8 +143,6 @@ namespace MaxLib.Net.ServerClient.Connectors
 
         public LoginState State { get; private set; }
         public int ServerPort { get; set; }
-
-        //public event GetUserConnectionHandler CreateServerUser;
 
         void RunLoop()
         {

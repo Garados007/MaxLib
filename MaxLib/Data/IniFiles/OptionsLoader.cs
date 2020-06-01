@@ -1829,12 +1829,6 @@ namespace MaxLib.Data.IniFiles
                 }
                 else sb.Append(fileString[i]);
             return sb.ToString();
-            //var sb = new StringBuilder(fileString);
-            //sb.Remove(0, 1);
-            //sb.Remove(sb.Length - 1, 1);
-            //if (sb.Length == 0) return "";
-            //for (int i = repl.Length - 2; i >= 0; i -= 2) sb.Replace(repl[i + 1], repl[i]);
-            //return sb.ToString();
         }
 
         const string markers = "=";

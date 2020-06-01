@@ -1009,17 +1009,6 @@ namespace MaxLib.Net.Webserver.Files
 
         public virtual void Show(ContentResult info, WebProgressTask task, SourceProvider source)
         {
-            //AddStartSequence(info, task, source);
-            //if (info.Infos.Length == 0) NoContent(task, source);
-            //else foreach (var c in info.Infos)
-            //    {
-            //        var l = new List<HttpDataSource>();
-            //        foreach (var v in InfoViewer)
-            //            l.AddRange(v.ViewContent(info.CurrentUrl, c, task, source));
-            //        if (l.Count == 0) InsertEmptyContent(c, task, source);
-            //        else WrapAndInsertContent(c, l.ToArray(), task, source);
-            //    }
-            //AddEndSequence(info, task, source);
             var lazy = new LazySource(task, (t) => ShowInternal(info, t, source))
             {
                 MimeType = MimeTypes.TextHtml

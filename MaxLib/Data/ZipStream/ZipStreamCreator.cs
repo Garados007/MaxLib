@@ -162,7 +162,6 @@ namespace MaxLib.Data.ZipStream
                 }
                 var crc32b = crcd.Crc;
                 header.Crc32 = ((uint)crc32b[0] << 24) | ((uint)crc32b[1] << 16) | ((uint)crc32b[2] << 8) | crc32b[3];
-                //header.GeneralPurposeFlag = (ushort)(GeneralPurpose.EncodingIsUtf8);
                 
 
                 var descr = new DataDescriptor
@@ -238,7 +237,6 @@ namespace MaxLib.Data.ZipStream
             ulong offset, SpecialPurpose[] meta)
         {
             data.Position = 0;
-            //byte[] crc32b = CRC.CRC32(data);
             var enc = new UTF8Encoding(false);
             var nameb = enc.GetBytes(name ?? "");
             var commentb = enc.GetBytes(comment ?? "");
@@ -270,9 +268,7 @@ namespace MaxLib.Data.ZipStream
                 LastModFileTime = time,
                 LastModFileDate = date,
                 Crc32 = 0,
-                //CompressedSize = (uint)data.Length,
                 CompressedSize = 0,
-                //UncompressedSize = (uint)data.Length,
                 UncompressedSize = 0,
                 FileNameLength = (ushort)nameb.Length,
                 ExtraFieldLength = (ushort)field.Length,
@@ -280,7 +276,6 @@ namespace MaxLib.Data.ZipStream
                 DiskNumberStart = 0,
                 InternalFileAttributes = (ushort)(InternalAttributes.BinaryFile),
                 ExternalFileAttributes = 0,
-                //RelativeOffsetOfLocalHeader = (uint)offset,
                 RelativeOffsetOfLocalHeader = 0xFFFFFFFF,
                 FileName = nameb,
                 ExtraField = field,
@@ -358,18 +353,7 @@ namespace MaxLib.Data.ZipStream
         public ulong CompressedSize, UncompressedSize;
 
         public override uint Write(Stream output)
-        {
-            using (var w = new BinaryWriter(output, Encoding.Default, true))
-            {
-                return 0;
-                //w.Write(Signature);
-                //w.Write(Crc);
-                //w.Write(CompressedSize);
-                //w.Write(UncompressedSize);
-                //w.Flush();
-                //return 20;
-            }
-        }
+            => 0;
     }
 
     class FileHeader : ZipBlock
@@ -651,8 +635,6 @@ namespace MaxLib.Data.ZipStream
         {
             using (var w = new BinaryWriter(output, Encoding.Default, true))
             {
-                //w.Write((ushort)0x0001);
-                //w.Write((ushort)32);
                 w.Write(UncompressedSize);
                 w.Write(CompressedSize);
                 w.Write(OffsetLocalHeaderRecord);
@@ -1002,7 +984,6 @@ namespace MaxLib.Data.ZipStream
                 if (count > 0)
                 {
                     enabled = true;
-                    //count = Math.Min(count, 5);
                     for (int i = 0; i < count; ++i)
                     {
                         Stream stream;
@@ -1026,20 +1007,7 @@ namespace MaxLib.Data.ZipStream
         }
 
         private void Execute(TaskInfo task)
-        {
-            //lock (lockRunningTaskCounter)
-            //{
-            //    runningTaskCounter++;
-            //}
-            //Task.Run(() =>
-            //{
-            task.Handler(new LazyZipTask(this));
-            //lock (lockRunningTaskCounter)
-            //    {
-            //        runningTaskCounter--;
-            //    }
-            //});
-        }
+            => task.Handler(new LazyZipTask(this));
 
         public void Dispose()
         {

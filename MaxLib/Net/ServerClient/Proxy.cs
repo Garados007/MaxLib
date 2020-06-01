@@ -74,7 +74,7 @@ namespace MaxLib.Net.ServerClient
             {
                 var id = b.GetRange(i, 16).ToArray();
                 var rm = Manager.Users.GetUserFromId(id);
-                //if (rm==null) serv.OwnedUser.Add(AddProxyUser()) //dringend weiterprogrammieren!!!
+                //if (rm==null) serv.OwnedUser.Add(AddProxyUser()) //todo continue development
             }
         }
 

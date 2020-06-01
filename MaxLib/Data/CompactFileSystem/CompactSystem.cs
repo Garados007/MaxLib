@@ -1588,7 +1588,6 @@ namespace MaxLib.Data.CompactFileSystem
                     if (NamePointer != 0)
                     {
                         new CompactBlockStream(System, NamePointer).DestroyAllBlocks();
-                        //System.FreeSpace.AddFreeBlock(NamePointer);
                         NamePointer = 0;
                     }
                     Flag &= ~CompactEntryFlags.ExportName;

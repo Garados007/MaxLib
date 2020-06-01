@@ -156,7 +156,6 @@ namespace MaxLib.Net.Webserver
 
         protected virtual void ClientConnected(TcpClient client)
         {
-            //WebServerInfo.Add(InfoType.Information, GetType(), "Connection", "Connection received on {0}", client.Client.RemoteEndPoint);
             //Session vorbereiten
             var session = CreateRandomSession();
             session.NetworkClient = client;
@@ -642,7 +641,6 @@ namespace MaxLib.Net.Webserver
                     while (!string.IsNullOrWhiteSpace((line = reader.ReadLine())))
                     {
                         if (task.Server.Settings.Debug_WriteRequests) sb.AppendLine(line);
-                        //WebServerInfo.Add(InfoType.Debug, GetType(), "Header", line);
                         var ind = line.IndexOf(':');
                         var key = line.Remove(ind);
                         var value = line.Substring(ind + 1).Trim();
@@ -738,7 +736,6 @@ namespace MaxLib.Net.Webserver
                 }
                 //Session
                 Session.SessionManager.Register(task);
-                //WebServerInfo.Add(InfoType.Debug, GetType(), "Header", "Post-Parsed Header");
             }
 
             public override bool CanWorkWith(WebProgressTask task)
@@ -782,7 +779,6 @@ namespace MaxLib.Net.Webserver
                 {
                     case HttpProtocollMethods.Head: return true;
                     case HttpProtocollMethods.Options: return true;
-                    //case HttpProtocollMethods.Trace: return true;
                     default: return false;
                 }
             }
@@ -915,7 +911,6 @@ namespace MaxLib.Net.Webserver
                 task.Document.ResponseHeader.StatusCode = HttpStateCode.OK;
                 task.Document.DataSources.Add(source);
                 task.Document.PrimaryEncoding = "utf-8";
-                //WebServerInfo.Add(InfoType.Debug, GetType(), "Document", "Loaded Document");
             }
 
             public override bool CanWorkWith(WebProgressTask task)
@@ -1027,7 +1022,6 @@ namespace MaxLib.Net.Webserver
                 if (task.Document.PrimaryEncoding != null)
                     response.HeaderParameter["Content-Type"] += "; charset=" +
                         task.Document.PrimaryEncoding;
-                //WebServerInfo.Add(InfoType.Debug, GetType(), "Response", "Created Response");
             }
 
             public override bool CanWorkWith(WebProgressTask task)
@@ -1118,7 +1112,6 @@ namespace MaxLib.Net.Webserver
 
             public override void ProgressTask(WebProgressTask task)
             {
-                //WebServerInfo.Add(InfoType.Debug, GetType(), "Sender", "Start Send Message");
                 var header = task.Document.ResponseHeader;
                 var stream = task.NetworkStream;
                 var writer = new StreamWriter(stream);
@@ -1163,7 +1156,6 @@ namespace MaxLib.Net.Webserver
                     WebServerInfo.Add(InfoType.Error, GetType(), "Send", "Connection closed by remote host.");
                     return;
                 }
-                //WebServerInfo.Add(InfoType.Debug, GetType(), "Sender", "Finish Send Message");
             }
 
             public override bool CanWorkWith(WebProgressTask task)
@@ -1262,7 +1254,6 @@ namespace MaxLib.Net.Webserver
             if (InformationReceived != null)
             {
                 if (IgnoreSenderEvents.Exists((type) => type.AssemblyQualifiedName == tile.Sender.AssemblyQualifiedName)) return;
-                //new Task(() => InformationReceived(tile)).Start();
                 InformationReceived(tile);
             }
         }
@@ -2666,7 +2657,6 @@ namespace MaxLib.Net.Webserver
             }
             while (readed != (TransferCompleteData ? AproximateLength() :
                 Math.Min(RangeEnd, AproximateLength()) - RangeStart));
-            //WebServerInfo.Add(InfoType.Debug, GetType(), "Send", "Sended {0:#,#0} Bytes", readed);
             return readed;
         }
 
@@ -2758,7 +2748,6 @@ namespace MaxLib.Net.Webserver
             }
             while (readed != (TransferCompleteData ? AproximateLength() :
                 Math.Min(RangeEnd, AproximateLength()) - RangeStart));
-            //WebServerInfo.Add(InfoType.Debug, GetType(), "Send", "Sended {0:#,#0} Bytes", readed);
             return readed;
         }
 
@@ -2864,7 +2853,6 @@ namespace MaxLib.Net.Webserver
         }
         
         protected PriorityList<WebProgressImportance, WebService> Services { get; private set; }
-        //private List<WebService> webServices = new List<WebService>();
         [Obsolete]
         public List<WebService> WebServices
         {

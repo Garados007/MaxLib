@@ -29,29 +29,6 @@ namespace MaxLib.Maths
             return CreateDeterminat(d);
         }
 
-        //public Determinat<T> RemoveRow(int index)
-        //{
-        //    if (index < 0 || index >= Height) throw new ArgumentOutOfRangeException("index");
-        //    var d = new T[Height - 1, Width];
-        //    for (int x = 0; x < Width; ++x)
-        //        for (int y = 0; y < Height; ++y)
-        //            if (y != index)
-        //                d[y < index ? y : y - 1, x] = data[y, x];
-        //    return CreateDeterminat(d);
-        //}
-
-        //public Determinat<T> RemoveCollumn(int index)
-        //{
-        //    if (index < 0 || index >= Width) throw new ArgumentOutOfRangeException("index");
-        //    var d = new T[Height, Width - 1];
-        //    for (int x = 0; x < Width; ++x)
-        //        if (x != index)
-        //            for (int y = 0; y < Height; ++y)
-        //                d[y, x < index ? x : x - 1] = data[y, x];
-        //    return CreateDeterminat(d);
-        //}
-
-
         #region iCloneable
 
         object ICloneable.Clone()
