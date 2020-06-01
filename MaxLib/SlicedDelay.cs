@@ -29,7 +29,7 @@ namespace MaxLib
         public void Wait(int duration)
         {
             var start = Environment.TickCount;
-            var rest = 0;
+            int rest;
             while ((rest = start + duration - Environment.TickCount) > 0)
             {
                 if (IsDisposed) return;

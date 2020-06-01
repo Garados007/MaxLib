@@ -25,7 +25,7 @@ namespace MaxLib.Net.ServerClient
             var user = Manager.Users.AddNewUser();
             user.IsProxy = true;
             user.GlobalId = targetGlobalId;
-            if (RemoteUserAdded != null) RemoteUserAdded(user);
+            RemoteUserAdded?.Invoke(user);
             var serv = Manager.Users.GetUserFromId(serverId);
             if (serv!=null)
             {
@@ -44,8 +44,10 @@ namespace MaxLib.Net.ServerClient
 
         public virtual void FetchUser(User serverUser)
         {
-            var pm = new PrimaryMessage();
-            pm.IgnoreProxy = false;
+            var pm = new PrimaryMessage
+            {
+                IgnoreProxy = false
+            };
             pm.MessageRoot.SetFromUser(serverUser);
             pm.MessageType = PrimaryMessageType.ProxyFetchList;
             Manager.SendMessage(pm);
@@ -93,8 +95,10 @@ namespace MaxLib.Net.ServerClient
                 Manager.ReceiveMessage(message);
                 return;
             }
-            var proxymes = new ProxyMessage();
-            proxymes.Message = message;
+            var proxymes = new ProxyMessage
+            {
+                Message = message
+            };
             var user = Manager.Users.GetUserFromId(message.MessageRoot.RemoteId);
             var serv = Server.Find((server) => server.OwnedUser.Contains(user));
             if (user == null || serv == null)

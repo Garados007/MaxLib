@@ -18,11 +18,7 @@ namespace MaxLib.Net.Webserver
 
     public class WebServer
     {
-        private Dictionary<WebServiceType, WebServiceGroup> webServiceGroups = new Dictionary<WebServiceType, WebServiceGroup>();
-        public Dictionary<WebServiceType, WebServiceGroup> WebServiceGroups
-        {
-            get { return webServiceGroups; }
-        }
+        public Dictionary<WebServiceType, WebServiceGroup> WebServiceGroups { get; } = new Dictionary<WebServiceType, WebServiceGroup>();
 
         public WebServerSettings Settings { get; protected set; }
 
@@ -31,20 +27,8 @@ namespace MaxLib.Net.Webserver
         protected TcpListener Listener;
         protected Thread ServerThread;
         public bool ServerExecution { get; protected set; }
-
-        //Sessions
-
-        private SyncedList<HttpSession> keepAliveSessions = new SyncedList<HttpSession>();
-        public SyncedList<HttpSession> KeepAliveSessions
-        {
-            get { return keepAliveSessions; }
-        }
-
-        private SyncedList<HttpSession> allSessions = new SyncedList<HttpSession>();
-        public SyncedList<HttpSession> AllSessions
-        {
-            get { return allSessions; }
-        }
+        public SyncedList<HttpSession> KeepAliveSessions { get; } = new SyncedList<HttpSession>();
+        public SyncedList<HttpSession> AllSessions { get; } = new SyncedList<HttpSession>();
 
         public WebServer(WebServerSettings settings)
         {
@@ -67,19 +51,19 @@ namespace MaxLib.Net.Webserver
         public virtual void AddWebService(WebService webService)
         {
             if (webService == null) return;
-            webServiceGroups[webService.ServiceType].Add(webService);
+            WebServiceGroups[webService.ServiceType].Add(webService);
         }
 
         public virtual bool ContainsWebService(WebService webService)
         {
             if (webService == null) return false;
-            return webServiceGroups[webService.ServiceType].Contains(webService);
+            return WebServiceGroups[webService.ServiceType].Contains(webService);
         }
 
         public virtual void RemoveWebService(WebService webService)
         {
             if (webService == null) return;
-            webServiceGroups[webService.ServiceType].Remove(webService);
+            WebServiceGroups[webService.ServiceType].Remove(webService);
         }
 
         public virtual void Start()
@@ -88,8 +72,10 @@ namespace MaxLib.Net.Webserver
             ServerExecution = true;
             Listener = new TcpListener(new IPEndPoint(Settings.IPFilter, Settings.Port));
             Listener.Start();
-            ServerThread = new Thread(ServerMainTask);
-            ServerThread.Name = "ServerThread - Port: " + Settings.Port.ToString();
+            ServerThread = new Thread(ServerMainTask)
+            {
+                Name = "ServerThread - Port: " + Settings.Port.ToString()
+            };
             ServerThread.Start();
         }
 
@@ -162,7 +148,7 @@ namespace MaxLib.Net.Webserver
             session.Ip = client.Client.RemoteEndPoint.ToString();
             var ind = session.Ip.IndexOf(':');
             if (ind != -1) session.Ip = session.Ip.Remove(ind);
-            allSessions.Add(session);
+            AllSessions.Add(session);
             //Verbindung abhorchen
             var task = new Task(() => ClientStartListen(session));
             task.Start();
@@ -196,7 +182,7 @@ namespace MaxLib.Net.Webserver
                 }
                 while (true)
                 {
-                    webServiceGroups[task.CurrentTask].Execute(task);
+                    WebServiceGroups[task.CurrentTask].Execute(task);
                     if (task.CurrentTask == WebServiceType.SendResponse) break;
                     task.CurrentTask = task.NextTask;
                     task.NextTask = task.NextTask == WebServiceType.SendResponse ?
@@ -229,7 +215,7 @@ namespace MaxLib.Net.Webserver
             if (task == null) return;
             while (true)
             {
-                webServiceGroups[task.CurrentTask].Execute(task);
+                WebServiceGroups[task.CurrentTask].Execute(task);
                 if (task.CurrentTask == terminationState) break;
                 task.CurrentTask = task.NextTask;
                 task.NextTask = task.NextTask == WebServiceType.SendResponse ?
@@ -240,12 +226,16 @@ namespace MaxLib.Net.Webserver
 
         protected virtual WebProgressTask PrepairProgressTask(HttpSession session)
         {
-            var task = new WebProgressTask();
-            task.CurrentTask = WebServiceType.PreParseRequest;
-            task.Document = new HttpDocument();
-            task.Document.RequestHeader = new HttpRequestHeader();
-            task.Document.ResponseHeader = new HttpResponseHeader();
-            task.Document.Session = session;
+            var task = new WebProgressTask
+            {
+                CurrentTask = WebServiceType.PreParseRequest,
+                Document = new HttpDocument
+                {
+                    RequestHeader = new HttpRequestHeader(),
+                    ResponseHeader = new HttpResponseHeader(),
+                    Session = session
+                }
+            };
             if (session.NetworkStream != null)
                 task.NetworkStream = session.NetworkStream;
             else try { session.NetworkStream = task.NetworkStream = session.NetworkClient.GetStream(); }
@@ -266,13 +256,13 @@ namespace MaxLib.Net.Webserver
                 r.NextBytes(b);
                 s.InternalSessionKey = BitConverter.ToInt64(b, 0);
             }
-            while (allSessions.Exists((ht) => ht != null && ht.InternalSessionKey == s.InternalSessionKey));
+            while (AllSessions.Exists((ht) => ht != null && ht.InternalSessionKey == s.InternalSessionKey));
             do
             {
                 s.PublicSessionKey = new byte[16];
                 r.NextBytes(s.PublicSessionKey);
             }
-            while (allSessions.Exists((ht) => ht != null && WebServerHelper.BytesEqual(ht.PublicSessionKey, s.PublicSessionKey)));
+            while (AllSessions.Exists((ht) => ht != null && WebServerHelper.BytesEqual(ht.PublicSessionKey, s.PublicSessionKey)));
             s.LastWorkTime = -1;
             return s;
         }
@@ -295,11 +285,7 @@ namespace MaxLib.Net.Webserver
         public bool Debug_WriteRequests = false;
         public bool Debug_LogConnections = false;
 
-        private Dictionary<string, string> defaultFileMimeAssociation = new Dictionary<string, string>();
-        public Dictionary<string, string> DefaultFileMimeAssociation
-        {
-            get { return defaultFileMimeAssociation; }
-        }
+        public Dictionary<string, string> DefaultFileMimeAssociation { get; } = new Dictionary<string, string>();
 
         protected enum SettingTypes
         {
@@ -338,8 +324,8 @@ namespace MaxLib.Net.Webserver
             var gr = set["Mime"].Options.GetSearch().FilterKeys(true);
             foreach (var keypair in gr)
             {
-                if (defaultFileMimeAssociation.ContainsKey((keypair as OptionsKey).Name)) { }
-                defaultFileMimeAssociation.Add((keypair as OptionsKey).Name, (keypair as OptionsKey).GetString());
+                if (DefaultFileMimeAssociation.ContainsKey((keypair as OptionsKey).Name)) { }
+                DefaultFileMimeAssociation.Add((keypair as OptionsKey).Name, (keypair as OptionsKey).GetString());
             }
         }
 
@@ -460,7 +446,7 @@ namespace MaxLib.Net.Webserver
 
         public static class SessionManager
         {
-            static List<SessionInformation> Sessions = new List<SessionInformation>();
+            static readonly List<SessionInformation> Sessions = new List<SessionInformation>();
 
             public static void Register(WebProgressTask task)
             {
@@ -504,8 +490,7 @@ namespace MaxLib.Net.Webserver
 
             public static SessionInformation RegisterNewSession(HttpSession session)
             {
-                byte[] bkey;
-                var key = GenerateSessionKey(out bkey);
+                var key = GenerateSessionKey(out byte[] bkey);
                 session.PublicSessionKey = bkey;
                 var si = new SessionInformation(key, bkey, DateTime.Now);
                 Sessions.Add(si);
@@ -565,8 +550,8 @@ namespace MaxLib.Net.Webserver
         /// </summary>
         public class HttpHeaderParser : WebService
         {
-            static object lockHeaderFile = new object();
-            static object lockRequestFile = new object();
+            static readonly object lockHeaderFile = new object();
+            static readonly object lockRequestFile = new object();
 
             /// <summary>
             /// WebServiceType.PreParseRequest: Liest und parst den Header aus dem Netzwerk-Stream und sammelt alle Informationen
@@ -658,7 +643,7 @@ namespace MaxLib.Net.Webserver
                 if (header.ProtocolMethod == HttpProtocollMethods.Post)
                 {
                     var buffer = new char[int.Parse(header.HeaderParameter["Content-Length"])];
-                    var count = reader.ReadBlock(buffer, 0, buffer.Length);
+                    _ = reader.ReadBlock(buffer, 0, buffer.Length);
                     header.Post.SetPost(new string(buffer));
                     if (task.Server.Settings.Debug_WriteRequests) sb.AppendLine(new string(buffer));
                 }
@@ -762,9 +747,11 @@ namespace MaxLib.Net.Webserver
                         break;
                     case HttpProtocollMethods.Options:
                         {
-                            var source = new HttpStringDataSource("GET\r\nPOST\r\nHEAD\r\nOPTIONS\r\nTRACE");
-                            source.MimeType = MimeTypes.TextPlain;
-                            source.TransferCompleteData = true;
+                            var source = new HttpStringDataSource("GET\r\nPOST\r\nHEAD\r\nOPTIONS\r\nTRACE")
+                            {
+                                MimeType = MimeTypes.TextPlain,
+                                TransferCompleteData = true
+                            };
                             task.Document.DataSources.Add(source);
                             task.NextTask = WebServiceType.PreParseRequest;
                         }
@@ -825,7 +812,7 @@ namespace MaxLib.Net.Webserver
                 }
             }
 
-            private List<Rule> rules = new List<Rule>();
+            private readonly List<Rule> rules = new List<Rule>();
             public List<Rule> Rules
             {
                 get { return rules; }
@@ -906,8 +893,10 @@ namespace MaxLib.Net.Webserver
 
             public override void ProgressTask(WebProgressTask task)
             {
-                var source = new HttpStringDataSource(Document);
-                source.MimeType = MimeTypes.TextHtml;
+                var source = new HttpStringDataSource(Document)
+                {
+                    MimeType = MimeTypes.TextHtml
+                };
                 task.Document.ResponseHeader.StatusCode = HttpStateCode.OK;
                 task.Document.DataSources.Add(source);
                 task.Document.PrimaryEncoding = "utf-8";
@@ -965,9 +954,11 @@ namespace MaxLib.Net.Webserver
                 if (task.Document.Information.ContainsKey("HttpDocumentFile"))
                 {
                     var path = task.Document.Information["HttpDocumentFile"].ToString();
-                    var source = new HttpFileDataSource(path);
-                    source.TransferCompleteData = true;
-                    source.MimeType = GetMime(Path.GetExtension(path), task);
+                    var source = new HttpFileDataSource(path)
+                    {
+                        TransferCompleteData = true,
+                        MimeType = GetMime(Path.GetExtension(path), task)
+                    };
                     task.Document.DataSources.Add(source);
                     task.Document.ResponseHeader.StatusCode = HttpStateCode.OK;
                 }
@@ -984,9 +975,11 @@ namespace MaxLib.Net.Webserver
                         html += "<li>FILE: <a href=\"" + url + "/" + WebServerHelper.EncodeUri(fi.Name) + "\">" +
                             fi.Name + "</a> [" + WebServerHelper.GetVolumeString(fi.Length, true, 4) + "]</li>";
                     html += "</ul>Ende der Ausgabe.</body></html>";
-                    var source = new HttpStringDataSource(html);
-                    source.TransferCompleteData = true;
-                    source.MimeType = MimeTypes.TextHtml;
+                    var source = new HttpStringDataSource(html)
+                    {
+                        TransferCompleteData = true,
+                        MimeType = MimeTypes.TextHtml
+                    };
                     task.Document.DataSources.Add(source);
                     task.Document.ResponseHeader.StatusCode = HttpStateCode.OK;
                 }
@@ -1190,10 +1183,7 @@ namespace MaxLib.Net.Webserver
 
         public string Information { get; private set; }
 
-        [NonSerialized]
-        private object additionalData;
-
-        public object AdditionalData => additionalData;
+        public object AdditionalData { get; }
 
         public InfoTile(InfoType type, Type sender, string infoType, string information)
         {
@@ -1206,7 +1196,7 @@ namespace MaxLib.Net.Webserver
         public InfoTile(InfoType type, Type sender, string infoType, object additionlData, string information)
             : this(type, sender, infoType, information)
         {
-            additionalData = additionlData;
+            AdditionalData = additionlData;
         }
 
         public InfoTile(InfoType type, Type sender, string infoType, string mask, params object[] data)
@@ -1232,21 +1222,12 @@ namespace MaxLib.Net.Webserver
 
     public static class WebServerInfo
     {
-        private static List<InfoTile> information = new List<InfoTile>();
-        public static List<InfoTile> Information
-        {
-            get { return WebServerInfo.information; }
-        }
-
-        private static List<Type> ignoreSenderEvents = new List<Type>();
-        public static List<Type> IgnoreSenderEvents
-        {
-            get { return WebServerInfo.ignoreSenderEvents; }
-        }
+        public static List<InfoTile> Information { get; } = new List<InfoTile>();
+        public static List<Type> IgnoreSenderEvents { get; } = new List<Type>();
 
         public static event InformationReceivedHandler InformationReceived;
 
-        static object lockObjekt = new object();
+        static readonly object lockObjekt = new object();
         public static void Add(InfoTile tile)
         {
             tile.Date = DateTime.Now;
@@ -1302,11 +1283,7 @@ namespace MaxLib.Net.Webserver
             }
         }
 
-        private Dictionary<string, string> headerParameter = new Dictionary<string, string>();
-        public Dictionary<string, string> HeaderParameter
-        {
-            get { return headerParameter; }
-        }
+        public Dictionary<string, string> HeaderParameter { get; } = new Dictionary<string, string>();
 
         private string protocolMethod = HttpProtocollMethods.Get;
         public string ProtocolMethod
@@ -1335,11 +1312,7 @@ namespace MaxLib.Net.Webserver
             }
         }
 
-        private HttpLocation location = new HttpLocation("/");
-        public HttpLocation Location
-        {
-            get { return location; }
-        }
+        public HttpLocation Location { get; } = new HttpLocation("/");
 
         private string host = "";
         public string Host
@@ -1347,43 +1320,12 @@ namespace MaxLib.Net.Webserver
             get => host;
             set => host = value ?? throw new ArgumentNullException("Host");
         }
-
-        private HttpPost post = new HttpPost("");
-        public HttpPost Post
-        {
-            get { return post; }
-        }
-
-        private List<string> fieldAccept = new List<string>();
-        public List<string> FieldAccept
-        {
-            get { return fieldAccept; }
-        }
-
-        private List<string> fieldAcceptCharset = new List<string>();
-        public List<string> FieldAcceptCharset
-        {
-            get { return fieldAcceptCharset; }
-        }
-
-        private List<string> fieldAcceptEncoding = new List<string>();
-        public List<string> FieldAcceptEncoding
-        {
-            get { return fieldAcceptEncoding; }
-        }
-
-        private HttpConnectionType fieldConnection = HttpConnectionType.Close;
-        public HttpConnectionType FieldConnection
-        {
-            get => fieldConnection;
-            set => fieldConnection = value;
-        }
-
-        private HttpCookie cookie = new HttpCookie("");
-        public HttpCookie Cookie
-        {
-            get { return cookie; }
-        }
+        public HttpPost Post { get; } = new HttpPost("");
+        public List<string> FieldAccept { get; } = new List<string>();
+        public List<string> FieldAcceptCharset { get; } = new List<string>();
+        public List<string> FieldAcceptEncoding { get; } = new List<string>();
+        public HttpConnectionType FieldConnection { get; set; } = HttpConnectionType.Close;
+        public HttpCookie Cookie { get; } = new HttpCookie("");
 
         public string FieldUserAgent
         {
@@ -2172,33 +2114,19 @@ namespace MaxLib.Net.Webserver
     [Serializable]
     public class HttpDocument : IDisposable
     {
-        private List<HttpDataSource> dataSources = new List<HttpDataSource>();
-        public List<HttpDataSource> DataSources
-        {
-            get { return dataSources; }
-        }
+        public List<HttpDataSource> DataSources { get; } = new List<HttpDataSource>();
 
         public string PrimaryMime
         {
-            get { return dataSources.Count == 0 ? null : dataSources[0].MimeType; }
+            get { return DataSources.Count == 0 ? null : DataSources[0].MimeType; }
         }
 
-        private string primaryEncoding = null;
-        public string PrimaryEncoding
-        {
-            get => primaryEncoding;
-            set => primaryEncoding = value;
-        }
+        public string PrimaryEncoding { get; set; } = null;
 
         public HttpRequestHeader RequestHeader { get; set; }
 
         public HttpResponseHeader ResponseHeader { get; set; }
-
-        private Dictionary<object, object> information = new Dictionary<object, object>();
-        public Dictionary<object, object> Information
-        {
-            get { return information; }
-        }
+        public Dictionary<object, object> Information { get; } = new Dictionary<object, object>();
 
         public object this[object identifer]
         {
@@ -2210,14 +2138,14 @@ namespace MaxLib.Net.Webserver
 
         public void Dispose()
         {
-            foreach (var ds in dataSources.ToArray()) ds.Dispose();
-            dataSources.Clear();
-            foreach (var kvp in information.ToArray())
+            foreach (var ds in DataSources.ToArray()) ds.Dispose();
+            DataSources.Clear();
+            foreach (var kvp in Information.ToArray())
             {
                 if (kvp.Key is IDisposable) ((IDisposable)kvp.Key).Dispose();
                 if (kvp.Value is IDisposable) ((IDisposable)kvp.Value).Dispose();
             }
-            information.Clear();
+            Information.Clear();
         }
     }
 
@@ -2530,7 +2458,7 @@ namespace MaxLib.Net.Webserver
         public override long WriteToStream(System.IO.Stream networkStream)
         {
             var data = Encoder.GetBytes(Data);
-            long length = 0;
+            long length;
             try
             {
                 if (TransferCompleteData) networkStream.Write(data, 0, (int)(length = data.Length));
@@ -2549,7 +2477,7 @@ namespace MaxLib.Net.Webserver
         {
             var l = new List<byte>();
             var buffer = new byte[4 * 1024];
-            long readed = 0;
+            long readed;
             do
             {
                 var length = readlength == 0 ? buffer.Length : readlength - l.Count;
@@ -2597,9 +2525,9 @@ namespace MaxLib.Net.Webserver
                 if (value == null) File = null;
                 else
                 {
-                    var fi = new System.IO.FileInfo(value);
+                    var fi = new FileInfo(value);
                     if (!fi.Directory.Exists) fi.Directory.Create();
-                    File = new System.IO.FileStream(value, System.IO.FileMode.OpenOrCreate,
+                    File = new FileStream(value, FileMode.OpenOrCreate,
                         ReadOnly ? FileAccess.Read : FileAccess.ReadWrite, ReadOnly ? FileShare.Read : FileShare.ReadWrite);
                 }
                 path = value;
@@ -2632,15 +2560,6 @@ namespace MaxLib.Net.Webserver
             long readed = 0;
             do
             {
-                var a1 = AproximateLength() - readed;
-                var a2 = Math.Min(RangeEnd, AproximateLength());
-                var a3 = Math.Min(RangeEnd, AproximateLength()) - RangeStart - readed;
-                var a4 = TransferCompleteData ?
-                    AproximateLength() - readed :
-                    Math.Min(RangeEnd, AproximateLength()) - RangeStart - readed;
-                var a5 = Math.Min(buffer.Length, TransferCompleteData ?
-                    AproximateLength() - readed :
-                    Math.Min(RangeEnd, AproximateLength()) - RangeStart - readed);
                 var length = (int)Math.Min(buffer.Length, TransferCompleteData ?
                     AproximateLength() - readed :
                     Math.Min(RangeEnd, AproximateLength()) - RangeStart - readed);
@@ -2665,7 +2584,7 @@ namespace MaxLib.Net.Webserver
             File.Position = 0;
             var buffer = new byte[4 * 1024];
             long readed = 0;
-            int r = 0;
+            int r;
             do
             {
                 var length = readlength == 0 ? buffer.Length :
@@ -2756,7 +2675,7 @@ namespace MaxLib.Net.Webserver
             Stream.Position = 0;
             var buffer = new byte[4 * 1024];
             long readed = 0;
-            int r = 0;
+            int r;
             do
             {
                 var length = readlength == 0 ? buffer.Length :
