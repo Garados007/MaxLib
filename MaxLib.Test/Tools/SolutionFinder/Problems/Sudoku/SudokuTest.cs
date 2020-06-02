@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using MaxLib.Tools.SolutionFinder.Problems.Sudoku;
+﻿using MaxLib.Tools.SolutionFinder.Problems.Sudoku;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 
