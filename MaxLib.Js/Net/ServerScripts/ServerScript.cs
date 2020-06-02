@@ -10,8 +10,7 @@ namespace MaxLib.Net.ServerScripts
     public class ServerScript
     {
         public static bool IsDebugMode = System.Diagnostics.Debugger.IsAttached;
-
-        Engine js;
+        readonly Engine js;
         public bool NeedJsTag { get; set; }
         public ServerScriptObject ScriptObject { get; protected set; }
         public Encoding Encoding { get; set; }
@@ -39,20 +38,22 @@ namespace MaxLib.Net.ServerScripts
 
         public Stream Parse(Stream source)
         {
-            var p = new parser();
-            p.js = js;
-            p.needJsTag = NeedJsTag;
-            p.sso = ScriptObject;
-            p.source = source;
-            p.encoding = Encoding;
-            p.exportReturn = ExportReturnValue;
-            p.mergeJS = MergeJS;
+            var p = new Parser
+            {
+                js = js,
+                needJsTag = NeedJsTag,
+                sso = ScriptObject,
+                source = source,
+                encoding = Encoding,
+                exportReturn = ExportReturnValue,
+                mergeJS = MergeJS
+            };
             p.Start();
             p.target.Position = 0;
             return p.target;
         }
 
-        class parser
+        class Parser
         {
             public Engine js;
             public bool needJsTag;
@@ -66,10 +67,12 @@ namespace MaxLib.Net.ServerScripts
 
             public void Start()
             {
-                w = new StreamWriter(target = new MemoryStream((int)source.Length));
-                w.AutoFlush = true;
+                w = new StreamWriter(target = new MemoryStream((int)source.Length))
+                {
+                    AutoFlush = true
+                };
                 sso.Write = (text) => { if (text != null) w.Write(text); };
-                readAll();
+                ReadAll();
                 w.Flush();
             }
 
@@ -99,7 +102,7 @@ namespace MaxLib.Net.ServerScripts
                 }
             }
 
-            void readAll()
+            void ReadAll()
             {
                 if (mergeJS)
                 {
@@ -108,7 +111,7 @@ namespace MaxLib.Net.ServerScripts
                     while (source.Position < source.Length)
                     {
                         var isTag = this.isTag;
-                        var text = readRaw();
+                        var text = ReadRaw();
                         if (text == "") continue;
                         if (isTag) r.Append(text);
                         else
@@ -129,7 +132,7 @@ namespace MaxLib.Net.ServerScripts
                     while (source.Position < source.Length)
                     {
                         var isTag = this.isTag;
-                        var text = readRaw();
+                        var text = ReadRaw();
                         if (text == "") continue;
                         if (isTag) Execute(text);
                         else w.Write(text);
@@ -137,7 +140,7 @@ namespace MaxLib.Net.ServerScripts
                 }
             }
 
-            string readRaw()
+            string ReadRaw()
             {
                 var sb = new StringBuilder();
                 if (isTag)
@@ -316,7 +319,7 @@ namespace MaxLib.Net.ServerScripts
                 return Encoding.UTF8.GetString(bytes);
             }
         }
-                
+
         #endregion
 
         #region Kurzschreibweisen
@@ -325,7 +328,9 @@ namespace MaxLib.Net.ServerScripts
         /// Schreibt Text direkt in den Ausgabestrom
         /// </summary>
         /// <param name="text">Auszugebender Text</param>
+#pragma warning disable IDE1006 // Benennungsstile
         public void w(string text)
+#pragma warning restore IDE1006 // Benennungsstile
         {
             Write?.Invoke(text);
         }
@@ -335,7 +340,9 @@ namespace MaxLib.Net.ServerScripts
         /// </summary>
         /// <param name="url">die URL</param>
         /// <returns>Der Inhalt von der URL</returns>
+#pragma warning disable IDE1006 // Benennungsstile
         public string wget(string url)
+#pragma warning restore IDE1006 // Benennungsstile
         {
             return WebGet(url);
         }
@@ -346,7 +353,9 @@ namespace MaxLib.Net.ServerScripts
         /// <param name="url">die URL</param>
         /// <param name="value">Ein JavaScript Objekt mit Werten.</param>
         /// <returns>Die Antwort von der URL</returns>
+#pragma warning disable IDE1006 // Benennungsstile
         public string wpost(string url, Jint.Native.JsValue value)
+#pragma warning restore IDE1006 // Benennungsstile
         {
             return WebPost(url, value);
         }
@@ -359,7 +368,9 @@ namespace MaxLib.Net.ServerScripts
         /// </summary>
         /// <param name="url">Die lokale URL zur Ressource</param>
         /// <returns>Die verarbeitete Antwort</returns>
+#pragma warning disable IDE1006 // Benennungsstile
         public string lget(string url)
+#pragma warning restore IDE1006 // Benennungsstile
         {
             return LocalGet(url);
         }
