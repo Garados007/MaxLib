@@ -20,7 +20,7 @@ If you find some bugs feel free to create an issue for this. I will try my best 
 
 **Content:**
 
-- `MaxLib.Collections`
+- [`MaxLib.Collections`](MaxLib/Collections)
     - `class:ByteTree<T>`: A collection in a tree structure. Each none use a single byte as a key to identify its child. Each node can have to max 256 children. Each node con contain data.
     - `class:EnumeratorBackup<T>`: A thread safe enumerator that will concat 2 other enumerators. 
         > *This may be removed in a future release*
