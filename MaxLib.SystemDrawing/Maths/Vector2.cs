@@ -3,6 +3,7 @@ using System.Drawing;
 
 namespace MaxLib.Maths
 {
+    [Obsolete]
     public struct Vector2 : IEquatable<Vector2Int>
     {
         public float X { get; set; }
