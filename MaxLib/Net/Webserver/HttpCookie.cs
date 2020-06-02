@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Collections.ObjectModel;
 using System.Text;
 
 namespace MaxLib.Net.Webserver
@@ -9,65 +9,45 @@ namespace MaxLib.Net.Webserver
     public class HttpCookie
     {
         [Serializable]
-        public class Cookie
+        public readonly struct Cookie
         {
-            public string Name { get; private set; }
-            public string Value { get; private set; }
-            public DateTime Expires { get; private set; }
-            public int MaxAge { get; private set; }
-            public string Path { get; private set; }
+            public ReadOnlyMemory<char> Name { get; }
+            public ReadOnlyMemory<char> Value { get; }
+            public DateTime Expires { get; }
+            public int MaxAge { get; }
+            public ReadOnlyMemory<char> Path { get; }
 
             public Cookie(string name, string value)
-            {
-                Name = name ?? throw new ArgumentNullException("name");
-                Value = value ?? throw new ArgumentNullException("value");
-                Expires = new DateTime(9999, 12, 31);
-                MaxAge = -1;
-                Path = "";
-            }
+                : this(name, value, new DateTime(9999, 12, 31), -1, "")
+            { }
 
             public Cookie(string name, string value, DateTime expires)
-            {
-                Name = name ?? throw new ArgumentNullException("name");
-                Value = value ?? throw new ArgumentNullException("value");
-                Expires = expires;
-                MaxAge = -1;
-                Path = "";
-            }
+                : this(name, value, expires, -1, "")
+            { }
 
             public Cookie(string name, string value, int maxAge)
-            {
-                Name = name ?? throw new ArgumentNullException("name");
-                Value = value ?? throw new ArgumentNullException("value");
-                Expires = new DateTime(9999, 12, 31);
-                MaxAge = maxAge;
-                Path = "";
-            }
+                : this(name, value, new DateTime(9999, 12, 31), maxAge, "")
+            { }
 
             public Cookie(string name, string value, string path)
-            {
-                Name = name ?? throw new ArgumentNullException("name");
-                Value = value ?? throw new ArgumentNullException("value");
-                Expires = new DateTime(9999, 12, 31);
-                MaxAge = -1;
-                Path = path ?? throw new ArgumentNullException("path");
-            }
+                : this(name, value, new DateTime(9999, 12, 31), -1, path) 
+            { }
 
             public Cookie(string name, string value, DateTime expires, int maxAge, string path)
             {
-                Name = name ?? throw new ArgumentNullException("name");
-                Value = value ?? throw new ArgumentNullException("value");
+                Name = name?.AsMemory() ?? throw new ArgumentNullException(nameof(name));
+                Value = value?.AsMemory() ?? throw new ArgumentNullException(nameof(value));
                 Expires = expires;
                 MaxAge = maxAge;
-                Path = path ?? throw new ArgumentNullException("path");
+                Path = path?.AsMemory() ?? throw new ArgumentNullException(nameof(path));
             }
 
             public override string ToString()
             {
                 var sb = new StringBuilder();
-                sb.Append(WebServerUtils.EncodeUri(Name));
+                sb.Append(WebServerUtils.EncodeUri(Name.ToString()));
                 sb.Append('=');
-                sb.Append(WebServerUtils.EncodeUri(Value));
+                sb.Append(WebServerUtils.EncodeUri(Value.ToString()));
                 if (Expires != new DateTime(9999, 12, 31))
                 {
                     sb.Append(";expires=");
@@ -86,31 +66,32 @@ namespace MaxLib.Net.Webserver
 
         public string CompleteRequestCookie { get; private set; }
 
-        public List<Cookie> AddedCookies { get; private set; }
+        public Dictionary<string, Cookie> AddedCookies { get; }
 
-        public Cookie[] RequestedCookies { get; private set; }
+        public ReadOnlyDictionary<string, Cookie> RequestedCookies { get; private set; }
 
         public HttpCookie(string cookie)
         {
             if (cookie == null) throw new ArgumentNullException("Cookie");
-            AddedCookies = new List<Cookie>();
-            RequestedCookies = new Cookie[0];
+            AddedCookies = new Dictionary<string, Cookie>();
+            RequestedCookies = new ReadOnlyDictionary<string, Cookie>(new Dictionary<string, Cookie>());
             SetRequestCookieString(cookie);
         }
 
-        public Cookie Get(string name)
+        public Cookie? Get(string name)
         {
-            var cookie = AddedCookies.Find((c) => c.Name == name);
-            if (cookie != null) return cookie;
-            return RequestedCookies.ToList().Find((c) => c.Name == name);
+            if (AddedCookies.TryGetValue(name, out Cookie cookie))
+                return cookie;
+            if (RequestedCookies.TryGetValue(name, out Cookie rcookie))
+                return rcookie;
+            return null;
         }
 
         public virtual void SetRequestCookieString(string cookie)
         {
-            CompleteRequestCookie = cookie ?? throw new ArgumentNullException("Cookie");
+            CompleteRequestCookie = cookie ?? throw new ArgumentNullException(nameof(cookie));
             AddedCookies.Clear();
-            var l = new List<Cookie>();
-            var rck = new List<string>();
+            var reqCookie = new Dictionary<string, Cookie>();
             if (CompleteRequestCookie != "")
             {
                 var tiles = CompleteRequestCookie.Split('&', ';');
@@ -120,32 +101,22 @@ namespace MaxLib.Net.Webserver
                     if (ind == -1)
                     {
                         var key = WebServerUtils.DecodeUri(tile.Trim());
-                        if (!rck.Contains(key))
-                        {
-                            rck.Add(key);
-                            l.Add(new Cookie(key, ""));
-                        }
+                        if (!reqCookie.ContainsKey(key))
+                            reqCookie.Add(key, new Cookie(key, ""));
                     }
                     else
                     {
                         var key = WebServerUtils.DecodeUri(tile.Remove(ind).Trim());
                         var value = ind + 1 == tile.Length ? "" : tile.Substring(ind + 1);
-                        if (!rck.Contains(key))
-                        {
-                            rck.Add(key);
-                            l.Add(new Cookie(key, value));
-                        }
+                        if (!reqCookie.ContainsKey(key))
+                            reqCookie.Add(key, new Cookie(key, value));
                     }
                 }
             }
-            RequestedCookies = l.ToArray();
+            RequestedCookies = new ReadOnlyDictionary<string, Cookie>(reqCookie);
         }
 
         public override string ToString()
-        {
-            var sb = new StringBuilder();
-            sb.Append(CompleteRequestCookie);
-            return sb.ToString();
-        }
+            => CompleteRequestCookie;
     }
 }

@@ -16,7 +16,7 @@ namespace MaxLib.Net.Webserver
         public IPAddress IPFilter
         {
             get => ipFilter;
-            set => ipFilter = value ?? throw new ArgumentNullException("IPFilter");
+            set => ipFilter = value ?? throw new ArgumentNullException(nameof(IPFilter));
         }
 
         //Debug
@@ -35,54 +35,64 @@ namespace MaxLib.Net.Webserver
 
         public virtual void LoadSettingFromData(string data)
         {
+            _ = data ?? throw new ArgumentNullException(nameof(data));
             var sf = new OptionsLoader(data);
-            var type = sf["Setting"].Options.GetEnum<SettingTypes>("Type");
-            switch (type)
-            {
-                case SettingTypes.MimeAssociation: Load_Mime(sf); break;
-                case SettingTypes.ServerSettings: Load_Server(sf); break;
-            }
+            if (sf["Mime"] != null)
+                Load_Mime(sf);
+            if (sf["Server"] != null)
+                Load_Server(sf);
         }
 
         public virtual void LoadSetting(string path)
         {
+            _ = path ?? throw new ArgumentNullException(nameof(path));
             SettingsPath = path;
             var sf = new OptionsLoader(path, false);
-            var type = sf["Setting"].Options.GetEnum<SettingTypes>("Type");
-            switch (type)
-            {
-                case SettingTypes.MimeAssociation: Load_Mime(sf); break;
-                case SettingTypes.ServerSettings: Load_Server(sf); break;
-            }
+            if (sf["Mime"] != null)
+                Load_Mime(sf);
+            if (sf["Server"] != null)
+                Load_Server(sf);
         }
 
         protected virtual void Load_Mime(OptionsLoader set)
         {
             DefaultFileMimeAssociation.Clear();
             var gr = set["Mime"].Options.GetSearch().FilterKeys(true);
-            foreach (var keypair in gr)
-            {
-                if (DefaultFileMimeAssociation.ContainsKey((keypair as OptionsKey).Name)) { }
-                DefaultFileMimeAssociation.Add((keypair as OptionsKey).Name, (keypair as OptionsKey).GetString());
-            }
+            foreach (OptionsKey keypair in gr)
+                DefaultFileMimeAssociation[keypair.Name] = keypair.GetString();
         }
 
         protected virtual void Load_Server(OptionsLoader set)
         {
             var server = set["Server"].Options;
             Port = server.GetInt32("Port", 80);
+            if (Port <= 0 || Port >= 0xffff)
+                Port = 80;
             ConnectionTimeout = server.GetInt32("ConnectionTimeout", 2000);
+            if (ConnectionTimeout < 0)
+                ConnectionTimeout = 2000;
         }
 
         public WebServerSettings(string settingFolderPath)
         {
-            foreach (var file in Directory.GetFiles(settingFolderPath))
-                if (file.EndsWith(".ini"))
-                    LoadSetting(file);
+            _ = settingFolderPath ?? throw new ArgumentNullException(nameof(settingFolderPath));
+            if (Directory.Exists(settingFolderPath))
+                foreach (var file in Directory.GetFiles(settingFolderPath))
+                {
+                    if (file.EndsWith(".ini"))
+                        LoadSetting(file);
+                }
+            else if (File.Exists(settingFolderPath))
+                LoadSetting(settingFolderPath);
+            else throw new DirectoryNotFoundException();
         }
 
         public WebServerSettings(int port, int connectionTimeout)
         {
+            if (port <= 0 || port >= 0xffff)
+                throw new ArgumentOutOfRangeException(nameof(port));
+            if (connectionTimeout < 0)
+                throw new ArgumentOutOfRangeException(nameof(connectionTimeout));
             Port = port;
             ConnectionTimeout = connectionTimeout;
         }
