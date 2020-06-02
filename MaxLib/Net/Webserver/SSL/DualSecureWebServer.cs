@@ -3,7 +3,6 @@ using System.IO;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
 
 namespace MaxLib.Net.Webserver.SSL
 {
@@ -120,23 +119,6 @@ namespace MaxLib.Net.Webserver.SSL
             {
                 BaseStream.Write(buffer, offset, count);
             }
-        }
-    }
-
-    public class DualSecureWebServerSettings : WebServerSettings
-    {
-        public X509Certificate Certificate { get; set; }
-
-        public DualSecureWebServerSettings(string settingFolderPath)
-            : base(settingFolderPath)
-        {
-
-        }
-
-        public DualSecureWebServerSettings(int port, int connectionTimeout, X509Certificate certificate)
-            : base(port, connectionTimeout)
-        {
-            Certificate = certificate;
         }
     }
 }

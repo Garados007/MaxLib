@@ -1,10 +1,8 @@
-﻿using MaxLib.Data.IniFiles;
-using System;
+﻿using System;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -96,46 +94,6 @@ namespace MaxLib.Net.Webserver.SSL
 
                 ClientStartListen(session);
             });
-        }
-    }
-
-    public class SecureWebServerSettings : WebServerSettings
-    {
-        public int SecurePort { get; private set; }
-
-        bool enableUnsafePort = true;
-        public bool EnableUnsafePort
-        {
-            get => enableUnsafePort;
-            set => enableUnsafePort = value;
-        }
-
-        public X509Certificate Certificate { get; set; }
-
-        public SecureWebServerSettings(string settingFolderPath)
-            : base(settingFolderPath)
-        {
-        }
-
-        public SecureWebServerSettings(int port, int securePort, int connectionTimeout)
-            : base(port, connectionTimeout)
-        {
-            SecurePort = securePort;
-        }
-
-        public SecureWebServerSettings(int securePort, int connectionTimeout)
-            : base(80, connectionTimeout)
-        {
-            SecurePort = securePort;
-            EnableUnsafePort = false;
-        }
-
-        protected override void Load_Server(OptionsLoader set)
-        {
-            base.Load_Server(set);
-            var server = set["Server"].Options;
-            SecurePort = server.GetInt32("SecurePort", 443);
-            EnableUnsafePort = server.GetBool("EnableUnsafePort", true);
         }
     }
 }
