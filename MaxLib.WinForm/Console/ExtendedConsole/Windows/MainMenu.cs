@@ -15,14 +15,14 @@ namespace MaxLib.Console.ExtendedConsole.Windows
             get { return text; }
             set
             {
-                text = value == null ? "" : value;
-                base.DoChange();
+                text = value ?? "";
+                DoChange();
             }
         }
         public event Action Click;
         internal void OnClick()
         {
-            if (Click != null) Click();
+            Click?.Invoke();
         }
         public List<MainMenu> Submenu { get; private set; }
         public string Key { get; set; }
@@ -74,9 +74,9 @@ namespace MaxLib.Console.ExtendedConsole.Windows
                     if (Submenu[si].Submenu.Count > 0)
                     {
                         Submenu[si].ComputeClientSize();
-                        Submenu[si].X = (X + Width + Submenu[si].Width < Console.Matrix.Width ?
+                        Submenu[si].X = X + Width + Submenu[si].Width < Console.Matrix.Width ?
                             X + Width :
-                            X - Submenu[si].Width < 0 ? 0 : x - Submenu[si].Width);
+                            X - Submenu[si].Width < 0 ? 0 : x - Submenu[si].Width;
                         Submenu[si].Y = Y + si + Submenu[si].Height < Console.Matrix.Height ?
                             Y + si :
                             Console.Matrix.Height - Submenu[si].Height;

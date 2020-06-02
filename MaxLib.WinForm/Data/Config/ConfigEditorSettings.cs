@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -36,7 +32,7 @@ namespace MaxLib.Data.Config
             AddDefaultEditor();
         }
 
-        List<(Func<IConfigValueBase, bool>, Func<ErrorProvider, IConfigValueBase, Control>)> editors 
+        readonly List<(Func<IConfigValueBase, bool>, Func<ErrorProvider, IConfigValueBase, Control>)> editors 
             = new List<(Func<IConfigValueBase, bool>, Func<ErrorProvider, IConfigValueBase, Control>)>();
 
         /// <summary>

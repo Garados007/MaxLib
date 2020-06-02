@@ -5,11 +5,11 @@ namespace MaxLib.Console.ExtendedConsole.Windows.Forms
 {
     public sealed class FormsContainer : ICollection<Form>
     {
-        List<Form> forms = new List<Form>();
+        readonly List<Form> forms = new List<Form>();
         public event Action Change;
         void DoChange()
         {
-            if (Change != null) Change();
+            Change?.Invoke();
         }
 
         public Form FocusedForm { get { return forms.Count > 0 ? forms[0] : null; } }

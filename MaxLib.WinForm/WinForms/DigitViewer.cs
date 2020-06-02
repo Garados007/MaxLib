@@ -22,9 +22,9 @@ namespace MaxLib.WinForms
             set { digit = value; Invalidate(); }
         }
 
-        private DigitConverter converter = new StandartConverter();
+        private IDigitConverter converter = new StandartConverter();
         [DefaultValue(typeof(StandartConverter))]
-        public DigitConverter Converter
+        public IDigitConverter Converter
         {
             get { return converter; }
             set { converter = value ?? throw new ArgumentNullException(); }

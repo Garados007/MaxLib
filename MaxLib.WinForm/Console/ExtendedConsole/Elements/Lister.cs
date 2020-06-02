@@ -38,7 +38,7 @@ namespace MaxLib.Console.ExtendedConsole.Elements
                 {
                     if (key == KeyUp) { SelectedIndex = Math.Max(0, SelectedIndex - 1); Render(); return true; }
                     if (key == KeyDown) { SelectedIndex = Math.Min(Math.Max(Elements.Count - 1, 0), SelectedIndex + 1); Render(); return true; }
-                    if (key == KeyEnter) { if (Cancel != null) Cancel(); Render(); return true; }
+                    if (key == KeyEnter) { Cancel?.Invoke(); Render(); return true; }
                     Render();
                     return false;
                 };
@@ -52,9 +52,9 @@ namespace MaxLib.Console.ExtendedConsole.Elements
             Cursor_Move(cursor);
             if (cursor.X >= Left && cursor.Y >= Top && cursor.X < Left + Width - 2 && cursor.Y <= Top + Height)
             {
-                if (((cursor.Y - Top) + ListOffset) < Elements.Count)
+                if ((cursor.Y - Top + ListOffset) < Elements.Count)
                 {
-                    if (Cancel != null) Cancel();
+                    Cancel?.Invoke();
                     Render();
                 }
             }
@@ -64,7 +64,7 @@ namespace MaxLib.Console.ExtendedConsole.Elements
         {
             if (cursor.X >= Left && cursor.Y >= Top && cursor.X < Left + Width && cursor.Y <= Top + Height)
             {
-                SelectedIndex = Math.Min(Elements.Count - 1, (cursor.Y - Top) + ListOffset);
+                SelectedIndex = Math.Min(Elements.Count - 1, cursor.Y - Top + ListOffset);
                 Render();
             }
         }
@@ -75,13 +75,6 @@ namespace MaxLib.Console.ExtendedConsole.Elements
             writer.Owner.Cursor.Down -= Cursor_Down;
         }
 
-        void Focus()
-        {
-            if (SelectedIndex < Height / 2) ListOffset = 0;
-            else if (SelectedIndex > Elements.Count - Height / 2) ListOffset = Elements.Count - Height;
-            else ListOffset = SelectedIndex - Height / 2;
-        }
-
         void Render()
         {
             writer.BeginWrite();
@@ -89,7 +82,6 @@ namespace MaxLib.Console.ExtendedConsole.Elements
             //Text
             for (int i = 0; i < Elements.Count; ++i) if (i >= ListOffset && i < ListOffset + Height)
                 {
-                    var h = i - ListOffset;
                     var s = Elements[i].ToString();
                     if (s.Length > Width - 2) s = s.Remove(Width - 2);
                     s = s.PadRight(Width - 2, ' ');

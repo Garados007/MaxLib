@@ -16,17 +16,17 @@
         public event CurserChangeEvent Move, Down, Up;
         internal void DoMove()
         {
-            if (Move != null) Move(this);
+            Move?.Invoke(this);
             Owner.MainContainer.OnMouseMove(X, Y);
         }
         internal void DoDown()
         {
-            if (Down != null) Down(this);
+            Down?.Invoke(this);
             Owner.MainContainer.OnMouseDown(X, Y);
         }
         internal void DoUp()
         {
-            if (Up != null) Up(this);
+            Up?.Invoke(this);
             Owner.MainContainer.OnMouseUp(X, Y);
         }
 

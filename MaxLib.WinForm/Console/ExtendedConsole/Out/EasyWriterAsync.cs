@@ -30,7 +30,7 @@ namespace MaxLib.Console.ExtendedConsole.Out
 
         public void Clear()
         {
-            var m = matrix == null ? Owner.Matrix : matrix;
+            var m = matrix ?? Owner.Matrix;
             foreach (var s in m.matrix) foreach (var c in s)
                 {
                     c.Background = Owner.Options.Background;
@@ -41,7 +41,7 @@ namespace MaxLib.Console.ExtendedConsole.Out
 
         public void MakeEmpty()
         {
-            var m = matrix == null ? Owner.Matrix : matrix;
+            var m = matrix ?? Owner.Matrix;
             foreach (var s in m.matrix) foreach (var c in s)
                 {
                     c.Background = Owner.Options.Background;
@@ -63,7 +63,7 @@ namespace MaxLib.Console.ExtendedConsole.Out
         public void Write<T>(T text)
         {
             var s = text.ToString().ToCharArray();
-            var m = matrix == null ? Owner.Matrix : matrix;
+            var m = matrix ?? Owner.Matrix;
             for (int i = 0; i<s.Length; ++i)
             {
                 var c = m[WriterLeft, WriterTop];
@@ -86,7 +86,7 @@ namespace MaxLib.Console.ExtendedConsole.Out
         public void Write<T>(T text, ExtendedConsoleColor Foreground, ExtendedConsoleColor Background)
         {
             var s = text.ToString().ToCharArray();
-            var m = matrix == null ? Owner.Matrix : matrix;
+            var m = matrix ?? Owner.Matrix;
             for (int i = 0; i < s.Length; ++i)
             {
                 var c = m[WriterLeft, WriterTop];

@@ -1,13 +1,13 @@
 ﻿namespace MaxLib.WinForms
 {
-    public interface DigitConverter
+    public interface IDigitConverter
     {
         Digit Convert(char text);
 
         string BuildConvertable(string source);
     }
 
-    public class StandartConverter : DigitConverter
+    public class StandartConverter : IDigitConverter
     {
 
         public Digit Convert(char text)

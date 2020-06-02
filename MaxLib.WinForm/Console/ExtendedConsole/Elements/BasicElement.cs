@@ -19,7 +19,7 @@ namespace MaxLib.Console.ExtendedConsole.Elements
         public event Action Changed;
         protected void DoChange()
         {
-            if (Changed != null) Changed();
+            Changed?.Invoke();
         }
 
         public virtual void Draw(Out.ClipWriterAsync writer)
@@ -35,7 +35,7 @@ namespace MaxLib.Console.ExtendedConsole.Elements
     public class ElementContainer : ICollection<BasicElement>
     {
         #region ICollection
-        List<BasicElement> elements = new List<BasicElement>();
+        readonly List<BasicElement> elements = new List<BasicElement>();
 
         public void Add(BasicElement item)
         {
@@ -100,7 +100,7 @@ namespace MaxLib.Console.ExtendedConsole.Elements
 
         protected void DoClientChange()
         {
-            if (Changed != null) Changed();
+            Changed?.Invoke();
         }
 
         public void DrawElements(Out.ClipWriterAsync writer)
@@ -171,7 +171,7 @@ namespace MaxLib.Console.ExtendedConsole.Elements
             get { return text; }
             set
             {
-                text = value == null ? "" : value;
+                text = value ?? "";
                 Width = Width;
                 DoChange();
             }
@@ -237,7 +237,7 @@ namespace MaxLib.Console.ExtendedConsole.Elements
             writer.Write(doubleBounds ? '║' : '|', bc, bb);
             writer.Write(new string(' ', (Width - 2 - text.Length) / 2), tc, tb);
             writer.Write(text, tc, tb);
-            writer.Write(new string(' ', (Width - 2 - text.Length) - (Width - 2 - text.Length) / 2), tc, tb);
+            writer.Write(new string(' ', Width - 2 - text.Length - (Width - 2 - text.Length) / 2), tc, tb);
             writer.Write(doubleBounds ? '║' : '|', bc, bb);
             writer.SetWriterRelPos(0, 2);
             writer.Write(doubleBounds ? '╚' : '└', bc, bb);

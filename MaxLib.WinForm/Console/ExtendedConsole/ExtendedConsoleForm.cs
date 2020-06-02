@@ -9,7 +9,7 @@ namespace MaxLib.Console.ExtendedConsole
         internal ExtendedConsoleForm()
         {
             InitializeComponent();
-            FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            FormBorderStyle = FormBorderStyle.None;
             Load += ExtendedConsoleForm_Load;
             FormClosing += ExtendedConsoleForm_FormClosing;
             MouseMove += ExtendedConsoleForm_MouseMove;
@@ -83,7 +83,7 @@ namespace MaxLib.Console.ExtendedConsole
         Size LastSize = new Size();
         public new ExtendedConsole Owner { get; internal set; }
 
-        object flushlocker = new object();
+        readonly object flushlocker = new object();
 
         internal void Flush()
         {

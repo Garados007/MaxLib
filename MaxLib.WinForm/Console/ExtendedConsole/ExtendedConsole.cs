@@ -19,7 +19,7 @@ namespace MaxLib.Console.ExtendedConsole
         }
 
         bool writing = false;
-        object locker = new object();
+        readonly object locker = new object();
 
         internal void EndEdit()
         {
@@ -38,10 +38,10 @@ namespace MaxLib.Console.ExtendedConsole
         public event Action Load;
         internal void RunLoad()
         {
-            if (Load != null) Load();
+            Load?.Invoke();
         }
 
-        System.Threading.Thread Viewer;
+        readonly System.Threading.Thread Viewer;
         int screennum = 0;
         public int Screen
         {
@@ -82,8 +82,10 @@ namespace MaxLib.Console.ExtendedConsole
 
             if (Options.RunFormInExtraThread)
             {
-                Viewer = new System.Threading.Thread(StartViewer);
-                Viewer.Name = "Viewer Thread";
+                Viewer = new System.Threading.Thread(StartViewer)
+                {
+                    Name = "Viewer Thread"
+                };
                 Viewer.Start();
                 while (Form == null || !Form.Visible) System.Threading.Thread.Sleep(1);
             }
@@ -91,8 +93,10 @@ namespace MaxLib.Console.ExtendedConsole
 
         void StartViewer()
         {
-            Form = new ExtendedConsoleForm();
-            Form.Owner = this;
+            Form = new ExtendedConsoleForm
+            {
+                Owner = this
+            };
             Screen = 0;
             System.Windows.Forms.Application.Run(Form);
         }
@@ -124,7 +128,7 @@ namespace MaxLib.Console.ExtendedConsole
     {
         internal void CellChanged()
         {
-            if (Changed != null) Changed();
+            Changed?.Invoke();
         }
 
         internal Action Changed = null;
@@ -133,7 +137,7 @@ namespace MaxLib.Console.ExtendedConsole
 
         public ExtendedConsoleCell this[int x, int y]
         {
-            get { return (matrix[x])[y]; }
+            get { return matrix[x][y]; }
         }
 
         public int Width { get; private set; }
@@ -153,7 +157,7 @@ namespace MaxLib.Console.ExtendedConsole
                 while (y.Count > height) y.RemoveAt(y.Count - 1);
             }
             //
-            if (Changed != null) Changed();
+            Changed?.Invoke();
         }
 
         public void ClearData(ExtendedConsoleOptions options)
@@ -164,10 +168,11 @@ namespace MaxLib.Console.ExtendedConsole
                     c.Background = options.Background;
                     c.Foreground = options.Foreground;
                 }
-            if (Changed != null) Changed();
+            Changed?.Invoke();
         }
 
-        ExtendedConsoleDataCatcher row, column;
+        private readonly ExtendedConsoleDataCatcher row;
+        private readonly ExtendedConsoleDataCatcher column;
 
         public ExtendedConsoleDataCatcher Rows { get { return row; } }
         public ExtendedConsoleDataCatcher Columns { get { return column; } }
@@ -187,7 +192,7 @@ namespace MaxLib.Console.ExtendedConsole
 
     public sealed class ExtendedConsoleDataCatcher : IEnumerable<ExtendedConsoleDataStrip>
     {
-        ExtendedConsoleCellMatrix matrix;
+        readonly ExtendedConsoleCellMatrix matrix;
         internal bool Vertical;
 
         public ExtendedConsoleDataStrip this[int index]
@@ -217,8 +222,8 @@ namespace MaxLib.Console.ExtendedConsole
         class Enumerator : IEnumerator<ExtendedConsoleDataStrip>
         {
             int index = 0;
-            bool vertical = false;
-            ExtendedConsoleCellMatrix matrix;
+            readonly bool vertical = false;
+            readonly ExtendedConsoleCellMatrix matrix;
 
             public Enumerator(bool Vertical, ExtendedConsoleCellMatrix matrix)
             {
@@ -371,7 +376,7 @@ namespace MaxLib.Console.ExtendedConsole
                 else
                 {
                     font = value;
-                    if ((Owner != null)) Owner.OptionsChanged();
+                    if (Owner != null) Owner.OptionsChanged();
                 }
             }
         }
@@ -419,7 +424,7 @@ namespace MaxLib.Console.ExtendedConsole
             B = c.B;
         }
 
-        public ExtendedConsoleColor(int c) : this(System.Drawing.Color.FromArgb(c)) { }
+        public ExtendedConsoleColor(int c) : this(Color.FromArgb(c)) { }
 
         public static implicit operator ExtendedConsoleColor(System.Drawing.Color c)
         {
@@ -427,7 +432,7 @@ namespace MaxLib.Console.ExtendedConsole
         }
         public static implicit operator System.Drawing.Color(ExtendedConsoleColor c)
         {
-            return System.Drawing.Color.FromArgb(c.A, c.R, c.G, c.B);
+            return Color.FromArgb(c.A, c.R, c.G, c.B);
         }
 
         public static implicit operator ExtendedConsoleColor(int c)
@@ -488,7 +493,7 @@ namespace MaxLib.Console.ExtendedConsole
                 for (int y = Math.Min(StartY, StopY); y<=Math.Max(StartY, StopY); ++y)
                 {
                     for (int x = Math.Min(StartX, StopX); x <= Math.Max(StartX, StopX); ++x)
-                        s += (Owner.Matrix[x, y].Value < 32 ? ' ' : Owner.Matrix[x, y].Value);
+                        s += Owner.Matrix[x, y].Value < 32 ? ' ' : Owner.Matrix[x, y].Value;
                     if (y < Math.Max(StartY, StopY)) s += '\n';
                 }
                 return s;

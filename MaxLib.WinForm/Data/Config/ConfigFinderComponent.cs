@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MaxLib.Data.Config
@@ -136,8 +133,10 @@ namespace MaxLib.Data.Config
                 item.DropDownItems.Add(new ToolStripSeparator());
             foreach (var name in configs)
             {
-                var node = new ToolStripMenuItem(string.Format(AddConfigTextFormat, name));
-                node.Tag = new Tuple<string[], string>(categories, name);
+                var node = new ToolStripMenuItem(string.Format(AddConfigTextFormat, name))
+                {
+                    Tag = new Tuple<string[], string>(categories, name)
+                };
                 node.Click += (s, e) =>
                 {
                     var sender = (ToolStripMenuItem)s;

@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MaxLib.Data.Config
@@ -81,13 +78,17 @@ namespace MaxLib.Data.Config
             for (int i = 0; i<settings.Length; ++i)
             {
                 var setting = settings[i].ToArray();
-                var group = new GroupBox();
-                group.Text = settings[i].Key;
-                group.Dock = DockStyle.Top;
-                group.AutoSize = true;
-                var table = new TableLayoutPanel();
-                table.Dock = DockStyle.Top;
-                table.ColumnCount = 3;
+                var group = new GroupBox
+                {
+                    Text = settings[i].Key,
+                    Dock = DockStyle.Top,
+                    AutoSize = true
+                };
+                var table = new TableLayoutPanel
+                {
+                    Dock = DockStyle.Top,
+                    ColumnCount = 3
+                };
                 table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
                 table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
                 table.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, Settings.ErrorColumnWidth));

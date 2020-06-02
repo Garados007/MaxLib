@@ -89,12 +89,12 @@ namespace MaxLib.WinForms
             {
                 var d = InvertScroll ? -e.Delta : e.Delta;
                 const float zl = 1.1f, izl = 1 / zl;
-                if (d < 0) doZoom(zl);
-                else if (d > 0) doZoom(izl);
+                if (d < 0) DoZoom(zl);
+                else if (d > 0) DoZoom(izl);
             }
         }
 
-        private void doZoom(float factor)
+        private void DoZoom(float factor)
         {
             //var cp = GroundToScreen(new PointF(CenterPoint.X / Zoom, CenterPoint.Y / Zoom));
             Zoom *= factor;
@@ -123,8 +123,8 @@ namespace MaxLib.WinForms
                 switch (e.KeyCode)
                 {
                     case Keys.D0: Zoom = 1; break;
-                    case Keys.Oemplus: doZoom(1.1f); break;
-                    case Keys.OemMinus: doZoom(1 / 1.1f); break;
+                    case Keys.Oemplus: DoZoom(1.1f); break;
+                    case Keys.OemMinus: DoZoom(1 / 1.1f); break;
                     case Keys.Left: CenterPoint = new PointF(CenterPoint.X + movespeed, CenterPoint.Y); break;
                     case Keys.Right: CenterPoint = new PointF(CenterPoint.X - movespeed, CenterPoint.Y); break;
                     case Keys.Up: CenterPoint = new PointF(CenterPoint.X, CenterPoint.Y + movespeed); break;

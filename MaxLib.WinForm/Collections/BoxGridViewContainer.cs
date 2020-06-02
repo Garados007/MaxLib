@@ -11,7 +11,7 @@ namespace MaxLib.Collections
     {
         #region Collection
 
-        LineGridContainer<BoxGridElement> list = new LineGridContainer<BoxGridElement>();
+        readonly LineGridContainer<BoxGridElement> list = new LineGridContainer<BoxGridElement>();
 
         public IEnumerator<BoxGridElement> GetEnumerator()
         {
@@ -179,7 +179,7 @@ namespace MaxLib.Collections
                     var dist = om.GetSaveDistance(d) + d;
                     if (last != null && dist > d) dist += minDistance;
                     om.Merge(dist);
-                    line.Offset = (offset += dist);
+                    line.Offset = offset += dist;
                 }
                 else
                 {

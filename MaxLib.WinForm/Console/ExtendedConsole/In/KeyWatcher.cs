@@ -44,7 +44,7 @@ namespace MaxLib.Console.ExtendedConsole.In
 
     public sealed class KeyManager
     {
-        List<IKeyResolver> list = new List<IKeyResolver>();
+        readonly List<IKeyResolver> list = new List<IKeyResolver>();
 
         public void Bind(IKeyResolver kr)
         {

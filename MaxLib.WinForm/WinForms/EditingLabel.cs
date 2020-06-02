@@ -77,7 +77,7 @@ namespace MaxLib.WinForms
 
         public EditingLabel()
         {
-            base.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            base.BorderStyle = BorderStyle.None;
             GotFocus += EditingLabel_GotFocus;
             LostFocus += EditingLabel_LostFocus;
             BorderStyleChanged += EditingLabel_BorderStyleChanged;
@@ -89,8 +89,8 @@ namespace MaxLib.WinForms
                  //| ControlStyles.UserPaint
                  , true);
             base.BackColor = Color.Transparent;
-            base.TextChanged += EditingLabel_TextChanged;
-            base.HandleCreated += EditingLabel_HandleCreated;
+            TextChanged += EditingLabel_TextChanged;
+            HandleCreated += EditingLabel_HandleCreated;
         }
 
         void EditingLabel_HandleCreated(object sender, EventArgs e)
@@ -120,7 +120,7 @@ namespace MaxLib.WinForms
             lf = true;
             //Invalidate();
             //if (base.BorderStyle!=System.Windows.Forms.BorderStyle.None)
-            base.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            base.BorderStyle = BorderStyle.None;
             base.BackColor = Color.Transparent;
             if (showBoxWhenEdit && EditEnded != null) EditEnded(this, EventArgs.Empty);
             Text = base.Text;
@@ -135,9 +135,9 @@ namespace MaxLib.WinForms
             if (showBoxWhenEdit)
             {
                 sf = true;
-                base.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+                base.BorderStyle = BorderStyle.Fixed3D;
                 base.BackColor = BufColor;
-                if (EditStart != null) EditStart(this, EventArgs.Empty);
+                EditStart?.Invoke(this, EventArgs.Empty);
             }
             base.Text = Text;
             if (selectAllWhenFocus) SelectAll();

@@ -11,13 +11,13 @@ namespace MaxLib.Console.ExtendedConsole.Windows.Forms
         public event Action<Form> Focus;
         public void DoFocus()
         {
-            if (Focus != null) Focus(this);
+            Focus?.Invoke(this);
         }
 
         public event Action<Form> Close;
         public void DoClose()
         {
-            if (Close != null) Close(this);
+            Close?.Invoke(this);
         }
 
         string text = "";
@@ -26,7 +26,7 @@ namespace MaxLib.Console.ExtendedConsole.Windows.Forms
             get { return text; }
             set
             {
-                text = value == null ? "" : value;
+                text = value ?? "";
                 DoChange();
             }
         }
@@ -37,7 +37,7 @@ namespace MaxLib.Console.ExtendedConsole.Windows.Forms
             get { return baseString; }
             set
             {
-                baseString = value == null ? "" : value;
+                baseString = value ?? "";
                 DoChange();
             }
         }

@@ -33,9 +33,11 @@ namespace MaxLib.Console.ExtendedConsole.Windows
                     MainPart.Width = Console.Matrix.Width;
                     MainPart.Height = Console.Matrix.Height - 2;
                 };
-            
-            var back = new ImageViewer();
-            back.AlternativeColor = ConsoleColor.Green;
+
+            var back = new ImageViewer
+            {
+                AlternativeColor = ConsoleColor.Green
+            };
             Console.MainContainer.Add(MainPart = new MainTargetWindow(back)
                 {
                     X = 0,
