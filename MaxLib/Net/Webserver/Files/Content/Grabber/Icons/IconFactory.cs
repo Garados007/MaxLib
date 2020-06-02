@@ -26,7 +26,7 @@ namespace MaxLib.Net.Webserver.Files.Content.Grabber.Icons
         }
 
         public IconFetcher Fallback(IconInfo.ContentIdType source, IconInfo.ContentIdType target,
-            Func<ContentInfo, String> newContentId)
+            Func<ContentInfo, string> newContentId)
         {
             return IconFetcher.Fallback(source, target, newContentId, true);
         }
@@ -38,7 +38,7 @@ namespace MaxLib.Net.Webserver.Files.Content.Grabber.Icons
         }
 
         public IconFetcher Fallback(IconInfo.ContentIdType source, IconInfo.ContentIdType target,
-            Func<ContentInfo, String> newContentId, bool result)
+            Func<ContentInfo, string> newContentId, bool result)
         {
             return IconFetcher.Fallback(source, target, newContentId, result);
         }
