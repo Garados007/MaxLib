@@ -13,7 +13,7 @@ namespace MaxLib.Net.Webserver
         public string Data
         {
             get => data;
-            set => data = value ?? throw new ArgumentNullException("Data");
+            set => data = value ?? throw new ArgumentNullException(nameof(Data));
         }
 
         private string encoding;
@@ -27,12 +27,15 @@ namespace MaxLib.Net.Webserver
             }
         }
 
+        public override bool CanAcceptData => true;
+
+        public override bool CanProvideData => true;
+
         Encoding Encoder;
 
         public HttpStringDataSource(string data)
         {
-            Data = data ?? throw new ArgumentNullException("data");
-            NeedBufferManagement = false;
+            Data = data ?? throw new ArgumentNullException(nameof(data));
             Encoder = Encoding.UTF8;
             encoding = Encoder.WebName;
             TransferCompleteData = true;
@@ -42,20 +45,17 @@ namespace MaxLib.Net.Webserver
         {
         }
 
-        public override long AproximateLength()
-        {
-            return Encoder.GetByteCount(Data);
-        }
+        public override long? Length()
+            => Encoder.GetByteCount(Data);
 
-        public override long WriteToStream(System.IO.Stream networkStream)
+        public override long WriteToStream(Stream networkStream)
         {
             var data = Encoder.GetBytes(Data);
             long length;
             try
             {
-                if (TransferCompleteData) networkStream.Write(data, 0, (int)(length = data.Length));
-                else networkStream.Write(data, (int)RangeStart,
-                    (int)(length = Math.Min(RangeEnd, data.Length) - RangeStart));
+                networkStream.Write(data, (int)RangeStart,
+                    (int)(length = (RangeEnd ?? data.Length) - RangeStart));
             }
             catch (IOException)
             {
@@ -65,10 +65,10 @@ namespace MaxLib.Net.Webserver
             return length;
         }
 
-        public override long ReadFromStream(System.IO.Stream networkStream, long readlength)
+        public override long ReadFromStream(Stream networkStream, long readlength)
         {
             var l = new List<byte>();
-            var buffer = new byte[4 * 1024];
+            var buffer = new byte[64 * 1024];
             long readed;
             do
             {
@@ -82,7 +82,7 @@ namespace MaxLib.Net.Webserver
             return l.Count;
         }
 
-        public override byte[] GetSourcePart(long start, long length)
+        public override byte[] ReadSourcePart(long start, long length)
         {
             var b = Encoder.GetBytes(Data);
             return b.ToList().GetRange((int)start, (int)Math.Min(length, b.Length - start)).ToArray();
@@ -94,11 +94,6 @@ namespace MaxLib.Net.Webserver
             for (int i = 0; i < length; ++i) b[start + i] = source[i];
             Data = Encoder.GetString(b);
             return source.Length;
-        }
-
-        public override long ReserveExtraMemory(long bytes)
-        {
-            return 0; //Nicht notwendig
         }
     }
 }

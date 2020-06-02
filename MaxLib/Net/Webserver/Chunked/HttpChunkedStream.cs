@@ -9,44 +9,35 @@ namespace MaxLib.Net.Webserver.Chunked
     {
         public HttpChunkedStream(Stream baseStream, int readBufferLength = 0x8000)
         {
-            BaseStream = baseStream ?? throw new ArgumentNullException("baseStream");
+            BaseStream = baseStream ?? throw new ArgumentNullException(nameof(baseStream));
+            if (readBufferLength <= 0) 
+                throw new ArgumentOutOfRangeException(nameof(readBufferLength));
             ReadBufferLength = readBufferLength;
-            if (readBufferLength <= 0) throw new ArgumentOutOfRangeException("readBufferLength");
         }
 
-        public Stream BaseStream { get; private set; }
+        public Stream BaseStream { get; }
 
-        public int ReadBufferLength { get; private set; }
+        public int ReadBufferLength { get; }
 
-        public override long AproximateLength()
-        {
-            throw new NotSupportedException();
-        }
+        public override bool CanAcceptData => false;
+
+        public override bool CanProvideData => true;
+
+        public override long? Length() => null;
 
         public override void Dispose()
         {
             BaseStream.Dispose();
         }
 
-        public override byte[] GetSourcePart(long start, long length)
-        {
-            throw new NotSupportedException();
-        }
+        public override byte[] ReadSourcePart(long start, long length)
+            => throw new NotSupportedException();
 
         public override long ReadFromStream(Stream networkStream, long readlength)
-        {
-            throw new NotSupportedException();
-        }
-
-        public override long ReserveExtraMemory(long bytes)
-        {
-            throw new NotSupportedException();
-        }
+            => throw new NotSupportedException();
 
         public override int WriteSourcePart(byte[] source, long start, long length)
-        {
-            throw new NotSupportedException();
-        }
+            => throw new NotSupportedException();
 
         public override long WriteToStream(Stream networkStream)
         {

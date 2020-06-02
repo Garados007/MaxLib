@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace MaxLib.Net.Webserver
 {
@@ -7,7 +8,7 @@ namespace MaxLib.Net.Webserver
     {
         public abstract void Dispose();
 
-        public abstract long AproximateLength();
+        public abstract long? Length();
 
         private string mimeType = Webserver.MimeType.TextHtml;
         public virtual string MimeType
@@ -16,58 +17,54 @@ namespace MaxLib.Net.Webserver
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                    value = "text/html";
-                mimeType = value;
+                    mimeType = Webserver.MimeType.TextHtml;
+                else mimeType = value;
             }
         }
 
-        public abstract long WriteToStream(System.IO.Stream networkStream);
+        public abstract bool CanAcceptData { get; }
 
-        public abstract long ReadFromStream(System.IO.Stream networkStream, long readlength);
+        public abstract bool CanProvideData { get; }
 
-        public bool NeedBufferManagement { get; protected set; }
+        public abstract long WriteToStream(Stream networkStream);
 
-        public abstract byte[] GetSourcePart(long start, long length);
+        public abstract long ReadFromStream(Stream networkStream, long readlength);
+
+        public abstract byte[] ReadSourcePart(long start, long length);
 
         public abstract int WriteSourcePart(byte[] source, long start, long length);
 
-        public abstract long ReserveExtraMemory(long bytes);
-
-        private long rangeStart;
+        private long rangeStart = 0;
         public virtual long RangeStart
         {
-            get
-            {
-                if (TransferCompleteData) rangeStart = 0;
-                return rangeStart;
-            }
+            get => rangeStart;
             set
             {
-                if (value < 0) throw new ArgumentOutOfRangeException("RangeStart");
+                if (value < 0) throw new ArgumentOutOfRangeException(nameof(RangeStart));
                 if (value > 0) TransferCompleteData = false;
-                else if (rangeEnd == AproximateLength() - 1) TransferCompleteData = true;
+                else if (rangeEnd == null) TransferCompleteData = true;
                 rangeStart = value;
             }
         }
 
-        private long rangeEnd;
-        public virtual long RangeEnd
+        private long? rangeEnd = null;
+        public virtual long? RangeEnd
         {
-            get
-            {
-                if (TransferCompleteData) rangeEnd = AproximateLength() - 1;
-                return rangeEnd;
-            }
+            get => rangeEnd;
             set
             {
-                var length = AproximateLength();
-                if (value != length - 1) TransferCompleteData = false;
-                else if (rangeStart == 0) TransferCompleteData = true;
+                if (Length() == null && value != null)
+                    throw new ArgumentOutOfRangeException(nameof(RangeEnd));
+                if (value != null && value < 0) throw new ArgumentOutOfRangeException(nameof(RangeEnd));
+                if (value != null)
+                    TransferCompleteData = false;
+                else if (rangeStart == 0) 
+                    TransferCompleteData = true;
                 rangeEnd = value;
             }
         }
 
-        private bool transferCompleteData;
+        private bool transferCompleteData = true;
         public virtual bool TransferCompleteData
         {
             get => transferCompleteData;
@@ -76,7 +73,12 @@ namespace MaxLib.Net.Webserver
                 if (transferCompleteData = value)
                 {
                     rangeStart = 0;
-                    rangeEnd = AproximateLength();
+                    rangeEnd = null;
+                }
+                else
+                {
+                    if (rangeEnd == null)
+                        rangeEnd = Length();
                 }
             }
         }

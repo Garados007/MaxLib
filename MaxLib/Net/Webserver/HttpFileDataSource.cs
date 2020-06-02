@@ -6,7 +6,8 @@ namespace MaxLib.Net.Webserver
     [Serializable]
     public class HttpFileDataSource : HttpDataSource
     {
-        public System.IO.FileStream File { get; private set; }
+        public FileStream File { get; private set; }
+
         private string path = null;
         public virtual string Path
         {
@@ -21,13 +22,18 @@ namespace MaxLib.Net.Webserver
                     var fi = new FileInfo(value);
                     if (!fi.Directory.Exists) fi.Directory.Create();
                     File = new FileStream(value, FileMode.OpenOrCreate,
-                        ReadOnly ? FileAccess.Read : FileAccess.ReadWrite, ReadOnly ? FileShare.Read : FileShare.ReadWrite);
+                        ReadOnly ? FileAccess.Read : FileAccess.ReadWrite, 
+                        FileShare.ReadWrite);
                 }
                 path = value;
             }
         }
 
-        public bool ReadOnly { get; private set; }
+        public bool ReadOnly { get; }
+
+        public override bool CanAcceptData => true;
+
+        public override bool CanProvideData => true;
 
         public HttpFileDataSource(string path, bool readOnly = true)
         {
@@ -40,23 +46,23 @@ namespace MaxLib.Net.Webserver
             Path = null;
         }
 
-        public override long AproximateLength()
-        {
-            if (File == null) return 0;
-            else return File.Length;
-        }
+        public override long? Length()
+            => File?.Length;
 
-        public override long WriteToStream(System.IO.Stream networkStream)
+        public override long WriteToStream(Stream networkStream)
         {
             File.Position = TransferCompleteData ? 0 : RangeStart;
-            var buffer = new byte[4 * 1024];
+            var buffer = new byte[64 * 1024];
             long readed = 0;
+            bool hasmore;
+            var end = RangeEnd ?? Length();
             do
             {
-                var length = (int)Math.Min(buffer.Length, TransferCompleteData ?
-                    AproximateLength() - readed :
-                    Math.Min(RangeEnd, AproximateLength()) - RangeStart - readed);
-                readed += File.Read(buffer, 0, length);
+                var length = end == null 
+                    ? buffer.Length 
+                    : (int)Math.Min(buffer.Length, end.Value - RangeStart - readed);
+                var currentRead = File.Read(buffer, 0, length);
+                readed += currentRead;
                 try
                 {
                     networkStream.Write(buffer, 0, length);
@@ -66,16 +72,18 @@ namespace MaxLib.Net.Webserver
                     WebServerLog.Add(ServerLogType.Error, GetType(), "Send", "Connection closed by remote Host");
                     return -1;
                 }
+                hasmore = end == null
+                    ? currentRead > 0
+                    : readed < end.Value - RangeStart;
             }
-            while (readed != (TransferCompleteData ? AproximateLength() :
-                Math.Min(RangeEnd, AproximateLength()) - RangeStart));
+            while (hasmore);
             return readed;
         }
 
-        public override long ReadFromStream(System.IO.Stream networkStream, long readlength)
+        public override long ReadFromStream(Stream networkStream, long readlength)
         {
             File.Position = 0;
-            var buffer = new byte[4 * 1024];
+            var buffer = new byte[64 * 1024];
             long readed = 0;
             int r;
             do
@@ -91,7 +99,7 @@ namespace MaxLib.Net.Webserver
             return readed;
         }
 
-        public override byte[] GetSourcePart(long start, long length)
+        public override byte[] ReadSourcePart(long start, long length)
         {
             var b = new byte[length];
             File.Position = start;
@@ -104,12 +112,6 @@ namespace MaxLib.Net.Webserver
             File.Position = start;
             File.Write(source, 0, (int)length);
             return (int)length;
-        }
-
-        public override long ReserveExtraMemory(long bytes)
-        {
-            File.SetLength(File.Length + bytes);
-            return bytes;
         }
     }
 }

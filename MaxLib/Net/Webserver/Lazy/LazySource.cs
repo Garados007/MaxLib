@@ -10,8 +10,8 @@ namespace MaxLib.Net.Webserver.Lazy
     {
         public LazySource(WebProgressTask task, LazyEventHandler handler)
         {
-            this.task = new LazyTask(task ?? throw new ArgumentNullException("task"));
-            Handler = handler ?? throw new ArgumentNullException("handler");
+            this.task = new LazyTask(task ?? throw new ArgumentNullException(nameof(task)));
+            Handler = handler ?? throw new ArgumentNullException(nameof(handler));
         }
 
         public LazyEventHandler Handler { get; private set; }
@@ -24,10 +24,19 @@ namespace MaxLib.Net.Webserver.Lazy
             return list ?? Handler(task);
         }
 
-        public override long AproximateLength()
+        public override long? Length()
         {
-            if (list == null) list = GetAllSources().ToArray();
-            return list.Sum((s) => s.AproximateLength());
+            if (list == null) 
+                list = GetAllSources().ToArray();
+            long sum = 0;
+            foreach (var entry in list)
+            {
+                var length = entry.Length();
+                if (length == null)
+                    return null;
+                sum += length.Value;
+            }
+            return sum;
         }
 
         public override void Dispose()
@@ -37,33 +46,43 @@ namespace MaxLib.Net.Webserver.Lazy
                     s.Dispose();
         }
 
-        public override byte[] GetSourcePart(long start, long length)
+        public override byte[] ReadSourcePart(long start, long length)
         {
-            if (list == null) list = GetAllSources().ToArray();
+            if (list == null) 
+                list = GetAllSources().ToArray();
             using (var m = new MemoryStream((int)length))
             {
-                for (int i = 0; i < list.Length; ++i)
+                foreach (var entry in list)
                 {
-                    var apl = list[i].AproximateLength();
-                    if (start < apl)
+                    var elength = entry.Length();
+                    if (elength == null)
                     {
-                        var rl = Math.Min(length, apl - start);
-                        var b = list[i].GetSourcePart(start, rl);
-                        length -= rl;
-                        m.Write(b, 0, b.Length);
+                        var block = entry.ReadSourcePart(0, start + length);
+                        if (start < block.Length)
+                        {
+                            var readLength = Math.Min(length, block.Length - start);
+                            m.Write(block, (int)start, (int)readLength);
+                            length -= readLength;
+                        }
+                        start = Math.Max(0, start - block.Length);
                     }
-                    start -= apl;
+                    else
+                    {
+                        if (start < elength.Value)
+                        {
+                            var readLength = Math.Min(length, elength.Value - start);
+                            var block = entry.ReadSourcePart(start, readLength);
+                            length -= readLength;
+                            m.Write(block, 0, block.Length);
+                        }
+                        start = Math.Max(0, start - elength.Value);
+                    }
                 }
                 return m.ToArray();
             }
         }
 
         public override long ReadFromStream(Stream networkStream, long readlength)
-        {
-            return 0;
-        }
-
-        public override long ReserveExtraMemory(long bytes)
         {
             return 0;
         }
@@ -81,27 +100,26 @@ namespace MaxLib.Net.Webserver.Lazy
             return length;
         }
 
-#pragma warning disable CS0809
-        [Obsolete("This is not supported in this class.", true)]
         public override long RangeStart
         {
-            get => base.RangeStart;
-            set => base.RangeStart = value;
+            get => 0;
+            set => throw new NotSupportedException();
         }
 
-        [Obsolete("This is not supported in this class.", true)]
-        public override long RangeEnd
+        public override long? RangeEnd
         {
-            get => base.RangeEnd;
-            set => base.RangeEnd = value;
+            get => null;
+            set => throw new NotSupportedException();
         }
 
-        [Obsolete("This is not supported in this class.", true)]
         public override bool TransferCompleteData
         {
-            get => base.TransferCompleteData;
-            set => base.TransferCompleteData = value;
+            get => true;
+            set => throw new NotSupportedException();
         }
-#pragma warning restore CS0809
+
+        public override bool CanAcceptData => false;
+
+        public override bool CanProvideData => true;
     }
 }

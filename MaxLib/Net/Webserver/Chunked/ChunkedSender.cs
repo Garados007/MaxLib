@@ -95,7 +95,7 @@ namespace MaxLib.Net.Webserver.Chunked
             }
             else
             {
-                var length = source.AproximateLength();
+                var length = source.Length();
                 if (length == 0) return;
                 writer.WriteLine(length.ToString("X"));
                 writer.Flush();

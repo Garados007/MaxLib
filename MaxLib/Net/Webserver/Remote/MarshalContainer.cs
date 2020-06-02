@@ -10,12 +10,18 @@ namespace MaxLib.Net.Webserver.Remote
 
         public void SetOrigin(HttpDataSource origin)
         {
-            Origin = origin ?? throw new ArgumentNullException("origin");
+            Origin = origin ?? throw new ArgumentNullException(nameof(origin));
         }
 
-        public long AproximateLength()
+        public bool CanAcceptData()
+            => Origin?.CanAcceptData ?? false;
+
+        public bool CanProvideData()
+            => Origin?.CanProvideData ?? false;
+
+        public long? Length()
         {
-            return Origin.AproximateLength();
+            return Origin.Length();
         }
 
         public void Dispose()
@@ -25,17 +31,12 @@ namespace MaxLib.Net.Webserver.Remote
 
         public byte[] GetSourcePart(long start, long length)
         {
-            return Origin.GetSourcePart(start, length);
+            return Origin.ReadSourcePart(start, length);
         }
 
         public long ReadFromStream(Stream networkStream, long readlength)
         {
             return Origin.ReadFromStream(networkStream, readlength);
-        }
-
-        public long ReserveExtraMemory(long bytes)
-        {
-            return Origin.ReserveExtraMemory(bytes);
         }
 
         public int WriteSourcePart(byte[] source, long start, long length)
@@ -48,12 +49,12 @@ namespace MaxLib.Net.Webserver.Remote
             return Origin.WriteToStream(networkStream);
         }
 
-        public long RangeEnd()
+        public long? RangeEnd()
         {
             return Origin.RangeEnd;
         }
 
-        public void RangeEnd(long value)
+        public void RangeEnd(long? value)
         {
             Origin.RangeEnd = value;
         }

@@ -311,7 +311,7 @@ namespace MaxLib.Net.ServerScripts
             task.Start(Server);
             if (task.Task.Document.DataSources.Count == 0) return "";
             var ds = task.Task.Document.DataSources[0];
-            using (var m = new MemoryStream((int)ds.AproximateLength()))
+            using (var m = new MemoryStream((int)ds.Length()))
             {
                 ds.WriteToStream(m);
                 m.Position = 0;

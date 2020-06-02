@@ -2260,7 +2260,7 @@ namespace MaxLib.Data.HtmlDom
             var lines = (ScriptCode ?? "").Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < lines.Length; ++i)
             {
-                sb.Append(' ', 2 + 2 * (IndentLevel));
+                sb.Append(' ', 2 + 2 * IndentLevel);
                 sb.AppendLine(lines[i]);
             }
             sb.Append(GetEndTag());
@@ -2286,7 +2286,7 @@ namespace MaxLib.Data.HtmlDom
             var lines = (StyleCode ?? "").Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < lines.Length; ++i)
             {
-                sb.Append(' ', 2 + 2 * (IndentLevel));
+                sb.Append(' ', 2 + 2 * IndentLevel);
                 sb.AppendLine(lines[i]);
             }
             sb.Append(GetEndTag());
@@ -2761,7 +2761,7 @@ namespace MaxLib.Data.HtmlDom
         {
         }
 
-        public override long AproximateLength()
+        public override long Length()
         {
             return HtmlDomParser.DefaultEncoding.GetByteCount(Document.Html);
         }
@@ -2781,7 +2781,7 @@ namespace MaxLib.Data.HtmlDom
             return readlength;
         }
 
-        public override byte[] GetSourcePart(long start, long length)
+        public override byte[] ReadSourcePart(long start, long length)
         {
             var b = HtmlDomParser.DefaultEncoding.GetBytes(Document.Html).ToList();
             return b.GetRange((int)start, (int)length).ToArray();
@@ -2796,11 +2796,6 @@ namespace MaxLib.Data.HtmlDom
                 else b[(int)start + i] = source[i];
             Document.Html = HtmlDomParser.DefaultEncoding.GetString(b.ToArray());
             return i;
-        }
-
-        public override long ReserveExtraMemory(long bytes)
-        {
-            return 0;
         }
     }
 

@@ -22,7 +22,7 @@ namespace MaxLib.Net.Webserver.Services
             response.HeaderParameter["Connection"] = "keep-alive";
             response.HeaderParameter["X-UA-Compatible"] = "IE=Edge";
             response.HeaderParameter["Content-Length"] =
-                task.Document.DataSources.Sum((s) => s.AproximateLength()).ToString();
+                task.Document.DataSources.Sum((s) => s.Length()).ToString();
             if (task.Document.PrimaryEncoding != null)
                 response.HeaderParameter["Content-Type"] += "; charset=" +
                     task.Document.PrimaryEncoding;

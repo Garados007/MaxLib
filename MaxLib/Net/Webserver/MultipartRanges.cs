@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace MaxLib.Net.Webserver
@@ -20,10 +19,14 @@ namespace MaxLib.Net.Webserver
             get => joinGap;
             set
             {
-                if (value < 0) throw new ArgumentOutOfRangeException("JoinGap");
+                if (value < 0) throw new ArgumentOutOfRangeException(nameof(JoinGap));
                 joinGap = value;
             }
         }
+
+        public override bool CanAcceptData => false;
+
+        public override bool CanProvideData => true;
 
         [Serializable]
         struct Range
@@ -51,8 +54,8 @@ namespace MaxLib.Net.Webserver
 
         public MultipartRanges(Stream stream, HttpDocument document, string mime)
         {
-            this.document = document ?? throw new ArgumentNullException("document");
-            baseStream = stream ?? throw new ArgumentNullException("stream");
+            this.document = document ?? throw new ArgumentNullException(nameof(document));
+            baseStream = stream ?? throw new ArgumentNullException(nameof(stream));
             this.mime = MimeType = mime;
 
             document.ResponseHeader.HeaderParameter["Accept-Ranges"] = "bytes";
@@ -186,9 +189,17 @@ namespace MaxLib.Net.Webserver
             });
         }
 
-        public override long AproximateLength()
+        public override long? Length()
         {
-            return streams.Sum((s) => s.AproximateLength());
+            long sum = 0;
+            foreach (var stream in streams)
+            {
+                var length = stream.Length();
+                if (length == null)
+                    return null;
+                sum += length.Value;
+            }
+            return sum;
         }
 
         public override void Dispose()
@@ -197,34 +208,48 @@ namespace MaxLib.Net.Webserver
             foreach (var s in streams) s.Dispose();
         }
 
-        public override byte[] GetSourcePart(long start, long length)
+        public override byte[] ReadSourcePart(long start, long length)
         {
             var buffer = new byte[length];
             long offset = 0;
             for (int i = 0; i<streams.Count && length > 0; ++i)
             {
-                var al = streams[i].AproximateLength();
-                if (al < start)
+                var streamLength = streams[i].Length();
+                if (streamLength != null)
                 {
-                    start -= al;
-                    continue;
+                    if (streamLength.Value < start)
+                    {
+                        start -= streamLength.Value;
+                        continue;
+                    }
+                    var fl = Math.Min(length, streamLength.Value);
+                    var fb = streams[i].ReadSourcePart(start, fl);
+                    length -= fl;
+                    start = 0;
+                    Array.Copy(fb, 0, buffer, offset, fl);
+                    offset += fl;
                 }
-                var fl = Math.Min(length, al);
-                var fb = streams[i].GetSourcePart(start, fl);
-                length -= fl;
-                start = 0;
-                Array.Copy(fb, 0, buffer, offset, fl);
-                offset += fl;
+                else
+                {
+                    var block = streams[i].ReadSourcePart(0, start + length);
+                    if (block.Length < start)
+                    {
+                        start -= block.Length;
+                    }
+                    else
+                    {
+                        var readLength = Math.Min(length, block.Length - start);
+                        Array.Copy(block, start, block, offset, readLength);
+                        length -= readLength;
+                        start = 0;
+                        offset += readLength;
+                    }
+                }
             }
             return buffer;
         }
 
         public override long ReadFromStream(Stream networkStream, long readlength)
-        {
-            return 0;
-        }
-
-        public override long ReserveExtraMemory(long bytes)
         {
             return 0;
         }

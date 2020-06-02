@@ -16,9 +16,9 @@ namespace MaxLib.Net.Webserver.Remote
             Container.SetOrigin(source ?? throw new ArgumentNullException("source"));
         }
 
-        public override long AproximateLength()
+        public override long? Length()
         {
-            return Container.AproximateLength();
+            return Container.Length();
         }
 
         public override void Dispose()
@@ -26,7 +26,7 @@ namespace MaxLib.Net.Webserver.Remote
             Container.Dispose();
         }
 
-        public override byte[] GetSourcePart(long start, long length)
+        public override byte[] ReadSourcePart(long start, long length)
         {
             return Container.GetSourcePart(start, length);
         }
@@ -34,11 +34,6 @@ namespace MaxLib.Net.Webserver.Remote
         public override long ReadFromStream(Stream networkStream, long readlength)
         {
             return Container.ReadFromStream(networkStream, readlength);
-        }
-
-        public override long ReserveExtraMemory(long bytes)
-        {
-            return Container.ReserveExtraMemory(bytes);
         }
 
         public override int WriteSourcePart(byte[] source, long start, long length)
@@ -51,7 +46,7 @@ namespace MaxLib.Net.Webserver.Remote
             return Container.WriteToStream(networkStream);
         }
 
-        public override long RangeEnd
+        public override long? RangeEnd
         {
             get => Container.RangeEnd();
             set => Container.RangeEnd(value);
@@ -74,6 +69,10 @@ namespace MaxLib.Net.Webserver.Remote
             get => Container.MimeType();
             set => Container.MimeType(value);
         }
+
+        public override bool CanAcceptData => Container.CanAcceptData();
+
+        public override bool CanProvideData => Container.CanProvideData();
 
         public Collections.MarshalEnumerable<HttpDataSource> GetAllSources()
         {
