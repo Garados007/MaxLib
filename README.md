@@ -16,6 +16,7 @@ If you find some bugs feel free to create an issue for this. I will try my best 
 |-|-|
 | Framework | .NET Standard 2.0 |
 | Dependencies | none |
+| Systems | Windows, Linux |
 
 **Content:**
 
@@ -102,6 +103,7 @@ If you find some bugs feel free to create an issue for this. I will try my best 
 |-|-|
 | Framework | .NET Standard 2.0 |
 | Dependencies | MaxLib, Jint |
+| Systems | Windows, Linux? |
 
 **Content:**
 
@@ -114,6 +116,7 @@ If you find some bugs feel free to create an issue for this. I will try my best 
 |-|-|
 | Framework | .NET Standard 2.0 |
 | Dependencies | MaxLib, System.Data.SQLite |
+| Systems | Windows, Linux? |
 
 **Content:**
 
@@ -130,6 +133,7 @@ If you find some bugs feel free to create an issue for this. I will try my best 
 |-|-|
 | Framework | .NET Standard 2.0 |
 | Dependencies | MaxLib, System.Drawing.Common |
+| Systems | Windows, Linux? |
 
 - `MaxLib.Collections`
     - `class:LineGridContainer<T>`: add support for the MaxLib.WinForms library. This will position elements in a grid
@@ -146,6 +150,7 @@ If you find some bugs feel free to create an issue for this. I will try my best 
 |-|-|
 | Framework | .NET Framework 4.8 |
 | Dependencies | MaxLib, MaxLib.SystemDrawing, System.Windows.Forms |
+| Systems | Windows, Mono |
 
 - `MaxLib.Collection`
     - `class:BoxGridViewContainer`: allows you to render elements in a grid style
