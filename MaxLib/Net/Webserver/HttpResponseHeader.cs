@@ -33,7 +33,7 @@ namespace MaxLib.Net.Webserver
 
         public virtual void SetActualDate()
         {
-            FieldDate = WebServerHelper.GetDateString(DateTime.UtcNow);
+            FieldDate = WebServerUtils.GetDateString(DateTime.UtcNow);
         }
     }
 }

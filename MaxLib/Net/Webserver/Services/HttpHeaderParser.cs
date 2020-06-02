@@ -31,7 +31,7 @@ namespace MaxLib.Net.Webserver.Services
             if (task.Server.Settings.Debug_WriteRequests)
             {
                 sb.AppendLine(new string('=', 100));
-                var date = WebServerHelper.GetDateString(DateTime.Now);
+                var date = WebServerUtils.GetDateString(DateTime.Now);
                 sb.AppendLine("=   " + date + new string(' ', 95 - date.Length) + "=");
                 sb.AppendLine(new string('=', 100));
                 sb.AppendLine();
@@ -116,7 +116,7 @@ namespace MaxLib.Net.Webserver.Services
             if (task.Server.Settings.Debug_LogConnections)
             {
                 sb = new StringBuilder();
-                sb.AppendLine(WebServerHelper.GetDateString(DateTime.Now) + "  " +
+                sb.AppendLine(WebServerUtils.GetDateString(DateTime.Now) + "  " +
                     task.Session.NetworkClient.Client.RemoteEndPoint.ToString());
                 var host = header.HeaderParameter.ContainsKey("Host") ? header.HeaderParameter["Host"] : "";
                 sb.AppendLine("    " + host + task.Document.RequestHeader.Location.DocumentPath);

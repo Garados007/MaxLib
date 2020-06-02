@@ -256,7 +256,7 @@ namespace MaxLib.Net.Webserver
                 s.PublicSessionKey = new byte[16];
                 r.NextBytes(s.PublicSessionKey);
             }
-            while (AllSessions.Exists((ht) => ht != null && WebServerHelper.BytesEqual(ht.PublicSessionKey, s.PublicSessionKey)));
+            while (AllSessions.Exists((ht) => ht != null && WebServerUtils.BytesEqual(ht.PublicSessionKey, s.PublicSessionKey)));
             s.LastWorkTime = -1;
             return s;
         }

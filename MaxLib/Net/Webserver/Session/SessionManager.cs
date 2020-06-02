@@ -63,7 +63,7 @@ namespace MaxLib.Net.Webserver.Session
 
         public static SessionInformation Get(byte[] binkey)
         {
-            return Sessions.Find((si) => WebServerHelper.BytesEqual(si.ByteKey, binkey));
+            return Sessions.Find((si) => WebServerUtils.BytesEqual(si.ByteKey, binkey));
         }
 
         public static void DeleteSession(string hexkey)

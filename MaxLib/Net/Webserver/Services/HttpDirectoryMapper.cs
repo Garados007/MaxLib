@@ -65,10 +65,10 @@ namespace MaxLib.Net.Webserver.Services
                 var html = "<html lang=\"de\"><head><title>" + d.Name + "</title></head><body>";
                 html += "<h1>" + path + "</h1><a href=\"../\">Eine Ebene h&ouml;her</a><ul>";
                 foreach (var di in d.GetDirectories())
-                    html += "<li>DIRECTORY: <a href=\"" + url + "/" + WebServerHelper.EncodeUri(di.Name) + "\">" + di.Name + "</a></li>";
+                    html += "<li>DIRECTORY: <a href=\"" + url + "/" + WebServerUtils.EncodeUri(di.Name) + "\">" + di.Name + "</a></li>";
                 foreach (var fi in d.GetFiles())
-                    html += "<li>FILE: <a href=\"" + url + "/" + WebServerHelper.EncodeUri(fi.Name) + "\">" +
-                        fi.Name + "</a> [" + WebServerHelper.GetVolumeString(fi.Length, true, 4) + "]</li>";
+                    html += "<li>FILE: <a href=\"" + url + "/" + WebServerUtils.EncodeUri(fi.Name) + "\">" +
+                        fi.Name + "</a> [" + WebServerUtils.GetVolumeString(fi.Length, true, 4) + "]</li>";
                 html += "</ul>Ende der Ausgabe.</body></html>";
                 var source = new HttpStringDataSource(html)
                 {

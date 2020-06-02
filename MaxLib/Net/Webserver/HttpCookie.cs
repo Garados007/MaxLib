@@ -65,13 +65,13 @@ namespace MaxLib.Net.Webserver
             public override string ToString()
             {
                 var sb = new StringBuilder();
-                sb.Append(WebServerHelper.EncodeUri(Name));
+                sb.Append(WebServerUtils.EncodeUri(Name));
                 sb.Append('=');
-                sb.Append(WebServerHelper.EncodeUri(Value));
+                sb.Append(WebServerUtils.EncodeUri(Value));
                 if (Expires != new DateTime(9999, 12, 31))
                 {
                     sb.Append(";expires=");
-                    sb.Append(WebServerHelper.GetDateString(Expires));
+                    sb.Append(WebServerUtils.GetDateString(Expires));
                 }
                 if (MaxAge != -1)
                 {
@@ -119,7 +119,7 @@ namespace MaxLib.Net.Webserver
                     var ind = tile.IndexOf('=');
                     if (ind == -1)
                     {
-                        var key = WebServerHelper.DecodeUri(tile.Trim());
+                        var key = WebServerUtils.DecodeUri(tile.Trim());
                         if (!rck.Contains(key))
                         {
                             rck.Add(key);
@@ -128,7 +128,7 @@ namespace MaxLib.Net.Webserver
                     }
                     else
                     {
-                        var key = WebServerHelper.DecodeUri(tile.Remove(ind).Trim());
+                        var key = WebServerUtils.DecodeUri(tile.Remove(ind).Trim());
                         var value = ind + 1 == tile.Length ? "" : tile.Substring(ind + 1);
                         if (!rck.Contains(key))
                         {

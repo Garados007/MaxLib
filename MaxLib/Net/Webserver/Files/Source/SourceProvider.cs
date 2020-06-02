@@ -34,7 +34,7 @@ namespace MaxLib.Net.Webserver.Files.Source
         public SourceProvider(string[] pathRoot) : base(pathRoot)
         {
             DefaultIconSize = 64;
-            prefix = "/" + string.Join("/", pathRoot.Select((s) => WebServerHelper.EncodeUri(s)).ToArray());
+            prefix = "/" + string.Join("/", pathRoot.Select((s) => WebServerUtils.EncodeUri(s)).ToArray());
         }
 
         public sealed override bool CanWorkWith(WebProgressTask task)
@@ -87,7 +87,7 @@ namespace MaxLib.Net.Webserver.Files.Source
         protected string GetPath(string[] path)
         {
             return prefix + "/" +
-                string.Join("/", path.Select((s) => WebServerHelper.EncodeUri(s)).ToArray());
+                string.Join("/", path.Select((s) => WebServerUtils.EncodeUri(s)).ToArray());
         }
 
         protected abstract bool GetRessource(string id, WebProgressTask task);

@@ -22,14 +22,14 @@ namespace MaxLib.Net.Webserver
                     var ind = tile.IndexOf('=');
                     if (ind == -1)
                     {
-                        var t = WebServerHelper.DecodeUri(tile);
+                        var t = WebServerUtils.DecodeUri(tile);
                         if (!PostParameter.ContainsKey(t)) PostParameter.Add(t, "");
                     }
                     else
                     {
-                        var key = WebServerHelper.DecodeUri(tile.Remove(ind));
+                        var key = WebServerUtils.DecodeUri(tile.Remove(ind));
                         var value = ind + 1 == tile.Length ? "" : tile.Substring(ind + 1);
-                        if (!PostParameter.ContainsKey(key)) PostParameter.Add(key, WebServerHelper.DecodeUri(value));
+                        if (!PostParameter.ContainsKey(key)) PostParameter.Add(key, WebServerUtils.DecodeUri(value));
                     }
                 }
             }

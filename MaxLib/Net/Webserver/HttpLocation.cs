@@ -32,7 +32,7 @@ namespace MaxLib.Net.Webserver
             }
             var path = DocumentPath.Trim('/');
             DocumentPathTiles = path.Split('/');
-            for (int i = 0; i < DocumentPathTiles.Length; ++i) DocumentPathTiles[i] = WebServerHelper.DecodeUri(DocumentPathTiles[i]);
+            for (int i = 0; i < DocumentPathTiles.Length; ++i) DocumentPathTiles[i] = WebServerUtils.DecodeUri(DocumentPathTiles[i]);
             GetParameter.Clear();
             if (CompleteGet != "")
             {
@@ -42,14 +42,14 @@ namespace MaxLib.Net.Webserver
                     ind = tile.IndexOf('=');
                     if (ind == -1)
                     {
-                        var key = WebServerHelper.DecodeUri(tile);
+                        var key = WebServerUtils.DecodeUri(tile);
                         if (!GetParameter.ContainsKey(key)) GetParameter.Add(key, "");
                     }
                     else
                     {
-                        var key = WebServerHelper.DecodeUri(tile.Remove(ind));
+                        var key = WebServerUtils.DecodeUri(tile.Remove(ind));
                         var value = ind + 1 == tile.Length ? "" : tile.Substring(ind + 1);
-                        if (!GetParameter.ContainsKey(key)) GetParameter.Add(key, WebServerHelper.DecodeUri(value));
+                        if (!GetParameter.ContainsKey(key)) GetParameter.Add(key, WebServerUtils.DecodeUri(value));
                     }
                 }
             }

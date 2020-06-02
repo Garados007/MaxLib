@@ -94,7 +94,7 @@ namespace MaxLib.Net.Webserver.Files.Content.Viewer
                         case ContentType.File:
                             yield return Stringer("<a href=\"", source.NotifyRessource((info as FileInfo).LocalPath),
                                 "\">", info.Name, "</a> <b>[",
-                                WebServerHelper.GetVolumeString((info as FileInfo).Length, true, 3),
+                                WebServerUtils.GetVolumeString((info as FileInfo).Length, true, 3),
                                 "]</b>");
                             break;
                         case ContentType.Directory:
@@ -105,7 +105,7 @@ namespace MaxLib.Net.Webserver.Files.Content.Viewer
                                 foreach (var e in (info as DirectoryInfo).Contents)
                                 {
                                     yield return Stringer("<li>");
-                                    var p = path + "/" + WebServerHelper.EncodeUri(e.Name);
+                                    var p = path + "/" + WebServerUtils.EncodeUri(e.Name);
                                     foreach (var c in ViewContent(p, e, task, source))
                                         yield return c;
                                     yield return Stringer("</li>");
@@ -159,7 +159,7 @@ namespace MaxLib.Net.Webserver.Files.Content.Viewer
                         sb.Append("/");
                         yield return Stringer("<span class=\"split\">/</span>");
                     }
-                    sb.Append(WebServerHelper.EncodeUri(info.CurrentDir[i]));
+                    sb.Append(WebServerUtils.EncodeUri(info.CurrentDir[i]));
                     yield return Stringer("<a href=\"", sb, "\">", info.CurrentDir[i], "</a>");
                 }
                 yield return Stringer("</div></div>", "<div class=\"content-area\">");
@@ -218,7 +218,7 @@ namespace MaxLib.Net.Webserver.Files.Content.Viewer
                     {
                         case ContentType.Directory:
                             foreach (var c in (info as DirectoryInfo).Contents)
-                                foreach (var e in ShowContent(path + "/" + WebServerHelper.EncodeUri(c.Name), c, source))
+                                foreach (var e in ShowContent(path + "/" + WebServerUtils.EncodeUri(c.Name), c, source))
                                     yield return e;
                             break;
                         case ContentType.File:
@@ -257,7 +257,7 @@ namespace MaxLib.Net.Webserver.Files.Content.Viewer
                                 info.Created.ToString("s"), "\" data-modified=\"",
                                 info.Modified.ToString("s"), "\" data-access=\"",
                                 info.Access.ToString("s"), "\" data-length=\"", file.Length,
-                                "\" data-length-text=\"", WebServerHelper.GetVolumeString(file.Length, true, 3),
+                                "\" data-length-text=\"", WebServerUtils.GetVolumeString(file.Length, true, 3),
                                 "\" data-mime=\"", file.MimeType, "\" data-extension=\"", file.Extension,
                                 "\" href=\"", source.NotifyRessource((info as FileInfo).LocalPath),
                                 "\" title=\"", info.Name,

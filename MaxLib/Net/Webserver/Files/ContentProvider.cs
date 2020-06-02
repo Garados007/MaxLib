@@ -58,13 +58,13 @@ namespace MaxLib.Net.Webserver.Files
             {
                 CurrentDir = rp,
                 CurrentUrl = "/" + 
-                    string.Join("/", tp.Select((p) => WebServerHelper.EncodeUri(p)).ToArray()),
+                    string.Join("/", tp.Select((p) => WebServerUtils.EncodeUri(p)).ToArray()),
                 DirRoot = "/" + string.Join("/",
-                    PathRoot.Select((p) => WebServerHelper.EncodeUri(p)).ToArray()) + "/",
+                    PathRoot.Select((p) => WebServerUtils.EncodeUri(p)).ToArray()) + "/",
                 FirstRessourceName = content.Length > 0 ? content[0].Name : null,
                 Infos = content,
                 ParentUrl = "/" + 
-                    string.Join("/", tp.Select((p) => WebServerHelper.EncodeUri(p)).ToArray(),
+                    string.Join("/", tp.Select((p) => WebServerUtils.EncodeUri(p)).ToArray(),
                         0, rp.Length > 0 ? tp.Length - 1 : tp.Length),
                 UrlName = rp.Length == 0 ? "" : rp[rp.Length - 1]
             };
