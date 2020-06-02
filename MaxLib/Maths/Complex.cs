@@ -2,6 +2,7 @@
 
 namespace MaxLib.Maths
 {
+    [Obsolete]
     public class Complex
     {
         #region Instanz

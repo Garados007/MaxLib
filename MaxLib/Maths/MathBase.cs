@@ -1,5 +1,8 @@
-﻿namespace MaxLib.Maths
+﻿using System;
+
+namespace MaxLib.Maths
 {
+    [Obsolete]
     public abstract class MathBase<T>
     {
         protected abstract T One { get; }

@@ -2,6 +2,7 @@
 
 namespace MaxLib.Maths
 {
+    [Obsolete]
     public abstract class Determinat<T> : MatrixBase<T>, ICloneable
     {
         public Determinat(int size)

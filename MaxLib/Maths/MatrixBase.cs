@@ -3,6 +3,7 @@ using System.Text;
 
 namespace MaxLib.Maths
 {
+    [Obsolete]
     public abstract class MatrixBase<T> : MathBase<T>
     {
         #region Variablen

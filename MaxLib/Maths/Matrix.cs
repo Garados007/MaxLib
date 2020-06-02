@@ -2,6 +2,7 @@
 
 namespace MaxLib.Maths
 {
+    [Obsolete]
     public abstract class Matrix<T> : MatrixBase<T>, ICloneable
     {
         #region Konstruktoren

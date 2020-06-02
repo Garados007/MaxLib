@@ -1,5 +1,8 @@
-﻿namespace MaxLib.Maths
+﻿using System;
+
+namespace MaxLib.Maths
 {
+    [Obsolete]
     public class DoubleMatrix : Matrix<double>
     {
         public DoubleMatrix(int width, int height)
@@ -56,6 +59,7 @@
         }
     }
 
+    [Obsolete]
     public class DoubleDeterminate : Determinat<double>
     {
         public DoubleDeterminate(int size)
