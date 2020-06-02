@@ -18,7 +18,7 @@ namespace MaxLib.Net.Webserver.Files.Content.Grabber.Info
         public FileInfo()
         {
             Icon.Type = IconInfo.ContentIdType.DetectFile;
-            MimeType = MimeTypes.ApplicationOctetStream;
+            MimeType = Webserver.MimeType.ApplicationOctetStream;
         }
     }
 }

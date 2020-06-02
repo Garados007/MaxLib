@@ -173,7 +173,7 @@ namespace MaxLib.Net.Webserver.Files
                     token.Discard();
                     return false;
                 }
-                token.SetMime(MimeTypes.ImagePng);
+                token.SetMime(MimeType.ImagePng);
                 token.NotifyContentReady();
                 iconInfo.ContentId = token.Url;
                 iconInfo.Type = IconInfo.ContentIdType.Url;

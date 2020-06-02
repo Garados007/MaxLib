@@ -283,7 +283,7 @@ namespace MaxLib.Net.Webserver.Files.Source
                     (path.Length > 0 ? path[path.Length - 1] : "files") + ".zip\"";
                 task.Document.DataSources.Add(new LazySource(task, (t) => LazyCore(InitZip(r, path, ind, task)))
                 {
-                    MimeType = MimeTypes.ApplicationZip
+                    MimeType = MimeType.ApplicationZip
                 });
                 return true;
             }

@@ -17,7 +17,7 @@ namespace MaxLib.Net.Webserver.Files.Content.Viewer
                 sb.Append(t);
             return new HttpStringDataSource(sb.ToString())
             {
-                MimeType = MimeTypes.TextHtml,
+                MimeType = MimeType.TextHtml,
                 TransferCompleteData = true
             };
         }
@@ -45,7 +45,7 @@ namespace MaxLib.Net.Webserver.Files.Content.Viewer
     <ul>
 ")
                 {
-                    MimeType = MimeTypes.TextHtml,
+                    MimeType = MimeType.TextHtml,
                     TransferCompleteData = true,
 
                 };
@@ -59,7 +59,7 @@ namespace MaxLib.Net.Webserver.Files.Content.Viewer
 </html>
 ")
                 {
-                    MimeType = MimeTypes.TextHtml,
+                    MimeType = MimeType.TextHtml,
                     TransferCompleteData = true,
 
                 };

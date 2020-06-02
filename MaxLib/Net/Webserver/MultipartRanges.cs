@@ -150,7 +150,7 @@ namespace MaxLib.Net.Webserver
             var b = new byte[8];
             new Random().NextBytes(b);
             var boundary = BitConverter.ToString(b).Replace("-", "");
-            MimeType = MimeTypes.MultipartByteranges + "; boundary=" + boundary;
+            base.MimeType = Webserver.MimeType.MultipartByteranges + "; boundary=" + boundary;
             document.ResponseHeader.StatusCode = HttpStateCode.PartialContent;
             var sb = new StringBuilder();
             foreach (var r in ranges)

@@ -26,7 +26,7 @@ namespace MaxLib.Net.Webserver.Files.Content.Viewer
         {
             var lazy = new LazySource(task, (t) => ShowInternal(info, t, source))
             {
-                MimeType = MimeTypes.TextHtml
+                MimeType = MimeType.TextHtml
             };
             task.Document.DataSources.Add(lazy);
         }
