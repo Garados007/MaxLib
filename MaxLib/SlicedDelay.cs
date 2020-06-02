@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace MaxLib
 {
+    [Obsolete]
     public class SlicedDelay : Disposable
     {
         private int sliceTime = 100;
