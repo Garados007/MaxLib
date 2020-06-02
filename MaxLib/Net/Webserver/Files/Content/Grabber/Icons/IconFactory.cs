@@ -1,6 +1,7 @@
-﻿using System;
+﻿using MaxLib.Net.Webserver.Files.Content.Grabber.Info;
+using System;
 
-namespace MaxLib.Net.Webserver.Files
+namespace MaxLib.Net.Webserver.Files.Content.Grabber.Icons
 {
     public class IconFactory
     {

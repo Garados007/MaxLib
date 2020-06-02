@@ -1,8 +1,9 @@
-﻿using System;
+﻿using MaxLib.Net.Webserver.Files.Content.Grabber.Info;
+using System;
 using System.Linq;
 using System.Text;
 
-namespace MaxLib.Net.Webserver.Files
+namespace MaxLib.Net.Webserver.Files.Source
 {
     public abstract class SourceProvider : FileSystemService
     {

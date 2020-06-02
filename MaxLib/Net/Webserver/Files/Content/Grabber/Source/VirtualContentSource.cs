@@ -1,8 +1,10 @@
-﻿using System;
+﻿using MaxLib.Net.Webserver.Files.Content.Grabber.Icons;
+using MaxLib.Net.Webserver.Files.Content.Grabber.Info;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MaxLib.Net.Webserver.Files
+namespace MaxLib.Net.Webserver.Files.Content.Grabber.Source
 {
     public class VirtualContentSource : ContentSource
     {

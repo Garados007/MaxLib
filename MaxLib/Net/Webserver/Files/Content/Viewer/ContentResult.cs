@@ -1,4 +1,6 @@
-﻿namespace MaxLib.Net.Webserver.Files
+﻿using MaxLib.Net.Webserver.Files.Content.Grabber.Info;
+
+namespace MaxLib.Net.Webserver.Files.Content.Viewer
 {
     public class ContentResult
     {

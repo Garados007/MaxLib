@@ -1,6 +1,7 @@
-﻿using IO = System.IO;
+﻿using MaxLib.Net.Webserver.Files.Content.Grabber.Icons;
+using IO = System.IO;
 
-namespace MaxLib.Net.Webserver.Files
+namespace MaxLib.Net.Webserver.Files.Content.Grabber.Info
 {
     public abstract class FileInfo : ContentInfo
     {

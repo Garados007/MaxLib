@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using IO = System.IO;
 
-namespace MaxLib.Net.Webserver.Files
+namespace MaxLib.Net.Webserver.Files.Content.Grabber.Info
 {
     public class IODirectoryInfo : DirectoryInfo
     {

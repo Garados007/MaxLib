@@ -1,4 +1,4 @@
-﻿namespace MaxLib.Net.Webserver.Files
+﻿namespace MaxLib.Net.Webserver.Files.Content.Grabber.Info
 {
     public enum ContentType
     {

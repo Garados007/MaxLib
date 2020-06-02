@@ -1,4 +1,6 @@
-﻿namespace MaxLib.Net.Webserver.Files
+﻿using MaxLib.Net.Webserver.Files.Content.Grabber.Icons;
+
+namespace MaxLib.Net.Webserver.Files.Content.Grabber.Info
 {
     public abstract class DirectoryInfo : ContentInfo
     {

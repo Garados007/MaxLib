@@ -1,8 +1,10 @@
-﻿using System;
+﻿using MaxLib.Net.Webserver.Files.Content.Grabber.Info;
+using MaxLib.Net.Webserver.Files.Content.Grabber.Source;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MaxLib.Net.Webserver.Files
+namespace MaxLib.Net.Webserver.Files.Content.Grabber
 {
     public class ContentEnvironment : IDisposable
     {

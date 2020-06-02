@@ -2,8 +2,11 @@
 using MaxLib.Net.Webserver.Lazy;
 using System.Collections.Generic;
 using System.Text;
+using MaxLib.Net.Webserver.Files.Source;
+using MaxLib.Net.Webserver.Files.Content.Grabber.Info;
+using MaxLib.Net.Webserver.Files.Content.Grabber.Icons;
 
-namespace MaxLib.Net.Webserver.Files
+namespace MaxLib.Net.Webserver.Files.Content.Viewer
 {
     public class ContentViewerFactory
     {

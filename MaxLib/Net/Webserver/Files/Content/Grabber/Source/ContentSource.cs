@@ -1,6 +1,7 @@
-﻿using System;
+﻿using MaxLib.Net.Webserver.Files.Content.Grabber.Info;
+using System;
 
-namespace MaxLib.Net.Webserver.Files
+namespace MaxLib.Net.Webserver.Files.Content.Grabber.Source
 {
     public abstract class ContentSource : IDisposable
     {
