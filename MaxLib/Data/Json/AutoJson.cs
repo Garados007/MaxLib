@@ -9,6 +9,7 @@ namespace MaxLib.Data.Json.Auto
     /// objects to JSON accessible. Missing converters can easily be
     /// added. Every convertation is customizible.
     /// </summary>
+    [Obsolete]
     public class AutoJson
     {
         readonly Dictionary<Type, Func<object, JsonElement>> FiniteParser;

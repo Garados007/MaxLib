@@ -6,6 +6,7 @@ namespace MaxLib.Data.Json
 {
     namespace Smart
     {
+        [Obsolete]
         public static class JsonExtensions
         {
             public static string ParseSmart(this JsonParser parser, SmartJson element)
@@ -50,6 +51,7 @@ namespace MaxLib.Data.Json
         }
     }
 
+    [Obsolete]
     public class SmartJson
     {
         #region Mapping

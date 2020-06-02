@@ -8,6 +8,7 @@ using System.Text;
 
 namespace MaxLib.Data.Json
 {
+    [Obsolete]
     public class JsonParser
     {
         public static JsonParser SingleLine
@@ -120,6 +121,7 @@ namespace MaxLib.Data.Json
             return new Parser{ Text = text }.ParseElement() ?? new JsonValue{ ArgumentString = "" };
         }
 
+        [Obsolete]
         class Parser
         {
             public JsonElement ParseElement()
@@ -275,6 +277,7 @@ namespace MaxLib.Data.Json
         }
     }
 
+    [Obsolete]
     [Serializable]
     public abstract class JsonElement
     {
@@ -310,6 +313,7 @@ namespace MaxLib.Data.Json
         { get { return this as JsonValue; } }
     }
 
+    [Obsolete]
     [Serializable]
     public class JsonObject : JsonElement, IEnumerable<KeyValuePair<string, JsonElement>>
     {
@@ -430,6 +434,7 @@ namespace MaxLib.Data.Json
         }
     }
 
+    [Obsolete]
     [Serializable]
     public class JsonArray: JsonElement, IEnumerable<JsonElement>
     {
@@ -533,6 +538,7 @@ namespace MaxLib.Data.Json
         }
     }
 
+    [Obsolete]
     [Serializable]
     public class JsonValue : JsonElement
     {

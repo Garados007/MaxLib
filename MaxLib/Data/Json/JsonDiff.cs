@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace MaxLib.Data.Json.Diff
 {
+    [Obsolete]
     public abstract class JsonDiff
     {
         public abstract JsonElement Modify(JsonElement source);
@@ -13,6 +14,7 @@ namespace MaxLib.Data.Json.Diff
 
     }
 
+    [Obsolete]
     public class DiffModified : JsonDiff
     {
         public JsonElement NewValue { get; private set; }
@@ -42,6 +44,7 @@ namespace MaxLib.Data.Json.Diff
         }
     }
 
+    [Obsolete]
     public class DiffArrayAdded : JsonDiff
     {
         public JsonElement NewValue { get; private set; }
@@ -85,6 +88,7 @@ namespace MaxLib.Data.Json.Diff
         }
     }
 
+    [Obsolete]
     public class DiffObjectAdded : JsonDiff
     {
         public JsonElement NewValue { get; private set; }
@@ -123,6 +127,7 @@ namespace MaxLib.Data.Json.Diff
         }
     }
 
+    [Obsolete]
     public class DiffArrayShrink : JsonDiff
     {
         public int NewCount { get; private set; }
@@ -159,7 +164,7 @@ namespace MaxLib.Data.Json.Diff
         }
     }
 
-
+    [Obsolete]
     public class DiffObjectRemoved : JsonDiff
     {
         public string Key { get; private set; }
@@ -194,6 +199,7 @@ namespace MaxLib.Data.Json.Diff
         }
     }
 
+    [Obsolete]
     public class DiffArrayPath : JsonDiff
     {
         public JsonDiff Diff { get; private set; }
@@ -236,6 +242,7 @@ namespace MaxLib.Data.Json.Diff
         }
     }
 
+    [Obsolete]
     public class DiffObjectPath : JsonDiff
     {
         public JsonDiff Diff { get; private set; }
@@ -277,6 +284,7 @@ namespace MaxLib.Data.Json.Diff
         }
     }
     
+    [Obsolete]
     public class DiffContainer : JsonDiff
     {
         public List<JsonDiff> Diff { get; private set; }
@@ -314,6 +322,7 @@ namespace MaxLib.Data.Json.Diff
         }
     }
 
+    [Obsolete]
     public class DiffDeserializer
     {
         public JsonDiff Deserialize(JsonElement element)
@@ -451,6 +460,7 @@ namespace MaxLib.Data.Json.Diff
         }
     }
 
+    [Obsolete]
     public class DiffCreator
     {
         public virtual JsonDiff Diff(JsonElement oldElement, JsonElement newElement)
