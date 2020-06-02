@@ -1,6 +1,6 @@
 ﻿namespace MaxLib.Net.Webserver
 {
-    public enum InfoType
+    public enum ServerLogType : byte
     {
         Information,
         Debug,

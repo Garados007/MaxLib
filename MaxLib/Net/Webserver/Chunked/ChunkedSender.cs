@@ -49,12 +49,12 @@ namespace MaxLib.Net.Webserver.Chunked
             try { writer.Flush(); stream.Flush(); }
             catch (ObjectDisposedException)
             {
-                WebServerInfo.Add(InfoType.Error, GetType(), "Send", "Connection closed by remote host.");
+                WebServerLog.Add(ServerLogType.Error, GetType(), "Send", "Connection closed by remote host.");
                 return;
             }
             catch (IOException)
             {
-                WebServerInfo.Add(InfoType.Error, GetType(), "Send", "Connection closed by remote host.");
+                WebServerLog.Add(ServerLogType.Error, GetType(), "Send", "Connection closed by remote host.");
                 return;
             }
             //Daten senden
@@ -72,7 +72,7 @@ namespace MaxLib.Net.Webserver.Chunked
             }
             catch (IOException)
             {
-                WebServerInfo.Add(InfoType.Error, GetType(), "Send", "Connection closed by remote host.");
+                WebServerLog.Add(ServerLogType.Error, GetType(), "Send", "Connection closed by remote host.");
                 return;
             }
         }

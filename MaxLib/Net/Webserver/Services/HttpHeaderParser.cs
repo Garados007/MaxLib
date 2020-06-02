@@ -47,7 +47,7 @@ namespace MaxLib.Net.Webserver.Services
                 if (!((NetworkStream)stream).DataAvailable)
                 {
                     task.Document.RequestHeader.FieldConnection = HttpConnectionType.KeepAlive;
-                    WebServerInfo.Add(InfoType.Error, GetType(), "Header", "Request Time out");
+                    WebServerLog.Add(ServerLogType.Error, GetType(), "Header", "Request Time out");
                     task.Document.ResponseHeader.StatusCode = HttpStateCode.RequestTimeOut;
                     task.NextTask = WebServiceType.PreCreateResponse;
                     return;
@@ -55,7 +55,7 @@ namespace MaxLib.Net.Webserver.Services
             }
             catch (ObjectDisposedException)
             {
-                WebServerInfo.Add(InfoType.Error, GetType(), "Header", "Connection closed by remote host");
+                WebServerLog.Add(ServerLogType.Error, GetType(), "Header", "Connection closed by remote host");
                 task.Document.ResponseHeader.StatusCode = HttpStateCode.RequestTimeOut;
                 task.NextTask = task.CurrentTask = WebServiceType.SendResponse;
                 return;
@@ -64,14 +64,14 @@ namespace MaxLib.Net.Webserver.Services
             try { line = reader.ReadLine(); }
             catch
             {
-                WebServerInfo.Add(InfoType.Error, GetType(), "Header", "Connection closed by remote host");
+                WebServerLog.Add(ServerLogType.Error, GetType(), "Header", "Connection closed by remote host");
                 task.Document.ResponseHeader.StatusCode = HttpStateCode.RequestTimeOut;
                 task.NextTask = task.CurrentTask = WebServiceType.SendResponse;
                 return;
             }
             if (line == null)
             {
-                WebServerInfo.Add(InfoType.Error, GetType(), "Header", "Can't read Header line");
+                WebServerLog.Add(ServerLogType.Error, GetType(), "Header", "Can't read Header line");
                 task.Document.ResponseHeader.StatusCode = HttpStateCode.BadRequest;
                 task.NextTask = WebServiceType.PreCreateResponse;
                 return;
@@ -80,7 +80,7 @@ namespace MaxLib.Net.Webserver.Services
             {
                 if (task.Server.Settings.Debug_WriteRequests) sb.AppendLine(line);
                 var parts = line.Split(' ');
-                WebServerInfo.Add(InfoType.Debug, GetType(), "Header", line);
+                WebServerLog.Add(ServerLogType.Debug, GetType(), "Header", line);
                 header.ProtocolMethod = parts[0];
                 header.Url = parts[1];
                 header.HttpProtocol = parts[2];
@@ -96,7 +96,7 @@ namespace MaxLib.Net.Webserver.Services
             }
             catch
             {
-                WebServerInfo.Add(InfoType.Error, GetType(), "Header", "Bad Request");
+                WebServerLog.Add(ServerLogType.Error, GetType(), "Header", "Bad Request");
                 task.Document.ResponseHeader.StatusCode = HttpStateCode.BadRequest;
                 task.NextTask = WebServiceType.PreCreateResponse;
                 return;

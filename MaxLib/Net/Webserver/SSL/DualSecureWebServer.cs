@@ -12,7 +12,7 @@ namespace MaxLib.Net.Webserver.SSL
 
         public DualSecureWebServer(DualSecureWebServerSettings settings) : base(settings)
         {
-            WebServerInfo.Add(InfoType.Information, GetType(), "StartUp", "The use of dual mode is critical");
+            WebServerLog.Add(ServerLogType.Information, GetType(), "StartUp", "The use of dual mode is critical");
         }
 
         protected override void ClientStartListen(HttpSession session)

@@ -63,7 +63,7 @@ namespace MaxLib.Net.Webserver
                 }
                 catch (IOException)
                 {
-                    WebServerInfo.Add(InfoType.Error, GetType(), "Send", "Connection closed by remote Host");
+                    WebServerLog.Add(ServerLogType.Error, GetType(), "Send", "Connection closed by remote Host");
                     return -1;
                 }
             }

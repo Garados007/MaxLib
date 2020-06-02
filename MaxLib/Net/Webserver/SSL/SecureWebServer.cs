@@ -24,7 +24,7 @@ namespace MaxLib.Net.Webserver.SSL
         {
             if (SecureSettings.EnableUnsafePort)
                 base.Start();
-            WebServerInfo.Add(InfoType.Information, GetType(), "StartUp", "Start Secure Server on Port {0}", SecureSettings.SecurePort);
+            WebServerLog.Add(ServerLogType.Information, GetType(), "StartUp", "Start Secure Server on Port {0}", SecureSettings.SecurePort);
             ServerExecution = true;
             SecureListener = new TcpListener(new IPEndPoint(Settings.IPFilter, SecureSettings.SecurePort));
             SecureListener.Start();
@@ -39,13 +39,13 @@ namespace MaxLib.Net.Webserver.SSL
         {
             if (SecureSettings.EnableUnsafePort)
                 base.Stop();
-            WebServerInfo.Add(InfoType.Information, GetType(), "StartUp", "Stopped Secure Server");
+            WebServerLog.Add(ServerLogType.Information, GetType(), "StartUp", "Stopped Secure Server");
             ServerExecution = false;
         }
 
         protected virtual void SecureMainTask()
         {
-            WebServerInfo.Add(InfoType.Information, GetType(), "StartUp", "Secure Server succesfuly started");
+            WebServerLog.Add(ServerLogType.Information, GetType(), "StartUp", "Secure Server succesfuly started");
             while (ServerExecution)
             {
                 var start = Environment.TickCount;
@@ -63,7 +63,7 @@ namespace MaxLib.Net.Webserver.SSL
                 Thread.Sleep(20 - time);
             }
             SecureListener.Stop();
-            WebServerInfo.Add(InfoType.Information, GetType(), "StartUp", "Secure Server succesfuly stopped");
+            WebServerLog.Add(ServerLogType.Information, GetType(), "StartUp", "Secure Server succesfuly stopped");
         }
 
         protected virtual void SecureClientConnected(TcpClient client)

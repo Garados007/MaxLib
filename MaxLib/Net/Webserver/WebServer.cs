@@ -62,7 +62,7 @@ namespace MaxLib.Net.Webserver
 
         public virtual void Start()
         {
-            WebServerInfo.Add(InfoType.Information, GetType(), "StartUp", "Start Server on Port {0}", Settings.Port);
+            WebServerLog.Add(ServerLogType.Information, GetType(), "StartUp", "Start Server on Port {0}", Settings.Port);
             ServerExecution = true;
             Listener = new TcpListener(new IPEndPoint(Settings.IPFilter, Settings.Port));
             Listener.Start();
@@ -75,14 +75,14 @@ namespace MaxLib.Net.Webserver
 
         public virtual void Stop()
         {
-            WebServerInfo.Add(InfoType.Information, GetType(), "StartUp", "Stopped Server");
+            WebServerLog.Add(ServerLogType.Information, GetType(), "StartUp", "Stopped Server");
             ServerExecution = false;
             ServerThread.Join();
         }
         
         protected virtual void ServerMainTask()
         {
-            WebServerInfo.Add(InfoType.Information, GetType(), "StartUp", "Server succesfuly started");
+            WebServerLog.Add(ServerLogType.Information, GetType(), "StartUp", "Server succesfuly started");
             while (ServerExecution)
             {
                 var start = Environment.TickCount;
@@ -131,7 +131,7 @@ namespace MaxLib.Net.Webserver
             for (int i = 0; i < AllSessions.Count; ++i) AllSessions[i].NetworkClient.Close();
             AllSessions.Clear();
             KeepAliveSessions.Clear();
-            WebServerInfo.Add(InfoType.Information, GetType(), "StartUp", "Server succesfuly stopped");
+            WebServerLog.Add(ServerLogType.Information, GetType(), "StartUp", "Server succesfuly stopped");
         }
 
         protected virtual void ClientConnected(TcpClient client)
@@ -157,7 +157,7 @@ namespace MaxLib.Net.Webserver
                 try { ClientStartListen(session); }
                 catch (Exception e)
                 {
-                    WebServerInfo.Add(InfoType.FatalError, GetType(), "Unhandled Exception", e, "{0} in {1}", e.Message, e.StackTrace);
+                    WebServerLog.Add(ServerLogType.FatalError, GetType(), "Unhandled Exception", e, "{0} in {1}", e.Message, e.StackTrace);
                 }
             }
         }
@@ -167,7 +167,7 @@ namespace MaxLib.Net.Webserver
             session.LastWorkTime = -1;
             if (session.NetworkClient.Connected)
             {
-                WebServerInfo.Add(InfoType.Information, GetType(), "Connection", "Listen to Connection {0}", session.NetworkClient.Client.RemoteEndPoint);
+                WebServerLog.Add(ServerLogType.Information, GetType(), "Connection", "Listen to Connection {0}", session.NetworkClient.Client.RemoteEndPoint);
                 var task = PrepairProgressTask(session);
                 if (task == null)
                 {

@@ -79,7 +79,7 @@ namespace MaxLib.Net.Webserver.Services
                 case 509: return "Bandwidth Limit Exceeded";
                 case 510: return "Not Extended";
                 default:
-                    WebServerInfo.Add(InfoType.Information, GetType(), "StatusCode",
+                    WebServerLog.Add(ServerLogType.Information, GetType(), "StatusCode",
                         "Cant get status string from {0} ({1}).", code, (int)code);
                     return "";
             }
@@ -111,12 +111,12 @@ namespace MaxLib.Net.Webserver.Services
             try { writer.Flush(); }
             catch (ObjectDisposedException)
             {
-                WebServerInfo.Add(InfoType.Error, GetType(), "Send", "Connection closed by remote host.");
+                WebServerLog.Add(ServerLogType.Error, GetType(), "Send", "Connection closed by remote host.");
                 return;
             }
             catch (IOException)
             {
-                WebServerInfo.Add(InfoType.Error, GetType(), "Send", "Connection closed by remote host.");
+                WebServerLog.Add(ServerLogType.Error, GetType(), "Send", "Connection closed by remote host.");
                 return;
             }
             //Daten senden
@@ -128,7 +128,7 @@ namespace MaxLib.Net.Webserver.Services
             try { stream.Flush(); }
             catch (IOException)
             {
-                WebServerInfo.Add(InfoType.Error, GetType(), "Send", "Connection closed by remote host.");
+                WebServerLog.Add(ServerLogType.Error, GetType(), "Send", "Connection closed by remote host.");
                 return;
             }
         }
