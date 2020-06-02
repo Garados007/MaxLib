@@ -107,56 +107,21 @@ namespace MaxLib.Maths
             return new Size((int)v.X, (int)v.Y);
         }
 
-        static float MultiplicateAngle(Vector2 v, out int times)
-        {
-            var m = Math.Abs( v.Y / v.X);
-            if (v.X >= 0)
-            {
-                if (v.Y >= 0) times = 0;
-                else times = 1;
-            }
-            else
-            {
-                if (v.Y >= 0) times = 2;
-                else times = 3;
-            }
-            return m;
-        }
-
-        static double TurnAngle(double r, int times)
-        {
-            switch (times)
-            {
-                case 2: return 2 * w90 - r;
-                case 3: return 2 * w90 + r;
-                case 1: return 4 * w90 - r;
-                default: return r;
-            }
-        }
-        
-        const double w90 = (float)Math.PI / 2;
-
-        static double ToDegrees(double w)
-        {
-            return (w / Math.PI) * 180;
-        }
-
         public static float SpecialAngle(Vector2 v1, Vector2 v2)
         {
             
             if (v1 == Zero || v2 == Zero) return 0;
-            int t1, t2;
-            var m1 = MultiplicateAngle(v1, out t1);
-            var m2 = MultiplicateAngle(v2, out t2);
-            var a1 = v1.X != 0 ? Math.Atan(m1) : v1.Y >= 0 ? w90 : w90;
-            var a2 = v2.X != 0 ? Math.Atan(m2) : v2.Y >= 0 ? w90 : w90;
-            a1 = TurnAngle(a1, t1);
-            a2 = TurnAngle(a2, t2);
-            var r1 = (float)(a2 - a1);
-            if (r1 < 0) r1 += 2 * (float)Math.PI;
+            //var m1 = MultiplicateAngle(v1, out int t1);
+            //var m2 = MultiplicateAngle(v2, out int t2);
+            //var a1 = v1.X != 0 ? Math.Atan(m1) : v1.Y >= 0 ? w90 : w90;
+            //var a2 = v2.X != 0 ? Math.Atan(m2) : v2.Y >= 0 ? w90 : w90;
+            //a1 = TurnAngle(a1, t1);
+            //a2 = TurnAngle(a2, t2);
+            //var r1 = (float)(a2 - a1);
+            //if (r1 < 0) r1 += 2 * (float)Math.PI;
             var r2 = Angle(v1, v2);
-            var d1 = ToDegrees(r1);
-            var d2 = ToDegrees(r2);
+            //var d1 = ToDegrees(r1);
+            //var d2 = ToDegrees(r2);
             return r2;
         }
 
@@ -179,8 +144,8 @@ namespace MaxLib.Maths
         static float MultS(Vector2 v1, Vector2 v2)//Same Orign
         {
             var turn = false;
-            if (v1.X == (v1.Y)) { var v3 = v1; v1 = v2; v2 = v3; turn = true; }
-            if (v1.X == (v1.Y))
+            if (v1.X == v1.Y) { var v3 = v1; v1 = v2; v2 = v3; turn = true; }
+            if (v1.X == v1.Y)
             {
                 return 0;
             }
@@ -188,7 +153,7 @@ namespace MaxLib.Maths
             var n1 = v1.Normalize();
             var n2 = v2.Normalize();
             if (n1 == n2) return 0;
-            var r = ((v2.Y * v1.X - v2.X * v1.Y) / (v1.X * v1.X - v1.Y * v1.Y)) * (turn ? -1 : 1);
+            var r = (v2.Y * v1.X - v2.X * v1.Y) / (v1.X * v1.X - v1.Y * v1.Y) * (turn ? -1 : 1);
             return r;
         }
 

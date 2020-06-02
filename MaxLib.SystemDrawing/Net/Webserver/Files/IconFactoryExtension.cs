@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using IO = System.IO;
 using System.Drawing;
+using IO = System.IO;
 
 namespace MaxLib.Net.Webserver.Files
 {
@@ -17,6 +13,7 @@ namespace MaxLib.Net.Webserver.Files
         /// <returns></returns>
         public static IconFetcher ImgFile(this IconFactory fact)
         {
+            _ = fact ?? throw new ArgumentNullException(nameof(fact));
             return new ImgFileClass();
         }
 
@@ -27,6 +24,7 @@ namespace MaxLib.Net.Webserver.Files
         /// <returns></returns>
         public static IconFetcher IconFile(this IconFactory fact)
         {
+            _ = fact ?? throw new ArgumentNullException(nameof(fact));
             return new IconFileClass();
         }
 
@@ -38,6 +36,7 @@ namespace MaxLib.Net.Webserver.Files
         /// <returns></returns>
         public static IconFetcher IconFromUnknown(this IconFactory fact)
         {
+            _ = fact ?? throw new ArgumentNullException(nameof(fact));
             return new IconFromUnknownClass();
         }
 
@@ -49,6 +48,7 @@ namespace MaxLib.Net.Webserver.Files
         /// <returns></returns>
         public static IconFetcher FileDivider(this IconFactory fact)
         {
+            _ = fact ?? throw new ArgumentNullException(nameof(fact));
             return new FileDividerClass();
         }
 
@@ -67,7 +67,7 @@ namespace MaxLib.Net.Webserver.Files
                 if (token.ContentReady)
                 {
                     contentInfo.Icon.ContentId = token.Url;
-                    contentInfo.Icon.Type = MaxLib.Net.Webserver.Files.IconInfo.ContentIdType.Url;
+                    contentInfo.Icon.Type = IconInfo.ContentIdType.Url;
                     return true;
                 }
                 try
