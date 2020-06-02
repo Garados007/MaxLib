@@ -1,7 +1,6 @@
 ﻿using MaxLib.Collections;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -11,8 +10,6 @@ using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver
 {
-    #region WebServer
-
     public class WebServer
     {
         public Dictionary<WebServiceType, WebServiceGroup> WebServiceGroups { get; } = new Dictionary<WebServiceType, WebServiceGroup>();
@@ -264,12 +261,4 @@ namespace MaxLib.Net.Webserver
             return s;
         }
     }
-
-    #endregion
-
-    #region Easy Task Creaton
-
-    
-
-    #endregion
 }
