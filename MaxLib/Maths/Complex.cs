@@ -208,42 +208,42 @@ namespace MaxLib.Maths
 
         public static Complex operator +(Complex c, double z)
         {
-            return c + (new Complex(z));
+            return c + new Complex(z);
         }
 
         public static Complex operator +(double z, Complex c)
         {
-            return c + (new Complex(z));
+            return c + new Complex(z);
         }
 
         public static Complex operator -(Complex c, double z)
         {
-            return c - (new Complex(z));
+            return c - new Complex(z);
         }
 
         public static Complex operator -(double z, Complex c)
         {
-            return (new Complex(z)) - c;
+            return new Complex(z) - c;
         }
 
         public static Complex operator *(Complex c, double z)
         {
-            return c * (new Complex(z));
+            return c * new Complex(z);
         }
 
         public static Complex operator *(double z, Complex c)
         {
-            return c * (new Complex(z));
+            return c * new Complex(z);
         }
 
         public static Complex operator /(Complex c, double z)
         {
-            return c / (new Complex(z));
+            return c / new Complex(z);
         }
 
         public static Complex operator /(double z, Complex c)
         {
-            return (new Complex(z)) / c;
+            return new Complex(z) / c;
         }
 
         #endregion

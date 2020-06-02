@@ -1291,7 +1291,7 @@ namespace MaxLib.Net.Webserver.Files
                                 "<div class=\"content-name\">", info.Name, "</div></div></a>");
                             break;
                         case ContentType.File:
-                            var file = (info as FileInfo);
+                            var file = info as FileInfo;
                             yield return Stringer("<a class=\"content-box file\" data-name=\"",
                                 info.Name, "\" data-exists=\"", info.Exists, "\" data-created=\"",
                                 info.Created.ToString("s"), "\" data-modified=\"",
