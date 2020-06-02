@@ -5,3 +5,6 @@ dotnet_diagnostic.IDE0002.severity = suggestion
 
 # IDE0005: Using-Direktive ist unnötig.
 dotnet_diagnostic.IDE0005.severity = suggestion
+
+# IDE0047: Unnötige Klammern entfernen
+dotnet_diagnostic.IDE0047.severity = suggestion

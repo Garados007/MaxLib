@@ -2,7 +2,6 @@
 using System.Data.SQLite;
 using System.Diagnostics;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MaxLib.DB
 {
@@ -10,7 +9,7 @@ namespace MaxLib.DB
     {
         public class TransactionDisposer : IDisposable
         {
-            Database db;
+            readonly Database db;
 
             public TransactionDisposer(Database db)
             {
@@ -24,10 +23,10 @@ namespace MaxLib.DB
             }
         }
 
-
-        SQLiteFactory factory;
+        readonly SQLiteFactory factory;
         public SQLiteConnection Connection { get; private set; }
-        object lockObject = new object();
+
+        readonly object lockObject = new object();
 
         public Database(string file, string checkSql, string createSql)
         {
@@ -97,10 +96,9 @@ namespace MaxLib.DB
             }
         }
 
-        static Mutex Mutex = new Mutex(false);
+        static readonly Mutex Mutex = new Mutex(false);
         static SQLiteTransaction BigTransaction = null;
         static Thread TransactionThread;
-        static object lockCheckThread = new object();
         static int lockDepth = 0;
 
         public void BeginTransaction()

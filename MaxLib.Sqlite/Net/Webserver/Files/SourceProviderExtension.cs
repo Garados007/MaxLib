@@ -11,20 +11,21 @@ namespace MaxLib.Net.Webserver.Files
 {
     public static class SourceProviderExtension
     {
+#pragma warning disable IDE0060 // Nicht verwendete Parameter entfernen
         public static BufferedTokensClass BufferedTokens(this SourceProviderFactory factory, string[] pathRoot, string db = "temp\\io-tokens.db")
+#pragma warning restore IDE0060 // Nicht verwendete Parameter entfernen
         {
             return new BufferedTokensClass(pathRoot, db);
         }
 
         public class BufferedTokensClass : SourceProvider
         {
-            Dictionary<string, Token> TempTokens = new Dictionary<string, Token>();
-            Dictionary<string, Token> HandleTokens = new Dictionary<string, Token>();
-            HashSet<string> GeneratingTokens = new HashSet<String>();
-            ByteTree<Token> HashTree = new ByteTree<Token>();
-
-            Database db;
-            DbFactory fact;
+            readonly Dictionary<string, Token> TempTokens = new Dictionary<string, Token>();
+            readonly Dictionary<string, Token> HandleTokens = new Dictionary<string, Token>();
+            readonly HashSet<string> GeneratingTokens = new HashSet<String>();
+            readonly ByteTree<Token> HashTree = new ByteTree<Token>();
+            readonly Database db;
+            readonly DbFactory fact;
 
             public BufferedTokensClass(string[] pathRoot, string db) : base(pathRoot)
             {
@@ -71,7 +72,7 @@ namespace MaxLib.Net.Webserver.Files
                 }
             }
 
-            string getId()
+            string GetId()
             {
                 var r = new Random();
                 var b = new byte[16];
@@ -96,12 +97,12 @@ namespace MaxLib.Net.Webserver.Files
                 {
                     int next = bytes[ind];
                     ind++;
-                    num = num | (next << bits);
+                    num |= next << bits;
                     bits += 8;
                     while (bits >= 5)
                     {
                         var digit = num & 0x1f;
-                        num = num >> 5;
+                        num >>= 5;
                         bits -= 5;
                         sb.Append(alphabet[digit]);
                     }
@@ -119,7 +120,7 @@ namespace MaxLib.Net.Webserver.Files
                 if (HandleTokens.TryGetValue(ressourceHandle, out Token t))
                     return t;
                 string key;
-                do key = getId();
+                do key = GetId();
                 while (!GeneratingTokens.Add(key));
 
                 if (!IO.Directory.Exists("Temp\\ContentProvider"))
@@ -283,11 +284,6 @@ namespace MaxLib.Net.Webserver.Files
                 {
                     TransferCompleteData = true
                 });
-                //task.Document.DataSources.Add(new HttpStreamDataSource((r[ind] as FileInfo).GetStream())
-                //{
-                //    MimeType = (r[ind] as FileInfo).MimeType,
-                //    TransferCompleteData = true,
-                //});
                 return true;
             }
 

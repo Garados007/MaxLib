@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
 using System.Data.SQLite;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 
 namespace MaxLib.DB
 {
@@ -40,7 +40,6 @@ namespace MaxLib.DB
             {
                 var targetType = propertyInfo.DeclaringType;
                 var methodInfo = propertyInfo.GetGetMethod(true);
-                var returnType = methodInfo.ReturnType;
                 var exTarget = Expression.Parameter(typeof(T), "t");
                 var exTarget2 = Expression.Convert(exTarget, targetType);
                 var exBody = Expression.Call(exTarget2, methodInfo);
@@ -80,7 +79,7 @@ namespace MaxLib.DB
             public Dictionary<string, Query> QueryBuffer = new Dictionary<string, Query>();
         }
 
-        class lcComp : IEqualityComparer<string>
+        class LcComp : IEqualityComparer<string>
         {
             public bool Equals(string x, string y)
             {
@@ -105,21 +104,18 @@ namespace MaxLib.DB
             public long Delete { get; set; }
         }
 
-
-
-        Dictionary<Type, InfoContainer> storedTypes = new Dictionary<Type, InfoContainer>();
+        readonly Dictionary<Type, InfoContainer> storedTypes = new Dictionary<Type, InfoContainer>();
         readonly object lockStoredTypes = new object();
-        Database db;
-        lcComp lccomp = new lcComp();
+        readonly LcComp lccomp = new LcComp();
 
-        public Database Database => db;
+        public Database Database { get; }
 
         public bool ValidPropertyCheck { get; set; }
         public bool CacheQuerys { get; set; }
 
         public DbFactory(Database db)
         {
-            this.db = db ?? throw new ArgumentNullException("db");
+            this.Database = db ?? throw new ArgumentNullException("db");
             ValidPropertyCheck = true;
             CacheQuerys = true;
         }
@@ -197,7 +193,7 @@ namespace MaxLib.DB
             cont.addQuery = sb.ToString();
         }
 
-        private string getPropType(PropertyInfo p)
+        private string GetPropType(PropertyInfo p)
         {
             if (p.PropertyType.IsAssignableFrom(typeof(bool?))) return "bo?";
             if (p.PropertyType.IsAssignableFrom(typeof(short?))) return "sh?";
@@ -226,9 +222,11 @@ namespace MaxLib.DB
 
         private void LoadInfo(Type type)
         {
-            var cont = new InfoContainer();
-            cont.ClassType = type;
-            cont.ClassAttribute = type.GetCustomAttribute<DbClassAttribute>();
+            var cont = new InfoContainer
+            {
+                ClassType = type,
+                ClassAttribute = type.GetCustomAttribute<DbClassAttribute>()
+            };
             if (cont.ClassAttribute == null) throw new TypeAccessException("type doesn't contains DbClassAttribute");
             foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic))
             {
@@ -237,7 +235,7 @@ namespace MaxLib.DB
                 if (attr.DbPropName == null) attr.DbPropName = prop.Name;
                 cont.Properties[attr.DbPropName] = prop;
                 cont.PropAttributes[attr.DbPropName] = attr;
-                cont.PropertyType[attr.DbPropName] = getPropType(prop);
+                cont.PropertyType[attr.DbPropName] = GetPropType(prop);
                 cont.SetMethods[attr.DbPropName] = Helper.FastInvoke.BuildUntypedSetter<object>(prop);
                 cont.GetMethods[attr.DbPropName] = Helper.FastInvoke.BuildUntypedGetter<object>(prop);
             }
@@ -269,10 +267,9 @@ namespace MaxLib.DB
             return MatchTransfer(target, prop, () => resultIsNull ? nullValue is Check ? (Check)nullValue : defaultNullValue : getValue());
         }
 
-        private void FillKnowProp<T>(InfoContainer cont, string name, object target, PropertyInfo prop, bool resultIsNull, object nullValue, T defaultNullValue, Func<T> getValue)
+        private void FillKnowProp<T>(InfoContainer cont, string name, object target, bool resultIsNull, object nullValue, T defaultNullValue, Func<T> getValue)
         {
             cont.SetMethods[name](target, resultIsNull ? nullValue is T ? nullValue : defaultNullValue : getValue());
-            //prop.SetValue(target, resultIsNull ? nullValue is T ? nullValue : defaultNullValue : getValue());
         }
 
         Query lastQuery = null;
@@ -296,14 +293,14 @@ namespace MaxLib.DB
                 var key = sb.ToString();
                 if (cont.QueryBuffer.ContainsKey(key))
                     return cont.QueryBuffer[key];
-                var q = db.Create(creator());
+                var q = Database.Create(creator());
                 cont.QueryBuffer.Add(key, q);
                 return q;
             }
             else
             {
                 lastQuery?.Dispose();
-                return lastQuery = db.Create(creator());
+                return lastQuery = Database.Create(creator());
             }
         }
 
@@ -312,7 +309,7 @@ namespace MaxLib.DB
         public int LastInsertedId()
         {
             if (getLastInsertKey == null)
-                getLastInsertKey = db.Create("SELECT last_insert_rowid()");
+                getLastInsertKey = Database.Create("SELECT last_insert_rowid()");
             using (var r = getLastInsertKey.ExecuteReader(false))
             {
                 r.Read();
@@ -352,28 +349,28 @@ namespace MaxLib.DB
                 
                 switch (cont.PropertyType[name])
                 {
-                    case "bo?": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, null, () => (bool?)reader.GetBoolean(ind)); break;
-                    case "sh?": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, null, () => (short?)reader.GetInt16(ind)); break;
-                    case "in?": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, null, () => (int?)reader.GetInt32(ind)); break;
-                    case "lo?": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, null, () => (long?)reader.GetInt64(ind)); break;
-                    case "fl?": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, null, () => (float?)reader.GetFloat(ind)); break;
-                    case "do?": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, null, () => (double?)reader.GetDouble(ind)); break;
-                    case "ch?": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, null, () => (char?)reader.GetChar(ind)); break;
-                    case "Da?": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, null, () => (DateTime?)reader.GetDateTime(ind)); break;
-                    case "Gu?": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, null, () => (Guid?)reader.GetGuid(ind)); break;
-                    case "str": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, null, () => reader.GetString(ind)); break;
-                    case "boo": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, false, () => reader.GetBoolean(ind)); break;
-                    case "sho": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, 0, () => reader.GetInt16(ind)); break;
-                    case "int": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, 0, () => reader.GetInt32(ind)); break;
-                    case "lon": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, 0, () => reader.GetInt64(ind)); break;
-                    case "flo": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, 0, () => reader.GetFloat(ind)); break;
-                    case "dou": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, 0, () => reader.GetDouble(ind)); break;
-                    case "cha": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, 0, () => reader.GetChar(ind)); break;
-                    case "Dat": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, new DateTime(), () => reader.GetDateTime(ind)); break;
-                    case "Gui": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, new Guid(), () => reader.GetGuid(ind)); break;
-                    case "en?": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, null, () => (int?)reader.GetInt32(ind)); break;
-                    case "enu": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, 0, () => reader.GetInt32(ind)); break;
-                    case "bar": FillKnowProp(cont, name, r, prop, reader.IsDBNull(ind), attr.NullValue, null, () => GetByteArray(reader, ind)); break;
+                    case "bo?": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, null, () => (bool?)reader.GetBoolean(ind)); break;
+                    case "sh?": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, null, () => (short?)reader.GetInt16(ind)); break;
+                    case "in?": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, null, () => (int?)reader.GetInt32(ind)); break;
+                    case "lo?": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, null, () => (long?)reader.GetInt64(ind)); break;
+                    case "fl?": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, null, () => (float?)reader.GetFloat(ind)); break;
+                    case "do?": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, null, () => (double?)reader.GetDouble(ind)); break;
+                    case "ch?": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, null, () => (char?)reader.GetChar(ind)); break;
+                    case "Da?": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, null, () => (DateTime?)reader.GetDateTime(ind)); break;
+                    case "Gu?": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, null, () => (Guid?)reader.GetGuid(ind)); break;
+                    case "str": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, null, () => reader.GetString(ind)); break;
+                    case "boo": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, false, () => reader.GetBoolean(ind)); break;
+                    case "sho": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, 0, () => reader.GetInt16(ind)); break;
+                    case "int": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, 0, () => reader.GetInt32(ind)); break;
+                    case "lon": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, 0, () => reader.GetInt64(ind)); break;
+                    case "flo": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, 0, () => reader.GetFloat(ind)); break;
+                    case "dou": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, 0, () => reader.GetDouble(ind)); break;
+                    case "cha": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, 0, () => reader.GetChar(ind)); break;
+                    case "Dat": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, new DateTime(), () => reader.GetDateTime(ind)); break;
+                    case "Gui": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, new Guid(), () => reader.GetGuid(ind)); break;
+                    case "en?": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, null, () => (int?)reader.GetInt32(ind)); break;
+                    case "enu": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, 0, () => reader.GetInt32(ind)); break;
+                    case "bar": FillKnowProp(cont, name, r, reader.IsDBNull(ind), attr.NullValue, null, () => GetByteArray(reader, ind)); break;
 
                     default:
                         {
@@ -499,7 +496,7 @@ namespace MaxLib.DB
             var cont = storedTypes[type];
             cont.LoadAll++;
             
-            using (var q = db.Create(cont.selectAllQuery))
+            using (var q = Database.Create(cont.selectAllQuery))
             {
                 using (var r = q.ExecuteReader(false))
                 {
@@ -625,7 +622,7 @@ namespace MaxLib.DB
             }
             if (keys.Length == 0) sb.Append('1');
 
-            using (var q = db.Create(sb.ToString()))
+            using (var q = Database.Create(sb.ToString()))
             {
                 q.SetValues(val);
                 using (var r = q.ExecuteReader(false))
@@ -656,7 +653,6 @@ namespace MaxLib.DB
                         val[ind] = (int)val[ind];
                     ind++;
                 }
-            //val[ind++] = cont.Properties[cont.NameTable[i]].GetValue(value); 
             for (int i = 0; i < cont.PrimaryKeys.Length; ++i)
             {
                 val[ind] = cont.GetMethods[cont.PrimaryKeys[i]](value);
@@ -664,9 +660,8 @@ namespace MaxLib.DB
                     val[ind] = (int)val[ind];
                 ind++;
             }
-            //val[ind++] = cont.Properties[cont.PrimaryKeys[i]].GetValue(value);
 
-            using (var q = db.Create(cont.updateQuery))
+            using (var q = Database.Create(cont.updateQuery))
             {
                 q.SetValues(val);
                 return q.ExecuteNonQuery();
@@ -692,9 +687,8 @@ namespace MaxLib.DB
                         v = (int)v;
                     val.Add(v);
                 }
-                    //val.Add(cont.Properties[cont.NameTable[i]].GetValue(value));
 
-            using (var q = db.Create(cont.addQuery))
+            using (var q = Database.Create(cont.addQuery))
             {
                 q.SetValues(val.ToArray());
                 q.ExecuteNonQuery();
@@ -739,7 +733,7 @@ namespace MaxLib.DB
             }
             if (keys.Length == 0) sb.Append('1');
 
-            using (var q = db.Create(sb.ToString()))
+            using (var q = Database.Create(sb.ToString()))
             {
                 q.SetValues(val);
                 return q.ExecuteNonQuery();

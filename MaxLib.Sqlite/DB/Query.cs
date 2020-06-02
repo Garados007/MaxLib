@@ -16,8 +16,10 @@ namespace MaxLib.DB
         public Query(Database database, string sql)
         {
             Database = database ?? throw new ArgumentNullException("database");
-            Command = new SQLiteCommand(database.Connection);
-            Command.CommandText = sql ?? throw new ArgumentNullException("sql");
+            Command = new SQLiteCommand(database.Connection)
+            {
+                CommandText = sql ?? throw new ArgumentNullException("sql")
+            };
             var count = sql.Count((c) => c == '?');
             Parameter = new List<SQLiteParameter>(count);
             for (int i = 0; i < count; ++i)
@@ -46,7 +48,6 @@ namespace MaxLib.DB
             int result = 0;
             Database.Execute(() => result = Command.ExecuteNonQuery(), doCommit);
             return result;
-            //return Command.ExecuteNonQuery();
         }
 
         public SQLiteDataReader ExecuteReader(bool doCommit = true)
@@ -54,7 +55,6 @@ namespace MaxLib.DB
             SQLiteDataReader reader = null;
             Database.Execute(() => reader = Command.ExecuteReader(), doCommit);
             return reader;
-            //return Command.ExecuteReader();
         }
 
         #region IDisposable Support

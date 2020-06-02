@@ -1,7 +1,6 @@
 ﻿using MaxLib.DB;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -68,9 +67,8 @@ namespace MaxLib.Sqlite.DB
 
         private async Task WaitUntil(CancellationToken token)
         {
-            //return Task.Delay(-1, token).ContinueWith(task => { });
             try { await Task.Delay(-1, token); }
-            catch (TaskCanceledException e)
+            catch (TaskCanceledException)
             {
             }
             catch (AggregateException e)
