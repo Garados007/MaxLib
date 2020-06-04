@@ -12,7 +12,8 @@ namespace MaxLib.Net.Webserver
             get => httpProtocol;
             set
             {
-                if (string.IsNullOrWhiteSpace(value)) throw new ArgumentException("HttpProtocol cannot contain an empty Protocol", "HttpProtocol");
+                if (string.IsNullOrWhiteSpace(value)) 
+                    throw new ArgumentException("HttpProtocol cannot contain an empty Protocol", nameof(HttpProtocol));
                 httpProtocol = value;
             }
         }
@@ -25,7 +26,8 @@ namespace MaxLib.Net.Webserver
             get => protocolMethod;
             set
             {
-                if (string.IsNullOrWhiteSpace(value)) throw new ArgumentException("ProtocolMethod cannot be empty", "ProtocolMethod");
+                if (string.IsNullOrWhiteSpace(value)) 
+                    throw new ArgumentException("ProtocolMethod cannot be empty", nameof(ProtocolMethod));
                 protocolMethod = value;
             }
         }

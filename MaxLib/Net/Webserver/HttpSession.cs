@@ -20,15 +20,9 @@ namespace MaxLib.Net.Webserver
 
         public int LastWorkTime { get; set; }
 
-        private Dictionary<object, object> sessionInformation = new Dictionary<object, object>();
-        public Dictionary<object, object> SessionInformation
-        {
-            get { return sessionInformation; }
-        }
+        public Dictionary<object, object> SessionInformation { get; private set; } = new Dictionary<object, object>();
 
         public void AlwaysSyncSessionInformation(Dictionary<object, object> information)
-        {
-            sessionInformation = information;
-        }
+            => SessionInformation = information ?? throw new ArgumentNullException(nameof(information));
     }
 }

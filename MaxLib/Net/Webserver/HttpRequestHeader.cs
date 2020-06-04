@@ -6,16 +6,10 @@ namespace MaxLib.Net.Webserver
     [Serializable]
     public class HttpRequestHeader : HttpHeader
     {
-        private string url = "/";
         public string Url
         {
-            get => url;
-            set
-            {
-                if (url == null) throw new ArgumentNullException("Url");
-                url = value ?? "/";
-                Location.SetLocation(url);
-            }
+            get => Location.Url;
+            set => Location.SetLocation(value ?? "/");
         }
 
         public HttpLocation Location { get; } = new HttpLocation("/");
@@ -24,7 +18,7 @@ namespace MaxLib.Net.Webserver
         public string Host
         {
             get => host;
-            set => host = value ?? throw new ArgumentNullException("Host");
+            set => host = value ?? throw new ArgumentNullException(nameof(Host));
         }
         public HttpPost Post { get; } = new HttpPost("");
         public List<string> FieldAccept { get; } = new List<string>();
@@ -35,7 +29,7 @@ namespace MaxLib.Net.Webserver
 
         public string FieldUserAgent
         {
-            get => HeaderParameter["User-Agent"];
+            get => HeaderParameter.TryGetValue("User-Agent", out string value) ? value : null;
             set => HeaderParameter["User-Agent"] = value;
         }
     }

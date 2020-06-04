@@ -8,7 +8,7 @@ namespace MaxLib.Net.Webserver
     {
         public string CompletePost { get; private set; }
 
-        public Dictionary<string, string> PostParameter { get; private set; }
+        public Dictionary<string, string> PostParameter { get; }
 
         public virtual void SetPost(string post)
         {
@@ -37,7 +37,7 @@ namespace MaxLib.Net.Webserver
 
         public HttpPost(string post)
         {
-            if (post == null) throw new ArgumentNullException("Post");
+            _ = post ?? throw new ArgumentNullException(nameof(post));
             PostParameter = new Dictionary<string, string>();
             SetPost(post);
         }

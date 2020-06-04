@@ -11,8 +11,9 @@ namespace MaxLib.Net.Webserver
 
         public static bool IsSupported(string Version, string[] SupportedVersions)
         {
-            if (Version == null) throw new ArgumentNullException("Version");
-            if (SupportedVersions == null) throw new ArgumentNullException("SupportedVersions");
+            _ = Version ?? throw new ArgumentNullException(nameof(Version));
+            _ = SupportedVersions ?? throw new ArgumentNullException(nameof(SupportedVersions));
+
             if (SupportedVersions.Length == 0) return false;
             if (SupportedVersions.Contains(Version)) return true;
             var ind = Version.IndexOf('.');

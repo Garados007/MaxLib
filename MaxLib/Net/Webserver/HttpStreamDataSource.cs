@@ -6,18 +6,18 @@ namespace MaxLib.Net.Webserver
     [Serializable]
     public class HttpStreamDataSource : HttpDataSource
     {
-        public Stream Stream { get; set; }
+        public Stream Stream { get; }
 
         public bool ReadOnly { get; }
 
-        public override bool CanAcceptData => !ReadOnly;
+        public override bool CanAcceptData => !ReadOnly && Stream.CanWrite;
 
-        public override bool CanProvideData => true;
+        public override bool CanProvideData => Stream.CanRead;
 
         public HttpStreamDataSource(Stream stream, bool readOnly = true)
         {
             ReadOnly = readOnly;
-            Stream = stream;
+            Stream = stream ?? throw new ArgumentNullException(nameof(stream));
         }
 
         public override void Dispose()

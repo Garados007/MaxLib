@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace MaxLib.Net.Webserver
 {
@@ -14,50 +16,47 @@ namespace MaxLib.Net.Webserver
 
         public string CompleteGet { get; private set; }
 
-        public Dictionary<string, string> GetParameter { get; private set; }
+        public Dictionary<string, string> GetParameter { get; }
+
+        static readonly Regex UrlRegex = new Regex(@"^((?:\/+([^\/?]+))*\/?)(?:\?((?:([^&$]*)&?)*))?$", RegexOptions.Compiled);
+
+        static readonly Regex ArgsRegex = new Regex(@"^([^=]*)=(.*)$", RegexOptions.Compiled);
 
         public virtual void SetLocation(string url)
         {
-            Url = url ?? throw new ArgumentNullException("url");
-            var ind = url.IndexOf('?');
-            if (ind == -1)
+            Url = url ?? throw new ArgumentNullException(url);
+                GetParameter.Clear();
+            var match = UrlRegex.Match(url);
+            if (!match.Success)
             {
                 DocumentPath = url;
+                DocumentPathTiles = new[] { url };
                 CompleteGet = "";
             }
-            else
+            DocumentPath = match.Groups[1].Value;
+            DocumentPathTiles = match.Groups[2].Captures
+                .OfType<Capture>()
+                .Select(c => WebServerUtils.DecodeUri(c.Value))
+                .ToArray();
+            CompleteGet = match.Groups[3].Success ? match.Groups[3].Value ?? "" : "";
+            foreach (Capture capture in match.Groups[4].Captures)
             {
-                DocumentPath = url.Remove(ind);
-                CompleteGet = ind + 1 == url.Length ? "" : url.Substring(ind + 1);
-            }
-            var path = DocumentPath.Trim('/');
-            DocumentPathTiles = path.Split('/');
-            for (int i = 0; i < DocumentPathTiles.Length; ++i) DocumentPathTiles[i] = WebServerUtils.DecodeUri(DocumentPathTiles[i]);
-            GetParameter.Clear();
-            if (CompleteGet != "")
-            {
-                var tiles = CompleteGet.Split('&');
-                foreach (var tile in tiles)
+                var submatch = ArgsRegex.Match(capture.Value);
+                if (submatch.Success)
                 {
-                    ind = tile.IndexOf('=');
-                    if (ind == -1)
-                    {
-                        var key = WebServerUtils.DecodeUri(tile);
-                        if (!GetParameter.ContainsKey(key)) GetParameter.Add(key, "");
-                    }
-                    else
-                    {
-                        var key = WebServerUtils.DecodeUri(tile.Remove(ind));
-                        var value = ind + 1 == tile.Length ? "" : tile.Substring(ind + 1);
-                        if (!GetParameter.ContainsKey(key)) GetParameter.Add(key, WebServerUtils.DecodeUri(value));
-                    }
+                    GetParameter[WebServerUtils.DecodeUri(submatch.Groups[1].Value)]
+                        = WebServerUtils.DecodeUri(submatch.Groups[2].Value);
+                }
+                else
+                {
+                    GetParameter[capture.Value] = "";
                 }
             }
         }
 
         public HttpLocation(string url)
         {
-            if (url == null) throw new ArgumentNullException("url");
+            _ = url ?? throw new ArgumentNullException(nameof(url));
             GetParameter = new Dictionary<string, string>();
             SetLocation(url);
         }

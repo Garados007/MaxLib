@@ -9,25 +9,25 @@ namespace MaxLib.Net.Webserver
 
         public string FieldLocation
         {
-            get => HeaderParameter["Location"];
+            get => HeaderParameter.TryGetValue("Location", out string value) ? value : null;
             set => HeaderParameter["Location"] = value;
         }
 
         public string FieldDate
         {
-            get => HeaderParameter["Date"];
+            get => HeaderParameter.TryGetValue("Date", out string value) ? value : null;
             set => HeaderParameter["Date"] = value;
         }
 
         public string FieldLastModified
         {
-            get => HeaderParameter["Last-Modified"];
+            get => HeaderParameter.TryGetValue("Last-Modified", out string value) ? value : null;
             set => HeaderParameter["Last-Modified"] = value;
         }
 
         public string FieldContentType
         {
-            get => HeaderParameter["Content-Type"];
+            get => HeaderParameter.TryGetValue("Content-Type", out string value) ? value : null;
             set => HeaderParameter["Content-Type"] = value;
         }
 
