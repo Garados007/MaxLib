@@ -26,25 +26,11 @@ namespace MaxLib.Net.Webserver.Remote
             Container.Dispose();
         }
 
-        public override byte[] ReadSourcePart(long start, long length)
-        {
-            return Container.GetSourcePart(start, length);
-        }
+        protected override long WriteStreamInternal(Stream stream, long start, long? stop)
+            => Container.WriteStream(stream, start, stop);
 
-        public override long ReadFromStream(Stream networkStream, long readlength)
-        {
-            return Container.ReadFromStream(networkStream, readlength);
-        }
-
-        public override int WriteSourcePart(byte[] source, long start, long length)
-        {
-            return Container.WriteSourcePart(source, start, length);
-        }
-
-        public override long WriteToStream(Stream networkStream)
-        {
-            return Container.WriteToStream(networkStream);
-        }
+        protected override long ReadStreamInternal(Stream stream, long? length)
+            => Container.ReadStream(stream, length);
 
         public override long? RangeEnd
         {

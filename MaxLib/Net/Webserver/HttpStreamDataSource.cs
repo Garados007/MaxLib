@@ -10,7 +10,7 @@ namespace MaxLib.Net.Webserver
 
         public bool ReadOnly { get; }
 
-        public override bool CanAcceptData => true;
+        public override bool CanAcceptData => !ReadOnly;
 
         public override bool CanProvideData => true;
 
@@ -26,68 +26,44 @@ namespace MaxLib.Net.Webserver
         public override long? Length()
             => Stream?.Length;
 
-        public override long WriteToStream(Stream networkStream)
+        protected override long WriteStreamInternal(Stream stream, long start, long? stop)
         {
-            Stream.Position = TransferCompleteData ? 0 : RangeStart;
-            var buffer = new byte[64 * 1024];
-            long readed = 0;
-            bool canRead;
-            do
+            Stream.Position = start;
+            using (var skip = new SkipableStream(Stream, 0))
             {
-                var length = RangeEnd == null
-                    ? buffer.Length
-                    : (int)Math.Min(buffer.Length, RangeEnd.Value - RangeStart - readed);
-                var currentRead = Stream.Read(buffer, 0, length);
-                readed += currentRead;
                 try
                 {
-                    networkStream.Write(buffer, 0, length);
+                    return skip.WriteToStream(stream, 
+                        stop == null ? null : (long?)(stop.Value - start));
                 }
                 catch (IOException)
                 {
-                    WebServerLog.Add(ServerLogType.Error, GetType(), "Send", "Connection closed by remote Host");
-                    return -1;
+                    WebServerLog.Add(ServerLogType.Information, GetType(), "Send", "Connection closed by remote Host");
+                    return Stream.Position - start;
                 }
-                canRead = RangeEnd == null
-                    ? currentRead > 0
-                    : readed < RangeEnd.Value - RangeStart;
             }
-            while (canRead);
-            return readed;
         }
 
-        public override long ReadFromStream(Stream networkStream, long readlength)
+        protected override long ReadStreamInternal(Stream stream, long? length)
         {
+            if (ReadOnly)
+                throw new NotSupportedException();
             Stream.Position = 0;
-            var buffer = new byte[64 * 1024];
-            long readed = 0;
-            int r;
-            do
+            using (var skip = new SkipableStream(Stream, 0))
             {
-                var length = readlength == 0 ? buffer.Length :
-                    (int)Math.Min(buffer.Length, readlength - readed);
-                r = networkStream.Read(buffer, 0, length);
-                Stream.Write(buffer, 0, r);
-                readed += r;
+                long readed;
+                try
+                {
+                    readed = skip.ReadFromStream(stream, length);
+                }
+                catch (IOException)
+                {
+                    WebServerLog.Add(ServerLogType.Information, GetType(), "Send", "Connection closed by remote Host");
+                    readed = Stream.Position;
+                }
+                Stream.SetLength(readed);
+                return readed;
             }
-            while (r != 0);
-            Stream.SetLength(readed);
-            return readed;
-        }
-
-        public override byte[] ReadSourcePart(long start, long length)
-        {
-            var b = new byte[length];
-            Stream.Position = start;
-            Stream.Read(b, 0, b.Length);
-            return b;
-        }
-
-        public override int WriteSourcePart(byte[] source, long start, long length)
-        {
-            Stream.Position = start;
-            Stream.Write(source, 0, (int)length);
-            return (int)length;
         }
     }
 }

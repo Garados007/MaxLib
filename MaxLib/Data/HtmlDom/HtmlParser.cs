@@ -1,6 +1,8 @@
-﻿using System;
+﻿using MaxLib.Net.Webserver;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -2748,7 +2750,7 @@ namespace MaxLib.Data.HtmlDom
     #region Integration des Html DOM Models in den Webserver
 
     [Serializable]
-    public class HtmlDomDataSource : Net.Webserver.HttpDataSource
+    public class HtmlDomDataSource : HttpDataSource
     {
         public HtmlDomDocument Document { get; private set; }
 
@@ -2761,41 +2763,52 @@ namespace MaxLib.Data.HtmlDom
         {
         }
 
-        public override long Length()
+        public override long? Length()
         {
             return HtmlDomParser.DefaultEncoding.GetByteCount(Document.Html);
         }
 
-        public override long WriteToStream(System.IO.Stream networkStream)
+        public override bool CanAcceptData => true;
+
+        public override bool CanProvideData => true;
+
+        protected override long WriteStreamInternal(Stream stream, long start, long? stop)
         {
             var b = HtmlDomParser.DefaultEncoding.GetBytes(Document.Html);
-            networkStream.Write(b, 0, b.Length);
-            return b.LongLength;
+            using (var m = new MemoryStream(b))
+            using (var skip = new SkipableStream(m, start))
+            {
+                try
+                {
+                    return skip.WriteToStream(stream,
+                        stop == null ? null : (long?)(stop.Value - start));
+                }
+                catch (IOException)
+                {
+                    WebServerLog.Add(ServerLogType.Information, GetType(), "Send", "Connection closed by remote Host");
+                    return m.Position - start;
+                }
+            }
         }
 
-        public override long ReadFromStream(System.IO.Stream networkStream, long readlength)
+        protected override long ReadStreamInternal(Stream stream, long? length)
         {
-            var b = new byte[readlength];
-            networkStream.Read(b, 0, b.Length);
-            Document.Html = HtmlDomParser.DefaultEncoding.GetString(b);
-            return readlength;
-        }
-
-        public override byte[] ReadSourcePart(long start, long length)
-        {
-            var b = HtmlDomParser.DefaultEncoding.GetBytes(Document.Html).ToList();
-            return b.GetRange((int)start, (int)length).ToArray();
-        }
-
-        public override int WriteSourcePart(byte[] source, long start, long length)
-        {
-            var b = HtmlDomParser.DefaultEncoding.GetBytes(Document.Html).ToList();
-            int i = 0;
-            for (; i < length; ++i)
-                if (i + start >= b.Count) b.Add(source[i]);
-                else b[(int)start + i] = source[i];
-            Document.Html = HtmlDomParser.DefaultEncoding.GetString(b.ToArray());
-            return i;
+            using (var m = new MemoryStream())
+            using (var skip = new SkipableStream(m, 0))
+            {
+                long readed;
+                try
+                {
+                    readed = skip.ReadFromStream(stream, length);
+                }
+                catch (IOException)
+                {
+                    WebServerLog.Add(ServerLogType.Information, GetType(), "Send", "Connection closed by remote Host");
+                    readed = m.Position;
+                }
+                Document.Html = HtmlDomParser.DefaultEncoding.GetString(m.ToArray());
+                return readed;
+            }
         }
     }
 

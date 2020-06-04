@@ -208,63 +208,38 @@ namespace MaxLib.Net.Webserver
             foreach (var s in streams) s.Dispose();
         }
 
-        public override byte[] ReadSourcePart(long start, long length)
+        protected override long WriteStreamInternal(Stream stream, long start, long? stop)
         {
-            var buffer = new byte[length];
-            long offset = 0;
-            for (int i = 0; i<streams.Count && length > 0; ++i)
+            using (var skip = new SkipableStream(stream, start))
             {
-                var streamLength = streams[i].Length();
-                if (streamLength != null)
+                long total = 0;
+                foreach (var s in streams)
                 {
-                    if (streamLength.Value < start)
+                    if (stop != null && total >= stop.Value)
+                        return total;
+                    var end = stop == null ? null : (long?)(stop.Value - total);
+                    var size = s.Length();
+                    if (size == null)
                     {
-                        start -= streamLength.Value;
-                        continue;
-                    }
-                    var fl = Math.Min(length, streamLength.Value);
-                    var fb = streams[i].ReadSourcePart(start, fl);
-                    length -= fl;
-                    start = 0;
-                    Array.Copy(fb, 0, buffer, offset, fl);
-                    offset += fl;
-                }
-                else
-                {
-                    var block = streams[i].ReadSourcePart(0, start + length);
-                    if (block.Length < start)
-                    {
-                        start -= block.Length;
+                        total += s.WriteStream(skip, 0, end);
                     }
                     else
                     {
-                        var readLength = Math.Min(length, block.Length - start);
-                        Array.Copy(block, start, block, offset, readLength);
-                        length -= readLength;
-                        start = 0;
-                        offset += readLength;
+                        if (size.Value < skip.SkipBytes)
+                        {
+                            skip.Skip(size.Value);
+                            continue;
+                        }
+                        var leftSkip = skip.SkipBytes;
+                        skip.Skip(skip.SkipBytes);
+                        total += s.WriteStream(skip, leftSkip, end);
                     }
                 }
+                return total;
             }
-            return buffer;
         }
 
-        public override long ReadFromStream(Stream networkStream, long readlength)
-        {
-            return 0;
-        }
-
-        public override int WriteSourcePart(byte[] source, long start, long length)
-        {
-            return 0;
-        }
-
-        public override long WriteToStream(Stream networkStream)
-        {
-            long length = 0;
-            foreach (var s in streams)
-                length += s.WriteToStream(networkStream);
-            return length;
-        }
+        protected override long ReadStreamInternal(Stream stream, long? length)
+            => throw new NotSupportedException();
     }
 }

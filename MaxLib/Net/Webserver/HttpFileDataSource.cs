@@ -31,7 +31,7 @@ namespace MaxLib.Net.Webserver
 
         public bool ReadOnly { get; }
 
-        public override bool CanAcceptData => true;
+        public override bool CanAcceptData => !ReadOnly;
 
         public override bool CanProvideData => true;
 
@@ -49,69 +49,44 @@ namespace MaxLib.Net.Webserver
         public override long? Length()
             => File?.Length;
 
-        public override long WriteToStream(Stream networkStream)
+        protected override long WriteStreamInternal(Stream stream, long start, long? stop)
         {
-            File.Position = TransferCompleteData ? 0 : RangeStart;
-            var buffer = new byte[64 * 1024];
-            long readed = 0;
-            bool hasmore;
-            var end = RangeEnd ?? Length();
-            do
+            File.Position = start;
+            using (var skip = new SkipableStream(File, 0))
             {
-                var length = end == null 
-                    ? buffer.Length 
-                    : (int)Math.Min(buffer.Length, end.Value - RangeStart - readed);
-                var currentRead = File.Read(buffer, 0, length);
-                readed += currentRead;
                 try
                 {
-                    networkStream.Write(buffer, 0, length);
+                    return skip.WriteToStream(stream,
+                        stop == null ? null : (long?)(stop.Value - start));
                 }
                 catch (IOException)
                 {
-                    WebServerLog.Add(ServerLogType.Error, GetType(), "Send", "Connection closed by remote Host");
-                    return -1;
+                    WebServerLog.Add(ServerLogType.Information, GetType(), "Send", "Connection closed by remote Host");
+                    return File.Position - start;
                 }
-                hasmore = end == null
-                    ? currentRead > 0
-                    : readed < end.Value - RangeStart;
             }
-            while (hasmore);
-            return readed;
         }
 
-        public override long ReadFromStream(Stream networkStream, long readlength)
+        protected override long ReadStreamInternal(Stream stream, long? length)
         {
+            if (ReadOnly)
+                throw new NotSupportedException();
             File.Position = 0;
-            var buffer = new byte[64 * 1024];
-            long readed = 0;
-            int r;
-            do
+            using (var skip = new SkipableStream(File, 0))
             {
-                var length = readlength == 0 ? buffer.Length :
-                    (int)Math.Min(buffer.Length, readlength - readed);
-                r = networkStream.Read(buffer, 0, length);
-                File.Write(buffer, 0, r);
-                readed += r;
+                long readed;
+                try
+                {
+                    readed = skip.ReadFromStream(stream, length);
+                }
+                catch (IOException)
+                {
+                    WebServerLog.Add(ServerLogType.Information, GetType(), "Send", "Connection closed by remote Host");
+                    readed = File.Position;
+                }
+                File.SetLength(readed);
+                return readed;
             }
-            while (r != 0);
-            File.SetLength(readed);
-            return readed;
-        }
-
-        public override byte[] ReadSourcePart(long start, long length)
-        {
-            var b = new byte[length];
-            File.Position = start;
-            File.Read(b, 0, b.Length);
-            return b;
-        }
-
-        public override int WriteSourcePart(byte[] source, long start, long length)
-        {
-            File.Position = start;
-            File.Write(source, 0, (int)length);
-            return (int)length;
         }
     }
 }

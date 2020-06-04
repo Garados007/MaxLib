@@ -29,25 +29,11 @@ namespace MaxLib.Net.Webserver.Remote
             Origin.Dispose();
         }
 
-        public byte[] GetSourcePart(long start, long length)
-        {
-            return Origin.ReadSourcePart(start, length);
-        }
+        public long WriteStream(Stream stream, long start, long? stop)
+            => Origin.WriteStream(stream, start, stop);
 
-        public long ReadFromStream(Stream networkStream, long readlength)
-        {
-            return Origin.ReadFromStream(networkStream, readlength);
-        }
-
-        public int WriteSourcePart(byte[] source, long start, long length)
-        {
-            return Origin.WriteSourcePart(source, start, length);
-        }
-
-        public long WriteToStream(Stream networkStream)
-        {
-            return Origin.WriteToStream(networkStream);
-        }
+        public long ReadStream(Stream stream, long? length)
+            => Origin.ReadStream(stream, length);
 
         public long? RangeEnd()
         {
