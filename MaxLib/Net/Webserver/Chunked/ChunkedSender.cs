@@ -89,17 +89,31 @@ namespace MaxLib.Net.Webserver.Chunked
             {
                 stream.Flush();
                 writer.Flush();
-                source.WriteToStream(stream);
+                source.WriteStream(stream);
                 stream.Flush();
                 writer.Flush();
             }
             else
             {
                 var length = source.Length();
-                if (length == 0) return;
-                writer.WriteLine(length.ToString("X"));
-                writer.Flush();
-                source.WriteToStream(stream);
+                if (length == null)
+                    using (var m = new MemoryStream())
+                    {
+                        source.WriteStream(m);
+                        if (m.Length == 0)
+                            return;
+                        writer.WriteLine(m.Length.ToString("X"));
+                        writer.Flush();
+                        m.Position = 0;
+                        m.WriteTo(stream);
+                    }
+                else
+                {
+                    if (length.Value == 0) return;
+                    writer.WriteLine(length.Value.ToString("X"));
+                    writer.Flush();
+                    source.WriteStream(stream);
+                }
                 stream.Flush();
                 writer.WriteLine();
                 writer.Flush();

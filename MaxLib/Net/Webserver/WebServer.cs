@@ -157,7 +157,11 @@ namespace MaxLib.Net.Webserver
                 try { ClientStartListen(session); }
                 catch (Exception e)
                 {
-                    WebServerLog.Add(ServerLogType.FatalError, GetType(), "Unhandled Exception", e, "{0} in {1}", e.Message, e.StackTrace);
+                    WebServerLog.Add(
+                        ServerLogType.FatalError, 
+                        GetType(), 
+                        "Unhandled Exception", 
+                        $"{e.GetType().FullName}: {e.Message} in {e.StackTrace}");
                 }
             }
         }

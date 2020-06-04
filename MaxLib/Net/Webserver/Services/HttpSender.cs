@@ -123,7 +123,7 @@ namespace MaxLib.Net.Webserver.Services
             if (!(task.Document.Information.ContainsKey("Only Header") && (bool)task.Document.Information["Only Header"]))
                 for (int i = 0; i < task.Document.DataSources.Count; ++i)
                 {
-                    task.Document.DataSources[i].WriteToStream(stream);
+                    task.Document.DataSources[i].WriteStream(stream);
                 }
             try { stream.Flush(); }
             catch (IOException)

@@ -12,7 +12,11 @@ namespace MaxLib.Net.Webserver
         public readonly struct Cookie
         {
             public ReadOnlyMemory<char> Name { get; }
+
+            public string NameString => Name.ToString();
             public ReadOnlyMemory<char> Value { get; }
+
+            public string ValueString => Value.ToString();
             public DateTime Expires { get; }
             public int MaxAge { get; }
             public ReadOnlyMemory<char> Path { get; }

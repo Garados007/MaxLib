@@ -15,12 +15,12 @@ namespace MaxLib.Net.Webserver.Session
                 var si = RegisterNewSession(task.Session);
                 task.Session.PublicSessionKey = si.ByteKey;
                 task.Session.AlwaysSyncSessionInformation(si.Information);
-                task.Document.RequestHeader.Cookie.AddedCookies.Add(new HttpCookie.Cookie("Session", si.HexKey, 3600));
+                task.Document.RequestHeader.Cookie.AddedCookies.Add("Session", new HttpCookie.Cookie("Session", si.HexKey, 3600));
             }
             else
             {
-                if (!RegisterSession(task.Session, cookie.Value))
-                    task.Document.RequestHeader.Cookie.AddedCookies.Add(
+                if (!RegisterSession(task.Session, cookie.Value.ValueString))
+                    task.Document.RequestHeader.Cookie.AddedCookies.Add("Session",
                         new HttpCookie.Cookie("Session", Get(task.Session.PublicSessionKey).HexKey, 3600));
             }
         }
