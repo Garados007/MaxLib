@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver.Services
@@ -24,10 +24,9 @@ namespace MaxLib.Net.Webserver.Services
             _ = task ?? throw new ArgumentNullException(nameof(task));
 
             var header = task.Document.RequestHeader;
-            var mwt = 50;
             var sb = new StringBuilder();
-            if (!(task.NetworkStream?.BaseStream is NetworkStream stream))
-                task.NetworkStream = new HttpStream(stream = task.Session.NetworkClient.GetStream());
+            if (task.NetworkStream == null)
+                task.NetworkStream = new HttpStream(task.Session.NetworkClient.GetStream());
 
             if (task.Server.Settings.Debug_WriteRequests)
             {
@@ -38,33 +37,9 @@ namespace MaxLib.Net.Webserver.Services
                 sb.AppendLine();
             }
 
-            while (!stream.DataAvailable && mwt > 0)
-            {
-                await Task.Delay(100);
-                mwt--;
-                if (!task.Session.NetworkClient.Connected) return;
-            }
-            try
-            {
-                if (!stream.DataAvailable)
-                {
-                    task.Document.RequestHeader.FieldConnection = HttpConnectionType.KeepAlive;
-                    WebServerLog.Add(ServerLogType.Error, GetType(), "Header", "Request Time out");
-                    task.Document.ResponseHeader.StatusCode = HttpStateCode.RequestTimeOut;
-                    task.NextTask = WebServiceType.PreCreateResponse;
-                    return;
-                }
-            }
-            catch (ObjectDisposedException)
-            {
-                WebServerLog.Add(ServerLogType.Error, GetType(), "Header", "Connection closed by remote host");
-                task.Document.ResponseHeader.StatusCode = HttpStateCode.RequestTimeOut;
-                task.NextTask = task.CurrentTask = WebServiceType.SendResponse;
-                return;
-            }
-
+            var cancel = new CancellationTokenSource(5000);
             string line;
-            try { line = await task.NetworkStream.ReadLineAsync(); }
+            try { line = await task.NetworkStream.ReadLineAsync(cancel.Token); }
             catch
             {
                 WebServerLog.Add(ServerLogType.Error, GetType(), "Header", "Connection closed by remote host");
@@ -72,6 +47,8 @@ namespace MaxLib.Net.Webserver.Services
                 task.NextTask = task.CurrentTask = WebServiceType.SendResponse;
                 return;
             }
+            finally { cancel.Dispose(); }
+
             if (line == null)
             {
                 WebServerLog.Add(ServerLogType.Error, GetType(), "Header", "Can't read Header line");
