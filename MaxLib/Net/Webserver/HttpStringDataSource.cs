@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver
 {
@@ -47,8 +48,9 @@ namespace MaxLib.Net.Webserver
         public override long? Length()
             => Encoder.GetByteCount(Data);
 
-        protected override long WriteStreamInternal(Stream stream, long start, long? stop)
+        protected override async Task<long> WriteStreamInternal(Stream stream, long start, long? stop)
         {
+            await Task.CompletedTask;
             using (var m = new MemoryStream(Encoder.GetBytes(Data)))
             using (var skip = new SkipableStream(m, start))
             {
@@ -61,8 +63,9 @@ namespace MaxLib.Net.Webserver
             }
         }
 
-        protected override long ReadStreamInternal(Stream stream, long? length)
+        protected override async Task<long> ReadStreamInternal(Stream stream, long? length)
         {
+            await Task.CompletedTask;
             using (var m = new MemoryStream())
             using (var skip = new SkipableStream(m, 0))
             {

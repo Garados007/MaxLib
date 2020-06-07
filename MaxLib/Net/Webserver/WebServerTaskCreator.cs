@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver
 {
@@ -20,10 +21,9 @@ namespace MaxLib.Net.Webserver
                     ResponseHeader = new HttpResponseHeader(),
                     Session = new HttpSession()
                     {
-                        InternalSessionKey = 0,
                         Ip = "127.0.0.1",
                         LastWorkTime = -1,
-                        PublicSessionKey = new byte[0]
+                        SessionKey = new byte[0]
                     }
                 },
                 NetworkStream = new MemoryStream()
@@ -32,10 +32,10 @@ namespace MaxLib.Net.Webserver
             TerminationState = WebServiceType.SendResponse;
         }
 
-        public void Start(WebServer server)
+        public async Task Start(WebServer server)
         {
             Task.Server = server;
-            server.ExecuteTaskChain(Task, TerminationState);
+            await server.ExecuteTaskChain(Task, TerminationState);
             Task.Server = null;
         }
 
@@ -53,9 +53,9 @@ namespace MaxLib.Net.Webserver
             else Task.Document.RequestHeader.HeaderParameter.Add(key, value);
         }
 
-        public void SetPost(string post)
+        public void SetPost(string post, string mime)
         {
-            Task.Document.RequestHeader.Post.SetPost(post);
+            Task.Document.RequestHeader.Post.SetPost(post, mime);
         }
 
         public void SetAccept(string[] acceptTypes = null, string[] encoding = null)

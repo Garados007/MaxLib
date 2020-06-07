@@ -7,6 +7,8 @@ namespace MaxLib.Net.Webserver
     /// </summary>
     public static class MimeType
     {
+
+        public const string ApplicationXWwwFromUrlencoded = "application/x-www-form-urlencoded";
         /// <summary>
         /// Microsoft Excel Dateien (*.xls *.xla)
         /// </summary>

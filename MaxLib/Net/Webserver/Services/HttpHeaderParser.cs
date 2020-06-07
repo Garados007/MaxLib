@@ -2,7 +2,7 @@
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver.Services
 {
@@ -19,7 +19,7 @@ namespace MaxLib.Net.Webserver.Services
         /// </summary>
         public HttpHeaderParser() : base(WebServiceType.PreParseRequest) { }
 
-        public override void ProgressTask(WebProgressTask task)
+        public override async Task ProgressTask(WebProgressTask task)
         {
             _ = task ?? throw new ArgumentNullException(nameof(task));
 
@@ -42,7 +42,7 @@ namespace MaxLib.Net.Webserver.Services
 
             while (!((NetworkStream)stream).DataAvailable && mwt > 0)
             {
-                Thread.Sleep(100);
+                await Task.Delay(100);
                 mwt--;
                 if (!task.Session.NetworkClient.Connected) return;
             }
@@ -66,7 +66,7 @@ namespace MaxLib.Net.Webserver.Services
             }
 
             string line;
-            try { line = reader.ReadLine(); }
+            try { line = await reader.ReadLineAsync(); }
             catch
             {
                 WebServerLog.Add(ServerLogType.Error, GetType(), "Header", "Connection closed by remote host");
@@ -83,15 +83,17 @@ namespace MaxLib.Net.Webserver.Services
             }
             try
             {
-                if (task.Server.Settings.Debug_WriteRequests) sb.AppendLine(line);
+                if (task.Server.Settings.Debug_WriteRequests) 
+                    sb.AppendLine(line);
                 var parts = line.Split(' ');
                 WebServerLog.Add(ServerLogType.Debug, GetType(), "Header", line);
                 header.ProtocolMethod = parts[0];
                 header.Url = parts[1];
                 header.HttpProtocol = parts[2];
-                while (!string.IsNullOrWhiteSpace(line = reader.ReadLine()))
+                while (!string.IsNullOrWhiteSpace(line = await reader.ReadLineAsync()))
                 {
-                    if (task.Server.Settings.Debug_WriteRequests) sb.AppendLine(line);
+                    if (task.Server.Settings.Debug_WriteRequests) 
+                        sb.AppendLine(line);
                     var ind = line.IndexOf(':');
                     var key = line.Remove(ind);
                     var value = line.Substring(ind + 1).Trim();
@@ -106,12 +108,14 @@ namespace MaxLib.Net.Webserver.Services
                 task.NextTask = WebServiceType.PreCreateResponse;
                 return;
             }
-            if (header.ProtocolMethod == HttpProtocollMethod.Post)
+            if (header.HeaderParameter.ContainsKey("Content-Length"))
             {
                 var buffer = new char[int.Parse(header.HeaderParameter["Content-Length"])];
-                _ = reader.ReadBlock(buffer, 0, buffer.Length);
-                header.Post.SetPost(new string(buffer));
-                if (task.Server.Settings.Debug_WriteRequests) sb.AppendLine(new string(buffer));
+                _ = await reader.ReadBlockAsync(buffer, 0, buffer.Length);
+                header.Post.SetPost(new string(buffer), 
+                    header.HeaderParameter.TryGetValue("Content-Type", out string mime) ? mime : null);
+                if (task.Server.Settings.Debug_WriteRequests) 
+                    sb.AppendLine(new string(buffer));
             }
             if (task.Server.Settings.Debug_WriteRequests)
             {

@@ -14,37 +14,27 @@ namespace MaxLib.Net.Webserver.Session
             if (cookie == null)
             {
                 var si = RegisterNewSession(task.Session);
-                task.Session.PublicSessionKey = si.ByteKey;
+                task.Session.SessionKey = si.Key;
                 task.Session.AlwaysSyncSessionInformation(si.Information);
-                task.Document.RequestHeader.Cookie.AddedCookies.Add("Session", new HttpCookie.Cookie("Session", si.HexKey, 3600));
+                task.Document.RequestHeader.Cookie.AddedCookies.Add("Session", 
+                    new HttpCookie.Cookie("Session", Convert.ToBase64String(si.Key), 3600));
             }
             else
             {
-                if (!RegisterSession(task.Session, cookie.Value.ValueString))
+                if (!RegisterSession(task.Session, Convert.FromBase64String(cookie.Value.ValueString)))
                     task.Document.RequestHeader.Cookie.AddedCookies.Add("Session",
-                        new HttpCookie.Cookie("Session", Get(task.Session.PublicSessionKey).HexKey, 3600));
+                        new HttpCookie.Cookie("Session", Convert.ToBase64String(task.Session.SessionKey), 3600));
             }
-        }
-
-        public static bool RegisterSession(HttpSession session, string hexkey)
-        {
-            _ = session ?? throw new ArgumentNullException(nameof(session));
-            _ = hexkey ?? throw new ArgumentNullException(nameof(hexkey));
-            return RegisterSession(session, Get(hexkey));
         }
 
         public static bool RegisterSession(HttpSession session, byte[] binkey)
         {
             _ = session ?? throw new ArgumentNullException(nameof(session));
             _ = binkey ?? throw new ArgumentNullException(nameof(binkey));
-            return RegisterSession(session, Get(binkey));
-        }
-
-        static bool RegisterSession(HttpSession session, SessionInformation si)
-        {
+            var si = Get(binkey);
             var added = si != null;
             si = si ?? RegisterNewSession(session);
-            session.PublicSessionKey = si.ByteKey;
+            session.SessionKey = si.Key;
             session.AlwaysSyncSessionInformation(si.Information);
             return !added;
         }
@@ -52,47 +42,35 @@ namespace MaxLib.Net.Webserver.Session
         public static SessionInformation RegisterNewSession(HttpSession session)
         {
             _ = session ?? throw new ArgumentNullException(nameof(session));
-            var key = GenerateSessionKey(out byte[] bkey);
-            session.PublicSessionKey = bkey;
-            var si = new SessionInformation(key, bkey, DateTime.Now);
+            var key = GenerateSessionKey();
+            session.SessionKey = key;
+            var si = new SessionInformation(key, DateTime.Now);
             Sessions.Add(si);
             return si;
         }
 
-        public static SessionInformation Get(string hexkey)
+        public static SessionInformation Get(byte[] key)
         {
-            return Sessions.Find((si) => si != null && si.HexKey == hexkey);
+            _ = key ?? throw new ArgumentNullException(nameof(key));
+            return Sessions.Find((si) => WebServerUtils.BytesEqual(si.Key, key));
         }
 
-        public static SessionInformation Get(byte[] binkey)
+        public static void DeleteSession(byte[] key)
         {
-            return Sessions.Find((si) => WebServerUtils.BytesEqual(si.ByteKey, binkey));
-        }
-
-        public static void DeleteSession(string hexkey)
-        {
-            var ind = Sessions.FindIndex((si) => si.HexKey == hexkey);
+            _ = key ?? throw new ArgumentNullException(nameof(key));
+            var ind = Sessions.FindIndex((si) => si.Key == key);
             if (ind != -1) Sessions.RemoveAt(ind);
         }
 
-        public static void DeleteSession(byte[] binkey)
-        {
-            var ind = Sessions.FindIndex((si) => si.ByteKey == binkey);
-            if (ind != -1) Sessions.RemoveAt(ind);
-        }
-
-        const string hex = "0123456789ABCDEF";
-
-        static string GenerateSessionKey(out byte[] b)
+        static byte[] GenerateSessionKey()
         {
             var r = new Random();
+            var key = new byte[16];
             while (true)
             {
-                b = new byte[16];
-                r.NextBytes(b);
-                var h = "";
-                for (int i = 0; i < b.Length; ++i) h += hex[b[i] / 16].ToString() + hex[b[i] % 16].ToString();
-                if (!Sessions.Exists((si) => si.HexKey == h)) return h;
+                r.NextBytes(key);
+                if (!Sessions.Exists((si) => WebServerUtils.BytesEqual(key, si.Key)))
+                    return key;
             }
         }
     }

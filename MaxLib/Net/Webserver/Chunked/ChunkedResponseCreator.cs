@@ -1,5 +1,6 @@
 ﻿using MaxLib.Net.Webserver.Lazy;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver.Chunked
 {
@@ -22,7 +23,7 @@ namespace MaxLib.Net.Webserver.Chunked
                 ));
         }
 
-        public override void ProgressTask(WebProgressTask task)
+        public override async Task ProgressTask(WebProgressTask task)
         {
             var request = task.Document.RequestHeader;
             var response = task.Document.ResponseHeader;
@@ -39,6 +40,7 @@ namespace MaxLib.Net.Webserver.Chunked
                 response.HeaderParameter["Content-Type"] += "; charset=" +
                     task.Document.PrimaryEncoding;
             task.Document.Information.Add("block default response creator", true);
+            await Task.CompletedTask;
         }
     }
 }

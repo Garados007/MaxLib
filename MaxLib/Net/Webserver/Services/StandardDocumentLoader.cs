@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver.Services
 {
@@ -21,7 +22,7 @@ namespace MaxLib.Net.Webserver.Services
 
         public string Document { get; set; }
 
-        public override void ProgressTask(WebProgressTask task)
+        public override async Task ProgressTask(WebProgressTask task)
         {
             _ = task ?? throw new ArgumentNullException(nameof(task));
 
@@ -32,6 +33,8 @@ namespace MaxLib.Net.Webserver.Services
             task.Document.ResponseHeader.StatusCode = HttpStateCode.OK;
             task.Document.DataSources.Add(source);
             task.Document.PrimaryEncoding = "utf-8";
+
+            await Task.CompletedTask;
         }
 
         public override bool CanWorkWith(WebProgressTask task)

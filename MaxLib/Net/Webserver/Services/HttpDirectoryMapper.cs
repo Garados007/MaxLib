@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver.Services
 {
@@ -47,7 +48,7 @@ namespace MaxLib.Net.Webserver.Services
             }
         }
 
-        public override void ProgressTask(WebProgressTask task)
+        public override async Task ProgressTask(WebProgressTask task)
         {
             _ = task ?? throw new ArgumentNullException(nameof(task));
 
@@ -83,6 +84,7 @@ namespace MaxLib.Net.Webserver.Services
                 task.Document.DataSources.Add(source);
                 task.Document.ResponseHeader.StatusCode = HttpStateCode.OK;
             }
+            await Task.CompletedTask;
         }
 
         public override bool CanWorkWith(WebProgressTask task)

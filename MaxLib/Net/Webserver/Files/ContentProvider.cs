@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using MaxLib.Net.Webserver.Files.Content.Grabber.Icons;
 using MaxLib.Net.Webserver.Files.Content.Grabber.Info;
 using MaxLib.Net.Webserver.Files.Content.Viewer;
@@ -45,7 +46,7 @@ namespace MaxLib.Net.Webserver.Files
                 SourceProvider != null && ContentViewer != null;
         }
 
-        public override void ProgressTask(WebProgressTask task)
+        public override Task ProgressTask(WebProgressTask task)
         {
             var tp = task.Document.RequestHeader.Location.DocumentPathTiles;
             var rp = new string[tp.Length - PathRoot.Length];
@@ -69,6 +70,7 @@ namespace MaxLib.Net.Webserver.Files
                 UrlName = rp.Length == 0 ? "" : rp[rp.Length - 1]
             };
             ContentViewer.Show(result, task, SourceProvider);
+            return Task.CompletedTask;
         }
 
         void LoadIcons(ContentInfo content, WebProgressTask task)

@@ -83,7 +83,7 @@ namespace MaxLib.Net.Webserver.SSL
                 : client.Client.RemoteEndPoint.ToString();
             AllSessions.Add(session);
             //listen to connection
-            _ = Task.Run(() =>
+            _ = Task.Run(async () =>
             {
                 //authentificate as server and establish ssl connection
                 var stream = new SslStream(client.GetStream(), false);
@@ -102,7 +102,7 @@ namespace MaxLib.Net.Webserver.SSL
                     return;
                 }
 
-                SafeClientStartListen(session);
+                await SafeClientStartListen(session);
             });
         }
     }

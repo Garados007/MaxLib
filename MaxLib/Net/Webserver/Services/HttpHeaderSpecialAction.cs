@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver.Services
 {
@@ -12,7 +13,7 @@ namespace MaxLib.Net.Webserver.Services
         /// </summary>
         public HttpHeaderSpecialAction() : base(WebServiceType.PostParseRequest) { }
 
-        public override void ProgressTask(WebProgressTask task)
+        public override async Task ProgressTask(WebProgressTask task)
         {
             _ = task ?? throw new ArgumentNullException(nameof(task));
 
@@ -33,6 +34,8 @@ namespace MaxLib.Net.Webserver.Services
                     }
                     break;
             }
+
+            await Task.CompletedTask;
         }
 
         public override bool CanWorkWith(WebProgressTask task)

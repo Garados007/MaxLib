@@ -124,8 +124,7 @@ namespace MaxLib.Net.Webserver
 
                     if (kas.NetworkClient.Available > 0 && kas.LastWorkTime != -1)
                     {
-                        var task = new Task((session) => SafeClientStartListen((HttpSession)session), kas);
-                        task.Start();
+                        _ = Task.Run(() => SafeClientStartListen(kas));
                     }
                 }
 
@@ -157,13 +156,13 @@ namespace MaxLib.Net.Webserver
             _ = Task.Run(() => SafeClientStartListen(session));
         }
 
-        protected virtual void SafeClientStartListen(HttpSession session)
+        protected virtual async Task SafeClientStartListen(HttpSession session)
         {
             if (Debugger.IsAttached)
-                ClientStartListen(session);
+                await ClientStartListen(session);
             else
             {
-                try { ClientStartListen(session); }
+                try { await ClientStartListen(session); }
                 catch (Exception e)
                 {
                     WebServerLog.Add(
@@ -175,7 +174,7 @@ namespace MaxLib.Net.Webserver
             }
         }
 
-        protected virtual void ClientStartListen(HttpSession session)
+        protected virtual async Task ClientStartListen(HttpSession session)
         {
             session.LastWorkTime = -1;
             if (session.NetworkClient.Connected)
@@ -191,7 +190,7 @@ namespace MaxLib.Net.Webserver
                     return;
                 }
 
-                ExecuteTaskChain(task, WebServiceType.SendResponse);
+                await ExecuteTaskChain(task, WebServiceType.SendResponse);
 
                 if (task.Document.RequestHeader.FieldConnection == HttpConnectionType.KeepAlive)
                 {
@@ -215,12 +214,12 @@ namespace MaxLib.Net.Webserver
             session.NetworkClient.Close();
         }
 
-        internal protected virtual void ExecuteTaskChain(WebProgressTask task, WebServiceType terminationState = WebServiceType.SendResponse)
+        internal protected virtual async Task ExecuteTaskChain(WebProgressTask task, WebServiceType terminationState = WebServiceType.SendResponse)
         {
             if (task == null) return;
             while (true)
             {
-                WebServiceGroups[task.CurrentTask].Execute(task);
+                await WebServiceGroups[task.CurrentTask].Execute(task);
                 if (task.CurrentTask == terminationState) 
                     break;
                 task.CurrentTask = task.NextTask;
@@ -262,17 +261,10 @@ namespace MaxLib.Net.Webserver
             var r = new Random();
             do
             {
-                var b = new byte[8];
-                r.NextBytes(b);
-                s.InternalSessionKey = BitConverter.ToInt64(b, 0);
+                s.SessionKey = new byte[16];
+                r.NextBytes(s.SessionKey);
             }
-            while (AllSessions.Exists((ht) => ht != null && ht.InternalSessionKey == s.InternalSessionKey));
-            do
-            {
-                s.PublicSessionKey = new byte[16];
-                r.NextBytes(s.PublicSessionKey);
-            }
-            while (AllSessions.Exists((ht) => ht != null && WebServerUtils.BytesEqual(ht.PublicSessionKey, s.PublicSessionKey)));
+            while (AllSessions.Exists((ht) => ht != null && WebServerUtils.BytesEqual(ht.SessionKey, s.SessionKey)));
             s.LastWorkTime = -1;
             return s;
         }

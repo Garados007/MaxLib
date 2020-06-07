@@ -20,7 +20,7 @@ namespace MaxLib.Net.Webserver
             get => host;
             set => host = value ?? throw new ArgumentNullException(nameof(Host));
         }
-        public HttpPost Post { get; } = new HttpPost("");
+        public HttpPost Post { get; } = new HttpPost("", null);
         public List<string> FieldAccept { get; } = new List<string>();
         public List<string> FieldAcceptCharset { get; } = new List<string>();
         public List<string> FieldAcceptEncoding { get; } = new List<string>();

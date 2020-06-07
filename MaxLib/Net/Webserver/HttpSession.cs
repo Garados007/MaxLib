@@ -8,9 +8,7 @@ namespace MaxLib.Net.Webserver
     [Serializable]
     public class HttpSession
     {
-        public long InternalSessionKey { get; set; }
-
-        public byte[] PublicSessionKey { get; set; }
+        public byte[] SessionKey { get; set; }
 
         public string Ip { get; set; }
 

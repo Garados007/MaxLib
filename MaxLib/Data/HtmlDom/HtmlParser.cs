@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace MaxLib.Data.HtmlDom
 {
@@ -2772,8 +2773,9 @@ namespace MaxLib.Data.HtmlDom
 
         public override bool CanProvideData => true;
 
-        protected override long WriteStreamInternal(Stream stream, long start, long? stop)
+        protected override async Task<long> WriteStreamInternal(Stream stream, long start, long? stop)
         {
+            await Task.CompletedTask;
             var b = HtmlDomParser.DefaultEncoding.GetBytes(Document.Html);
             using (var m = new MemoryStream(b))
             using (var skip = new SkipableStream(m, start))
@@ -2791,7 +2793,7 @@ namespace MaxLib.Data.HtmlDom
             }
         }
 
-        protected override long ReadStreamInternal(Stream stream, long? length)
+        protected override Task<long> ReadStreamInternal(Stream stream, long? length)
         {
             using (var m = new MemoryStream())
             using (var skip = new SkipableStream(m, 0))
@@ -2807,7 +2809,7 @@ namespace MaxLib.Data.HtmlDom
                     readed = m.Position;
                 }
                 Document.Html = HtmlDomParser.DefaultEncoding.GetString(m.ToArray());
-                return readed;
+                return Task.FromResult(readed);
             }
         }
     }

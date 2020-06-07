@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Globalization;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver.Chunked
 {
@@ -31,14 +32,14 @@ namespace MaxLib.Net.Webserver.Chunked
             BaseStream.Dispose();
         }
 
-        protected override long WriteStreamInternal(Stream stream, long start, long? stop)
+        protected override async Task<long> WriteStreamInternal(Stream stream, long start, long? stop)
         {
             long total = 0;
             int readed;
             byte[] buffer = new byte[ReadBufferLength];
             do
             {
-                readed = BaseStream.Read(buffer, 0, (int)Math.Min(buffer.Length, start - total));
+                readed = await BaseStream.ReadAsync(buffer, 0, (int)Math.Min(buffer.Length, start - total));
                 total += readed;
             }
             while (total < start && readed > 0);
@@ -51,18 +52,18 @@ namespace MaxLib.Net.Webserver.Chunked
                 var read = stop == null
                     ? buffer.Length
                     : (int)Math.Min(buffer.Length, stop.Value - total);
-                readed = BaseStream.Read(buffer, 0, read);
+                readed = await BaseStream.ReadAsync(buffer, 0, read);
                 if (readed <= 0)
                     return total - start;
                 var length = ascii.GetBytes(readed.ToString("X"));
                 try
                 {
-                    stream.Write(length, 0, length.Length);
-                    stream.Write(nl, 0, nl.Length);
-                    stream.Write(buffer, 0, readed);
-                    stream.Write(nl, 0, nl.Length);
+                    await stream.WriteAsync(length, 0, length.Length);
+                    await stream.WriteAsync(nl, 0, nl.Length);
+                    await stream.WriteAsync(buffer, 0, readed);
+                    await stream.WriteAsync(nl, 0, nl.Length);
                     total += readed;
-                    stream.Flush();
+                    await stream.FlushAsync();
                 }
                 catch (IOException)
                 {
@@ -74,7 +75,7 @@ namespace MaxLib.Net.Webserver.Chunked
             return total - start;
         }
 
-        protected override long ReadStreamInternal(Stream stream, long? length)
+        protected override async Task<long> ReadStreamInternal(Stream stream, long? length)
         {
             long total = 0;
             int readed, numberLength;
@@ -82,7 +83,7 @@ namespace MaxLib.Net.Webserver.Chunked
             var buffer = new byte[0x10000];
             while (true)
             {
-                try { numberLength = ReadNumber(stream, buffer); }
+                try { numberLength = await ReadNumber(stream, buffer); }
                 catch (IOException)
                 {
                     WebServerLog.Add(ServerLogType.Information, GetType(), "read", "connection closed");
@@ -101,7 +102,7 @@ namespace MaxLib.Net.Webserver.Chunked
                 }
                 while (number > 0)
                 {
-                    try { readed = stream.Read(buffer, 0, (int)Math.Min(number, buffer.Length)); }
+                    try { readed = await stream.ReadAsync(buffer, 0, (int)Math.Min(number, buffer.Length)); }
                     catch (IOException)
                     {
                         WebServerLog.Add(ServerLogType.Information, GetType(), "read", "connection closed");
@@ -112,15 +113,15 @@ namespace MaxLib.Net.Webserver.Chunked
                         WebServerLog.Add(ServerLogType.Information, GetType(), "read", "could not read the block completly");
                         return total;
                     }
-                    BaseStream.Write(buffer, 0, readed);
+                    await BaseStream.WriteAsync(buffer, 0, readed);
                     total += readed;
                     number -= readed;
                 }
                 try
                 {
-                    readed = stream.Read(buffer, 0, 1);
+                    readed = await stream.ReadAsync(buffer, 0, 1);
                     if (readed > 0 && buffer[0] == '\r')
-                        readed = stream.Read(buffer, 0, 1);
+                        readed = await stream.ReadAsync(buffer, 0, 1);
                     if (readed == 0)
                         return total;
                 }
@@ -132,19 +133,19 @@ namespace MaxLib.Net.Webserver.Chunked
             }
         }
 
-        private int ReadNumber(Stream stream, byte[] buffer)
+        private async Task<int> ReadNumber(Stream stream, byte[] buffer)
         {
             int offset = 0;
             var byteBuffer = new byte[1];
             while (true)
             {
-                int readed = stream.Read(byteBuffer, 0, 1);
+                int readed = await stream.ReadAsync(byteBuffer, 0, 1);
                 if (readed == 0)
                     return offset;
                 if (byteBuffer[0] == '\r' || byteBuffer[0] == '\n')
                 {
                     if (byteBuffer[0] == '\r')
-                        stream.Read(byteBuffer, 0, 1);
+                        await stream.ReadAsync(byteBuffer, 0, 1);
                     return offset;
                 }
                 buffer[offset] = byteBuffer[0];

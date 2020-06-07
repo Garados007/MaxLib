@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver.Services
 {
@@ -18,7 +19,7 @@ namespace MaxLib.Net.Webserver.Services
             Importance = WebProgressImportance.High;
         }
 
-        public override void ProgressTask(WebProgressTask task)
+        public override async Task ProgressTask(WebProgressTask task)
         {
             _ = task ?? throw new ArgumentNullException(nameof(task));
 
@@ -53,6 +54,8 @@ namespace MaxLib.Net.Webserver.Services
             }
             //Session
             Session.SessionManager.Register(task);
+
+            await Task.CompletedTask;
         }
 
         public override bool CanWorkWith(WebProgressTask task)

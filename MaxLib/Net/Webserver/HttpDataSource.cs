@@ -28,9 +28,9 @@ namespace MaxLib.Net.Webserver
 
         public abstract bool CanProvideData { get; }
 
-        protected abstract long WriteStreamInternal(Stream stream, long start, long? stop);
+        protected abstract Task<long> WriteStreamInternal(Stream stream, long start, long? stop);
 
-        protected abstract long ReadStreamInternal(Stream stream, long? length);
+        protected abstract Task<long> ReadStreamInternal(Stream stream, long? length);
 
         /// <summary>
         /// Write its content to <paramref name="stream"/>.
@@ -39,14 +39,14 @@ namespace MaxLib.Net.Webserver
         /// <param name="start">the first own byte (inclusive) that should have been written</param>
         /// <param name="stop">the last own byte (excklusive) that should have been written or null to write all bytes till the end</param>
         /// <returns>the effective number of bytes written to the stream</returns>
-        public long WriteStream(Stream stream, long start, long? stop)
+        public async Task<long> WriteStream(Stream stream, long start, long? stop)
         {
             _ = stream ?? throw new ArgumentNullException(nameof(stream));
             if (start < 0) throw new ArgumentOutOfRangeException(nameof(start));
             if (Length() != null && start >= Length().Value)
                 throw new ArgumentOutOfRangeException(nameof(start));
             if (stop != null && stop < start) throw new ArgumentOutOfRangeException(nameof(stop));
-            return WriteStreamInternal(stream, start, stop);
+            return await WriteStreamInternal(stream, start, stop);
         }
 
         /// <summary>
@@ -56,8 +56,8 @@ namespace MaxLib.Net.Webserver
         /// </summary>
         /// <param name="stream">the stream to write the data into</param>
         /// <returns>the effective number of bytes written to the stream</returns>
-        public long WriteStream(Stream stream)
-            => WriteStream(stream ?? throw new ArgumentNullException(nameof(stream)), RangeStart, RangeEnd);
+        public async Task<long> WriteStream(Stream stream)
+            => await WriteStream(stream ?? throw new ArgumentNullException(nameof(stream)), RangeStart, RangeEnd);
 
         /// <summary>
         /// Read the data of <paramref name="stream"/> and replace its own data with it.
@@ -65,11 +65,11 @@ namespace MaxLib.Net.Webserver
         /// <param name="stream">the stream to read the data from</param>
         /// <param name="length">the number of bytes that should been readed. null to read all bytes.</param>
         /// <returns>the number of bytes readed from the stream</returns>
-        public long ReadStream(Stream stream, long? length = null)
+        public async Task<long> ReadStream(Stream stream, long? length = null)
         {
             _ = stream ?? throw new ArgumentNullException(nameof(stream));
             if (length != null && length < 0) throw new ArgumentOutOfRangeException(nameof(length));
-            return ReadStreamInternal(stream, length);
+            return await ReadStreamInternal(stream, length);
         }
 
         private long rangeStart = 0;
@@ -125,9 +125,9 @@ namespace MaxLib.Net.Webserver
         {
             _ = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
             var buffered = new BufferedSinkStream();
-            _ = new Task(() =>
+            _ = new Task(async () =>
             {
-                dataSource.WriteStream(buffered);
+                await dataSource.WriteStream(buffered);
                 buffered.FinishWrite();
             });
             return buffered;
