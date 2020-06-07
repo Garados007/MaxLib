@@ -35,7 +35,7 @@ namespace MaxLib.Net.Webserver
         public void Start(WebServer server)
         {
             Task.Server = server;
-            server.ListenFromTaskCreator(Task, TerminationState);
+            server.ExecuteTaskChain(Task, TerminationState);
             Task.Server = null;
         }
 

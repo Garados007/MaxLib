@@ -33,15 +33,10 @@ namespace MaxLib.Net.Webserver
         }
 
         protected PriorityList<WebProgressImportance, WebService> Services { get; private set; }
-        [Obsolete]
-        public List<WebService> WebServices
-        {
-            get { return Services.ToList(); }
-        }
 
         public void Add(WebService service)
         {
-            if (service == null) throw new ArgumentNullException("service");
+            _ = service ?? throw new ArgumentNullException(nameof(service));
             service.ImportanceChanged += Service_ImportanceChanged;
             Services.Add(service.Importance, service);
         }
@@ -90,11 +85,13 @@ namespace MaxLib.Net.Webserver
                     if (task.Session.NetworkClient != null && !task.Session.NetworkClient.Connected) return;
                     service.ProgressTask(task);
                     task.Document[ServiceType] = true;
-                    if (se) return;
+                    if (se) 
+                        return;
                     set = true;
                 }
             }
-            if (!set) task.Document[ServiceType] = false;
+            if (!set) 
+                task.Document[ServiceType] = false;
         }
     }
 }

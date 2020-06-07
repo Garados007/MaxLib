@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -46,22 +47,24 @@ namespace MaxLib.Net.Webserver.SSL
         protected virtual void SecureMainTask()
         {
             WebServerLog.Add(ServerLogType.Information, GetType(), "StartUp", "Secure Server succesfuly started");
+            var watch = new Stopwatch();
             while (ServerExecution)
             {
-                var start = Environment.TickCount;
-                //Ausstehende Verbindungen
+                watch.Restart();
+                //pending connection
                 int step = 0;
                 for (; step < 10; step++)
                 {
                     if (!SecureListener.Pending()) break;
                     SecureClientConnected(SecureListener.AcceptTcpClient());
                 }
-                //Warten
-                var stop = Environment.TickCount;
-                if (SecureListener.Pending()) continue;
-                var time = (stop - start) % 20;
-                Thread.Sleep(20 - time);
+                //wait
+                if (SecureListener.Pending()) 
+                    continue;
+                var time = watch.ElapsedMilliseconds % 20;
+                Thread.Sleep(20 - (int)time);
             }
+            watch.Stop();
             SecureListener.Stop();
             WebServerLog.Add(ServerLogType.Information, GetType(), "StartUp", "Secure Server succesfuly stopped");
         }
@@ -73,17 +76,25 @@ namespace MaxLib.Net.Webserver.SSL
                 client.Close();
                 return;
             }
+            //prepare session
             var session = CreateRandomSession();
             session.NetworkClient = client;
-            session.Ip = client.Client.RemoteEndPoint.ToString();
-            var ind = session.Ip.LastIndexOf(':');
-            if (ind != -1) session.Ip = session.Ip.Remove(ind);
+            session.Ip = client.Client.RemoteEndPoint is IPEndPoint iPEndPoint
+                ? iPEndPoint.Address.ToString()
+                : client.Client.RemoteEndPoint.ToString();
             AllSessions.Add(session);
-            Task.Run(() =>
+            //listen to connection
+            _ = Task.Run(() =>
             {
+                //authentificate as server and establish ssl connection
                 var stream = new SslStream(client.GetStream(), false);
                 session.NetworkStream = stream;
-                stream.AuthenticateAsServer(SecureSettings.Certificate, false, SslProtocols.Default, true);
+                stream.AuthenticateAsServer(
+                    serverCertificate:          SecureSettings.Certificate, 
+                    clientCertificateRequired:  false, 
+                    enabledSslProtocols:        SslProtocols.Default, 
+                    checkCertificateRevocation: true
+                    );
                 if (!stream.IsAuthenticated)
                 {
                     stream.Dispose();
@@ -92,7 +103,7 @@ namespace MaxLib.Net.Webserver.SSL
                     return;
                 }
 
-                ClientStartListen(session);
+                SafeClientStartListen(session);
             });
         }
     }

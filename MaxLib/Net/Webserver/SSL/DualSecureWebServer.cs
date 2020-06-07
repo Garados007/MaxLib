@@ -25,7 +25,12 @@ namespace MaxLib.Net.Webserver.SSL
                 {
                     var ssl = new SslStream(peaker, false);
                     session.NetworkStream = ssl;
-                    ssl.AuthenticateAsServer(DualSettings.Certificate, false, SslProtocols.Default, true);
+                    ssl.AuthenticateAsServer(
+                        serverCertificate:          DualSettings.Certificate,
+                        clientCertificateRequired:  false,
+                        enabledSslProtocols:        SslProtocols.Default,
+                        checkCertificateRevocation: true
+                        );
                     if (!ssl.IsAuthenticated)
                     {
                         ssl.Dispose();
