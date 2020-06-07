@@ -1,6 +1,5 @@
 ﻿using MaxLib.Collections;
 using System;
-using System.Collections.Generic;
 
 namespace MaxLib.Net.Webserver
 {
