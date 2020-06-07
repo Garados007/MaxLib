@@ -1,5 +1,7 @@
-﻿using System;
+﻿using MaxLib.Data;
+using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver
 {
@@ -117,6 +119,14 @@ namespace MaxLib.Net.Webserver
                         rangeEnd = Length();
                 }
             }
+        }
+
+        public static Stream TransformToStream(HttpDataSource dataSource)
+        {
+            _ = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
+            var buffered = new BufferedSinkStream();
+            _ = new Task(() => dataSource.WriteStream(buffered));
+            return buffered;
         }
     }
 }
