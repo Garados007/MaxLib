@@ -9,6 +9,7 @@ namespace MaxLib.Net.Webserver.Session
 
         public static void Register(WebProgressTask task)
         {
+            _ = task ?? throw new ArgumentNullException(nameof(task));
             var cookie = task.Document.RequestHeader.Cookie.Get("Session");
             if (cookie == null)
             {
@@ -27,21 +28,22 @@ namespace MaxLib.Net.Webserver.Session
 
         public static bool RegisterSession(HttpSession session, string hexkey)
         {
-            var si = Get(hexkey);
-            var added = false;
-            if (si == null) si = RegisterNewSession(session);
-            else added = true;
-            session.PublicSessionKey = si.ByteKey;
-            session.AlwaysSyncSessionInformation(si.Information);
-            return added;
+            _ = session ?? throw new ArgumentNullException(nameof(session));
+            _ = hexkey ?? throw new ArgumentNullException(nameof(hexkey));
+            return RegisterSession(session, Get(hexkey));
         }
 
         public static bool RegisterSession(HttpSession session, byte[] binkey)
         {
-            var si = Get(binkey);
-            var added = false;
-            if (si == null) si = RegisterNewSession(session);
-            else added = true;
+            _ = session ?? throw new ArgumentNullException(nameof(session));
+            _ = binkey ?? throw new ArgumentNullException(nameof(binkey));
+            return RegisterSession(session, Get(binkey));
+        }
+
+        static bool RegisterSession(HttpSession session, SessionInformation si)
+        {
+            var added = si != null;
+            si = si ?? RegisterNewSession(session);
             session.PublicSessionKey = si.ByteKey;
             session.AlwaysSyncSessionInformation(si.Information);
             return !added;
@@ -49,6 +51,7 @@ namespace MaxLib.Net.Webserver.Session
 
         public static SessionInformation RegisterNewSession(HttpSession session)
         {
+            _ = session ?? throw new ArgumentNullException(nameof(session));
             var key = GenerateSessionKey(out byte[] bkey);
             session.PublicSessionKey = bkey;
             var si = new SessionInformation(key, bkey, DateTime.Now);

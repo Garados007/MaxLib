@@ -20,45 +20,42 @@ namespace MaxLib.Net.Webserver.Services
 
         public override void ProgressTask(WebProgressTask task)
         {
+            _ = task ?? throw new ArgumentNullException(nameof(task));
+
             var header = task.Document.RequestHeader;
             //Accept
-            if (header.HeaderParameter.ContainsKey("Accept"))
+            if (header.HeaderParameter.TryGetValue("Accept", out string value))
             {
-                var tiles = header.HeaderParameter["Accept"].Split(
-                    new[] { ',', ' ', ';' }, StringSplitOptions.RemoveEmptyEntries);
-                header.FieldAccept.AddRange(tiles);
+                header.FieldAccept.AddRange(value.Split(
+                    new[] { ',', ' ', ';' }, StringSplitOptions.RemoveEmptyEntries));
             }
             //Accept-Encoding
-            if (header.HeaderParameter.ContainsKey("Accept-Encoding"))
+            if (header.HeaderParameter.TryGetValue("Accept-Encoding", out value))
             {
-                var tiles = header.HeaderParameter["Accept-Encoding"].Split(
-                    new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                header.FieldAcceptEncoding.AddRange(tiles);
+                header.FieldAcceptEncoding.AddRange(value.Split(
+                    new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries));
             }
             //Connection
-            if (header.HeaderParameter.ContainsKey("Connection"))
+            if (header.HeaderParameter.TryGetValue("Connection", out value))
             {
-                var text = header.HeaderParameter["Connection"].ToLower();
-                if (text == "keep-alive") header.FieldConnection =
-                    HttpConnectionType.KeepAlive;
+                if (value.ToLower() == "keep-alive") 
+                    header.FieldConnection = HttpConnectionType.KeepAlive;
             }
             //Host
-            if (header.HeaderParameter.ContainsKey("Host"))
+            if (header.HeaderParameter.TryGetValue("Host", out value))
             {
-                header.Host = header.HeaderParameter["Host"];
+                header.Host = value;
             }
             //Cookie
-            if (header.HeaderParameter.ContainsKey("Cookie"))
+            if (header.HeaderParameter.TryGetValue("Cookie", out value))
             {
-                header.Cookie.SetRequestCookieString(header.HeaderParameter["Cookie"]);
+                header.Cookie.SetRequestCookieString(value);
             }
             //Session
             Session.SessionManager.Register(task);
         }
 
         public override bool CanWorkWith(WebProgressTask task)
-        {
-            return true;
-        }
+            => true;
     }
 }

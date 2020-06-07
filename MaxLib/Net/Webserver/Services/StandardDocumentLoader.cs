@@ -1,4 +1,6 @@
-﻿namespace MaxLib.Net.Webserver.Services
+﻿using System;
+
+namespace MaxLib.Net.Webserver.Services
 {
     /// <summary>
     /// WebServiceType.PreCreateDocument: Stellt ein festdefiniertes Dokument bereit. Dies ist unabhängig vom 
@@ -21,6 +23,8 @@
 
         public override void ProgressTask(WebProgressTask task)
         {
+            _ = task ?? throw new ArgumentNullException(nameof(task));
+
             var source = new HttpStringDataSource(Document)
             {
                 MimeType = MimeType.TextHtml
@@ -31,8 +35,6 @@
         }
 
         public override bool CanWorkWith(WebProgressTask task)
-        {
-            return true;
-        }
+            => true;
     }
 }

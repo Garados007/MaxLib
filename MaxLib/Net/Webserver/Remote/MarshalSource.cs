@@ -8,23 +8,19 @@ namespace MaxLib.Net.Webserver.Remote
     {
         public bool IsLazy => Container.IsLazy();
 
-        internal MarshalContainer Container { get; private set; }
+        internal MarshalContainer Container { get; }
 
         public MarshalSource(HttpDataSource source)
         {
             Container = new MarshalContainer();
-            Container.SetOrigin(source ?? throw new ArgumentNullException("source"));
+            Container.SetOrigin(source ?? throw new ArgumentNullException(nameof(source)));
         }
 
         public override long? Length()
-        {
-            return Container.Length();
-        }
+            => Container.Length();
 
         public override void Dispose()
-        {
-            Container.Dispose();
-        }
+            => Container.Dispose();
 
         protected override long WriteStreamInternal(Stream stream, long start, long? stop)
             => Container.WriteStream(stream, start, stop);
@@ -61,8 +57,6 @@ namespace MaxLib.Net.Webserver.Remote
         public override bool CanProvideData => Container.CanProvideData();
 
         public Collections.MarshalEnumerable<HttpDataSource> GetAllSources()
-        {
-            return Container.Sources();
-        }
+            => Container.Sources();
     }
 }

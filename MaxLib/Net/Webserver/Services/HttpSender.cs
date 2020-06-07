@@ -87,6 +87,8 @@ namespace MaxLib.Net.Webserver.Services
 
         public override void ProgressTask(WebProgressTask task)
         {
+            _ = task ?? throw new ArgumentNullException(nameof(task));
+
             var header = task.Document.ResponseHeader;
             var stream = task.NetworkStream;
             var writer = new StreamWriter(stream);
@@ -134,8 +136,6 @@ namespace MaxLib.Net.Webserver.Services
         }
 
         public override bool CanWorkWith(WebProgressTask task)
-        {
-            return true;
-        }
+            => true;
     }
 }

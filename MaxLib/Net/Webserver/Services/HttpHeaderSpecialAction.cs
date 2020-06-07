@@ -1,4 +1,6 @@
-﻿namespace MaxLib.Net.Webserver.Services
+﻿using System;
+
+namespace MaxLib.Net.Webserver.Services
 {
     /// <summary>
     /// WebServiceType.PostParseRequest: Verarbeitet die Aktion HEAD oder OPTIONS, die vom Browser angefordert wurde
@@ -12,6 +14,8 @@
 
         public override void ProgressTask(WebProgressTask task)
         {
+            _ = task ?? throw new ArgumentNullException(nameof(task));
+
             switch (task.Document.RequestHeader.ProtocolMethod)
             {
                 case HttpProtocollMethod.Head:
@@ -33,8 +37,9 @@
 
         public override bool CanWorkWith(WebProgressTask task)
         {
-            var method = task.Document.RequestHeader.ProtocolMethod;
-            switch (method)
+            _ = task ?? throw new ArgumentNullException(nameof(task));
+
+            switch (task.Document.RequestHeader.ProtocolMethod)
             {
                 case HttpProtocollMethod.Head: return true;
                 case HttpProtocollMethod.Options: return true;

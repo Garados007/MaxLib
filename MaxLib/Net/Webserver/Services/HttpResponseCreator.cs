@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace MaxLib.Net.Webserver.Services
 {
@@ -14,15 +15,19 @@ namespace MaxLib.Net.Webserver.Services
 
         public override void ProgressTask(WebProgressTask task)
         {
+            _ = task ?? throw new ArgumentNullException(nameof(task));
+
             var request = task.Document.RequestHeader;
             var response = task.Document.ResponseHeader;
             response.FieldContentType = task.Document.PrimaryMime;
             response.SetActualDate();
             response.HttpProtocol = request.HttpProtocol;
-            response.HeaderParameter["Connection"] = "keep-alive";
-            response.HeaderParameter["X-UA-Compatible"] = "IE=Edge";
-            response.HeaderParameter["Content-Length"] =
-                task.Document.DataSources.Sum((s) => s.Length()).ToString();
+            response.SetHeader(new[]
+            {
+                ("Connection", "keep-alive"),
+                ("X-UA-Compatible", "IE=Edge"),
+                ("Content-Length", task.Document.DataSources.Sum((s) => s.Length()).ToString()),
+            });
             if (task.Document.PrimaryEncoding != null)
                 response.HeaderParameter["Content-Type"] += "; charset=" +
                     task.Document.PrimaryEncoding;

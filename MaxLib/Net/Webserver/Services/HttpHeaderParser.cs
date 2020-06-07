@@ -21,6 +21,8 @@ namespace MaxLib.Net.Webserver.Services
 
         public override void ProgressTask(WebProgressTask task)
         {
+            _ = task ?? throw new ArgumentNullException(nameof(task));
+
             var header = task.Document.RequestHeader;
             var stream = task.NetworkStream;
             var reader = new StreamReader(stream);
@@ -28,6 +30,7 @@ namespace MaxLib.Net.Webserver.Services
             var sb = new StringBuilder();
             if (!(stream is NetworkStream))
                 stream = task.Session.NetworkClient.GetStream();
+
             if (task.Server.Settings.Debug_WriteRequests)
             {
                 sb.AppendLine(new string('=', 100));
@@ -36,6 +39,7 @@ namespace MaxLib.Net.Webserver.Services
                 sb.AppendLine(new string('=', 100));
                 sb.AppendLine();
             }
+
             while (!((NetworkStream)stream).DataAvailable && mwt > 0)
             {
                 Thread.Sleep(100);
@@ -60,6 +64,7 @@ namespace MaxLib.Net.Webserver.Services
                 task.NextTask = task.CurrentTask = WebServiceType.SendResponse;
                 return;
             }
+
             string line;
             try { line = reader.ReadLine(); }
             catch
@@ -126,8 +131,6 @@ namespace MaxLib.Net.Webserver.Services
         }
 
         public override bool CanWorkWith(WebProgressTask task)
-        {
-            return true;
-        }
+            => true;
     }
 }

@@ -5,13 +5,13 @@ namespace MaxLib.Net.Webserver.Session
 {
     public class SessionInformation
     {
-        public string HexKey { get; private set; }
+        public string HexKey { get; }
 
-        public byte[] ByteKey { get; private set; }
+        public byte[] ByteKey { get; }
 
-        public DateTime Generated { get; private set; }
+        public DateTime Generated { get; }
 
-        public Dictionary<object, object> Information { get; private set; }
+        public Dictionary<object, object> Information { get; }
 
         public SessionInformation(string hexkey, byte[] bytekey, DateTime generated)
         {

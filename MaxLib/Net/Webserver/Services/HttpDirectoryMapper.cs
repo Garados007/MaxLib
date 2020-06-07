@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace MaxLib.Net.Webserver.Services
 {
@@ -21,6 +22,8 @@ namespace MaxLib.Net.Webserver.Services
 
         protected string GetMime(string extension, WebProgressTask task)
         {
+            _ = extension ?? throw new ArgumentNullException(nameof(extension));
+            _ = task ?? throw new ArgumentNullException(nameof(task));
             switch (extension.ToLower())
             {
                 case ".html": return MimeType.TextHtml;
@@ -46,6 +49,8 @@ namespace MaxLib.Net.Webserver.Services
 
         public override void ProgressTask(WebProgressTask task)
         {
+            _ = task ?? throw new ArgumentNullException(nameof(task));
+
             if (task.Document.Information.ContainsKey("HttpDocumentFile"))
             {
                 var path = task.Document.Information["HttpDocumentFile"].ToString();
@@ -82,6 +87,8 @@ namespace MaxLib.Net.Webserver.Services
 
         public override bool CanWorkWith(WebProgressTask task)
         {
+            _ = task ?? throw new ArgumentNullException(nameof(task));
+
             if (MapFolderToo && task.Document.Information.ContainsKey("HttpDocumentFolder")) return true;
             return task.Document.Information.ContainsKey("HttpDocumentFile");
         }

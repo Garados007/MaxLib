@@ -18,16 +18,19 @@ namespace MaxLib.Net.Webserver.Services
 
         public class Rule
         {
-            public string[] UrlMappedPath { get; private set; }
+            public string[] UrlMappedPath { get; }
 
-            public string LocalMappedPath { get; private set; }
+            public string LocalMappedPath { get; }
 
-            public bool DenyAccess { get; private set; }
+            public bool DenyAccess { get; }
 
-            public bool File { get; private set; }
+            public bool File { get; }
 
             public Rule(string urlPath, string localPath, bool denyAccess, bool file = true)
             {
+                _ = urlPath ?? throw new ArgumentNullException(nameof(urlPath));
+                _ = localPath ?? throw new ArgumentNullException(nameof(localPath));
+
                 UrlMappedPath = urlPath.Split(new char[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
                 if (!Directory.Exists(localPath)) Directory.CreateDirectory(localPath);
                 LocalMappedPath = localPath;
@@ -37,6 +40,8 @@ namespace MaxLib.Net.Webserver.Services
 
             public virtual bool SameUrlBasePath(string[] url)
             {
+                _ = url ?? throw new ArgumentNullException(nameof(url));
+
                 if (url.Length == 1 && url[0] == "" && UrlMappedPath.Length == 0) return true;
                 for (int i = 0; i < Math.Min(UrlMappedPath.Length, url.Length); ++i)
                 {
@@ -46,24 +51,23 @@ namespace MaxLib.Net.Webserver.Services
             }
         }
 
-        private readonly List<Rule> rules = new List<Rule>();
-        public List<Rule> Rules
-        {
-            get { return rules; }
-        }
+        public List<Rule> Rules { get; } = new List<Rule>();
 
         public void Add(Rule rule)
-        {
-            rules.Add(rule);
-        }
+            => Rules.Add(rule ?? throw new ArgumentNullException(nameof(rule)));
 
         public void Add(string urlPath, string localPath, bool denyAccess, bool file = true)
         {
+            _ = urlPath ?? throw new ArgumentNullException(nameof(urlPath));
+            _ = localPath ?? throw new ArgumentNullException(nameof(localPath));
+
             Add(new Rule(urlPath, localPath, denyAccess, file));
         }
 
         public override void ProgressTask(WebProgressTask task)
         {
+            _ = task ?? throw new ArgumentNullException(nameof(task));
+
             var path = task.Document.RequestHeader.Location.DocumentPathTiles;
             var rule = new List<Rule>();
             var level = -1;
@@ -102,8 +106,6 @@ namespace MaxLib.Net.Webserver.Services
         }
 
         public override bool CanWorkWith(WebProgressTask task)
-        {
-            return true;
-        }
+            => true;
     }
 }
