@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MaxLib.Data.Bits
+namespace MaxLib.Data.BitData
 {
     public struct Bits : IComparable, IComparable<Bits>, IEquatable<Bits>
     {
@@ -130,6 +130,9 @@ namespace MaxLib.Data.Bits
 
         public static Bits operator !(Bits b)
             => new Bits(b.bits?.Select(v => !v) ?? new Bit[0]);
+
+        public static Bits operator ~(Bits b)
+            => !b;
 
         public static Bits operator <<(Bits b, int count)
         {
