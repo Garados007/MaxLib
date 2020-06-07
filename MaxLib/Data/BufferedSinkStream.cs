@@ -124,7 +124,7 @@ namespace MaxLib.Data
         /// <see cref="Write(byte[], int, int)"/> function and
         /// <see cref="Read(byte[], int, int)"/> will not read further.
         /// </summary>
-        public void FinisheWrite()
+        public void FinishWrite()
             => writeFinish = true;
 
         public override void Write(byte[] buffer, int offset, int count)

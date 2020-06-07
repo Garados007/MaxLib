@@ -20,6 +20,13 @@ namespace MaxLib.Net.Webserver
 
         public Dictionary<string, string> HeaderParameter { get; } = new Dictionary<string, string>();
 
+        public void SetHeader(IEnumerable<(string, string)> headers)
+        {
+            _ = headers ?? throw new ArgumentNullException(nameof(headers));
+            foreach (var (key, value) in headers)
+                HeaderParameter[key] = value;
+        }
+
         private string protocolMethod = HttpProtocollMethod.Get;
         public string ProtocolMethod
         {

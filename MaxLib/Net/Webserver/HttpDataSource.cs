@@ -128,7 +128,7 @@ namespace MaxLib.Net.Webserver
             _ = new Task(() =>
             {
                 dataSource.WriteStream(buffered);
-                buffered.FinisheWrite();
+                buffered.FinishWrite();
             });
             return buffered;
         }

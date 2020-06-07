@@ -10,7 +10,8 @@ namespace MaxLib.Net.Webserver.Chunked
         public ChunkedResponseCreator(bool onlyWithLazy = false) : base(WebServiceType.PreCreateResponse)
         {
             OnlyWithLazy = onlyWithLazy;
-            if (onlyWithLazy) Importance = WebProgressImportance.High;
+            if (onlyWithLazy) 
+                Importance = WebProgressImportance.High;
         }
 
         public override bool CanWorkWith(WebProgressTask task)
@@ -28,9 +29,12 @@ namespace MaxLib.Net.Webserver.Chunked
             response.FieldContentType = task.Document.PrimaryMime;
             response.SetActualDate();
             response.HttpProtocol = request.HttpProtocol;
-            response.HeaderParameter["Connection"] = "keep-alive";
-            response.HeaderParameter["X-UA-Compatible"] = "IE=Edge";
-            response.HeaderParameter["Transfer-Encoding"] = "chunked";
+            response.SetHeader(new[]
+            {
+                ("Connection", "keep-alive"),
+                ("X-UA-Compatible", "IE=Edge"),
+                ("Transfer-Encoding", "chunked"),
+            });
             if (task.Document.PrimaryEncoding != null)
                 response.HeaderParameter["Content-Type"] += "; charset=" +
                     task.Document.PrimaryEncoding;
