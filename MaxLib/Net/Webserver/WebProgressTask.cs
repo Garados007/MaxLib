@@ -18,7 +18,7 @@ namespace MaxLib.Net.Webserver
 
         public void Dispose()
         {
-            Document.Dispose();
+            Document?.Dispose();
         }
     }
 }

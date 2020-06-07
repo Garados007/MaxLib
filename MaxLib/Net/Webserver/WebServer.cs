@@ -12,7 +12,7 @@ namespace MaxLib.Net.Webserver
 {
     public class WebServer
     {
-        public Dictionary<WebServiceType, WebServiceGroup> WebServiceGroups { get; } = new Dictionary<WebServiceType, WebServiceGroup>();
+        public FullDictionary<WebServiceType, WebServiceGroup> WebServiceGroups { get; }
 
         public WebServerSettings Settings { get; protected set; }
 
@@ -27,7 +27,8 @@ namespace MaxLib.Net.Webserver
         public WebServer(WebServerSettings settings)
         {
             Settings = settings;
-            for (int i = 1; i <= 7; ++i) WebServiceGroups.Add((WebServiceType)i, new WebServiceGroup((WebServiceType)i));
+            WebServiceGroups = new FullDictionary<WebServiceType, WebServiceGroup>((k) => new WebServiceGroup(k));
+            WebServiceGroups.FullEnumKeys();
         }
 
         public virtual void InitialDefault()
