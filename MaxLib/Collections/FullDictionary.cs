@@ -12,7 +12,7 @@ namespace MaxLib.Collections
     /// <typeparam name="TValue">the value type</typeparam>
     public class FullDictionary<TKey, TValue> : IDictionary<TKey, TValue>
     {
-        readonly Dictionary<TKey, TValue> dict;
+        readonly Dictionary<TKey, TValue> dict = new Dictionary<TKey, TValue>();
 
         readonly Func<TKey, TValue> CreateValue;
 
