@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net.Sockets;
 
 namespace MaxLib.Net.Webserver
@@ -14,7 +13,7 @@ namespace MaxLib.Net.Webserver
 
         public TcpClient NetworkClient { get; set; }
 
-        public Stream NetworkStream { get; set; }
+        public HttpStream NetworkStream { get; set; }
 
         public int LastWorkTime { get; set; }
 

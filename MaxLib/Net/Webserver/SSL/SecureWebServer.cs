@@ -87,7 +87,7 @@ namespace MaxLib.Net.Webserver.SSL
             {
                 //authentificate as server and establish ssl connection
                 var stream = new SslStream(client.GetStream(), false);
-                session.NetworkStream = stream;
+                session.NetworkStream = new HttpStream(stream);
                 stream.AuthenticateAsServer(
                     serverCertificate:          SecureSettings.Certificate, 
                     clientCertificateRequired:  false, 

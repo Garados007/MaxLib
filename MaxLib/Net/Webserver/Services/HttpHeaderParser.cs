@@ -24,12 +24,10 @@ namespace MaxLib.Net.Webserver.Services
             _ = task ?? throw new ArgumentNullException(nameof(task));
 
             var header = task.Document.RequestHeader;
-            var stream = task.NetworkStream;
-            var reader = new StreamReader(stream);
             var mwt = 50;
             var sb = new StringBuilder();
-            if (!(stream is NetworkStream))
-                stream = task.Session.NetworkClient.GetStream();
+            if (!(task.NetworkStream?.BaseStream is NetworkStream stream))
+                task.NetworkStream = new HttpStream(stream = task.Session.NetworkClient.GetStream());
 
             if (task.Server.Settings.Debug_WriteRequests)
             {
@@ -40,7 +38,7 @@ namespace MaxLib.Net.Webserver.Services
                 sb.AppendLine();
             }
 
-            while (!((NetworkStream)stream).DataAvailable && mwt > 0)
+            while (!stream.DataAvailable && mwt > 0)
             {
                 await Task.Delay(100);
                 mwt--;
@@ -48,7 +46,7 @@ namespace MaxLib.Net.Webserver.Services
             }
             try
             {
-                if (!((NetworkStream)stream).DataAvailable)
+                if (!stream.DataAvailable)
                 {
                     task.Document.RequestHeader.FieldConnection = HttpConnectionType.KeepAlive;
                     WebServerLog.Add(ServerLogType.Error, GetType(), "Header", "Request Time out");
@@ -66,7 +64,7 @@ namespace MaxLib.Net.Webserver.Services
             }
 
             string line;
-            try { line = await reader.ReadLineAsync(); }
+            try { line = await task.NetworkStream.ReadLineAsync(); }
             catch
             {
                 WebServerLog.Add(ServerLogType.Error, GetType(), "Header", "Connection closed by remote host");
@@ -90,7 +88,7 @@ namespace MaxLib.Net.Webserver.Services
                 header.ProtocolMethod = parts[0];
                 header.Url = parts[1];
                 header.HttpProtocol = parts[2];
-                while (!string.IsNullOrWhiteSpace(line = await reader.ReadLineAsync()))
+                while (!string.IsNullOrWhiteSpace(line = await task.NetworkStream.ReadLineAsync()))
                 {
                     if (task.Server.Settings.Debug_WriteRequests) 
                         sb.AppendLine(line);
@@ -110,12 +108,12 @@ namespace MaxLib.Net.Webserver.Services
             }
             if (header.HeaderParameter.ContainsKey("Content-Length"))
             {
-                var buffer = new char[int.Parse(header.HeaderParameter["Content-Length"])];
-                _ = await reader.ReadBlockAsync(buffer, 0, buffer.Length);
-                header.Post.SetPost(new string(buffer), 
+                var buffer = new byte[int.Parse(header.HeaderParameter["Content-Length"])];
+                _ = await task.NetworkStream.ReadAsync(buffer, 0, buffer.Length);
+                header.Post.SetPost(Encoding.UTF8.GetString(buffer), 
                     header.HeaderParameter.TryGetValue("Content-Type", out string mime) ? mime : null);
                 if (task.Server.Settings.Debug_WriteRequests) 
-                    sb.AppendLine(new string(buffer));
+                    sb.AppendLine(Encoding.UTF8.GetString(buffer));
             }
             if (task.Server.Settings.Debug_WriteRequests)
             {

@@ -26,7 +26,7 @@ namespace MaxLib.Net.Webserver
                         SessionKey = new byte[0]
                     }
                 },
-                NetworkStream = new MemoryStream()
+                NetworkStream = new HttpStream(new MemoryStream())
             };
             Task.Session = Task.Document.Session;
             TerminationState = WebServiceType.SendResponse;
@@ -76,12 +76,12 @@ namespace MaxLib.Net.Webserver
 
         public void SetStream(Stream stream)
         {
-            Task.NetworkStream = stream;
+            Task.NetworkStream = new HttpStream(stream);
         }
 
         public void SetStream(Stream input, Stream output)
         {
-            Task.NetworkStream = new BidirectionalStream(input, output);
+            Task.NetworkStream = new HttpStream(new BidirectionalStream(input, output));
         }
 
         public class BidirectionalStream : Stream

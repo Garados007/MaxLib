@@ -6,7 +6,7 @@ namespace MaxLib.Net.Webserver
     {
         public HttpDocument Document { get; set; }
 
-        public System.IO.Stream NetworkStream { get; set; }
+        public HttpStream NetworkStream { get; set; }
 
         public WebServiceType NextTask { get; set; }
 

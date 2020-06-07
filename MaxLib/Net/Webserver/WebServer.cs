@@ -235,7 +235,7 @@ namespace MaxLib.Net.Webserver
             if (stream == null)
                 try
                 {
-                    stream = session.NetworkStream = session.NetworkClient.GetStream();
+                    stream = session.NetworkStream = new HttpStream(session.NetworkClient.GetStream());
                 }
                 catch (InvalidOperationException)
                 { return null; }

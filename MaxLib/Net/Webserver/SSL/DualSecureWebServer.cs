@@ -25,7 +25,7 @@ namespace MaxLib.Net.Webserver.SSL
                 if (mark != 0 && (mark < 32 || mark >= 127))
                 {
                     var ssl = new SslStream(peaker, false);
-                    session.NetworkStream = ssl;
+                    session.NetworkStream = new HttpStream(ssl);
                     ssl.AuthenticateAsServer(
                         serverCertificate:          DualSettings.Certificate,
                         clientCertificateRequired:  false,
@@ -40,7 +40,7 @@ namespace MaxLib.Net.Webserver.SSL
                         return;
                     }
                 }
-                else session.NetworkStream = peaker;
+                else session.NetworkStream = new HttpStream(peaker);
             }
             await base.ClientStartListen(session);
         }
