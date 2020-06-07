@@ -1,7 +1,7 @@
-﻿using System;
+﻿using MaxLib.Data;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace MaxLib.Net.Webserver
@@ -20,10 +20,14 @@ namespace MaxLib.Net.Webserver
             get => joinGap;
             set
             {
-                if (value < 0) throw new ArgumentOutOfRangeException("JoinGap");
+                if (value < 0) throw new ArgumentOutOfRangeException(nameof(JoinGap));
                 joinGap = value;
             }
         }
+
+        public override bool CanAcceptData => false;
+
+        public override bool CanProvideData => true;
 
         [Serializable]
         struct Range
@@ -47,13 +51,12 @@ namespace MaxLib.Net.Webserver
         readonly Stream baseStream;
         readonly HttpDocument document;
         List<Range> ranges = new List<Range>();
-        readonly string mime;
 
         public MultipartRanges(Stream stream, HttpDocument document, string mime)
         {
-            this.document = document ?? throw new ArgumentNullException("document");
-            baseStream = stream ?? throw new ArgumentNullException("stream");
-            this.mime = MimeType = mime;
+            this.document = document ?? throw new ArgumentNullException(nameof(document));
+            baseStream = stream ?? throw new ArgumentNullException(nameof(stream));
+            MimeType = mime;
 
             document.ResponseHeader.HeaderParameter["Accept-Ranges"] = "bytes";
             if (document.RequestHeader.HeaderParameter.ContainsKey("Range"))
@@ -150,17 +153,17 @@ namespace MaxLib.Net.Webserver
             var b = new byte[8];
             new Random().NextBytes(b);
             var boundary = BitConverter.ToString(b).Replace("-", "");
-            MimeType = MimeTypes.MultipartByteranges + "; boundary=" + boundary;
+            base.MimeType = Webserver.MimeType.MultipartByteranges + "; boundary=" + boundary;
             document.ResponseHeader.StatusCode = HttpStateCode.PartialContent;
             var sb = new StringBuilder();
             foreach (var r in ranges)
             {
                 sb.Append("--");
                 sb.AppendLine(boundary);
-                if (mime != null)
+                if (MimeType != null)
                 {
                     sb.Append("Content-Type: ");
-                    sb.AppendLine(mime);
+                    sb.AppendLine(MimeType);
                 }
                 sb.Append("Content-Range: ");
                 sb.AppendLine(r.ToString(baseStream.Length));
@@ -186,9 +189,17 @@ namespace MaxLib.Net.Webserver
             });
         }
 
-        public override long AproximateLength()
+        public override long? Length()
         {
-            return streams.Sum((s) => s.AproximateLength());
+            long sum = 0;
+            foreach (var stream in streams)
+            {
+                var length = stream.Length();
+                if (length == null)
+                    return null;
+                sum += length.Value;
+            }
+            return sum;
         }
 
         public override void Dispose()
@@ -197,49 +208,38 @@ namespace MaxLib.Net.Webserver
             foreach (var s in streams) s.Dispose();
         }
 
-        public override byte[] GetSourcePart(long start, long length)
+        protected override long WriteStreamInternal(Stream stream, long start, long? stop)
         {
-            var buffer = new byte[length];
-            long offset = 0;
-            for (int i = 0; i<streams.Count && length > 0; ++i)
+            using (var skip = new SkipableStream(stream, start))
             {
-                var al = streams[i].AproximateLength();
-                if (al < start)
+                long total = 0;
+                foreach (var s in streams)
                 {
-                    start -= al;
-                    continue;
+                    if (stop != null && total >= stop.Value)
+                        return total;
+                    var end = stop == null ? null : (long?)(stop.Value - total);
+                    var size = s.Length();
+                    if (size == null)
+                    {
+                        total += s.WriteStream(skip, 0, end);
+                    }
+                    else
+                    {
+                        if (size.Value < skip.SkipBytes)
+                        {
+                            skip.Skip(size.Value);
+                            continue;
+                        }
+                        var leftSkip = skip.SkipBytes;
+                        skip.Skip(skip.SkipBytes);
+                        total += s.WriteStream(skip, leftSkip, end);
+                    }
                 }
-                var fl = Math.Min(length, al);
-                var fb = streams[i].GetSourcePart(start, fl);
-                length -= fl;
-                start = 0;
-                Array.Copy(fb, 0, buffer, offset, fl);
-                offset += fl;
+                return total;
             }
-            return buffer;
         }
 
-        public override long ReadFromStream(Stream networkStream, long readlength)
-        {
-            return 0;
-        }
-
-        public override long ReserveExtraMemory(long bytes)
-        {
-            return 0;
-        }
-
-        public override int WriteSourcePart(byte[] source, long start, long length)
-        {
-            return 0;
-        }
-
-        public override long WriteToStream(Stream networkStream)
-        {
-            long length = 0;
-            foreach (var s in streams)
-                length += s.WriteToStream(networkStream);
-            return length;
-        }
+        protected override long ReadStreamInternal(Stream stream, long? length)
+            => throw new NotSupportedException();
     }
 }

@@ -308,12 +308,12 @@ namespace MaxLib.Net.ServerScripts
             task.TerminationState = WebServiceType.PostCreateDocument;
             task.Task.CurrentTask = WebServiceType.PostParseRequest;
             task.Task.NextTask = WebServiceType.PreCreateDocument;
-            task.Start(Server);
+            task.Start(Server).Wait();
             if (task.Task.Document.DataSources.Count == 0) return "";
             var ds = task.Task.Document.DataSources[0];
-            using (var m = new MemoryStream((int)ds.AproximateLength()))
+            using (var m = new MemoryStream((int)ds.Length()))
             {
-                ds.WriteToStream(m);
+                ds.WriteStream(m).Wait();
                 m.Position = 0;
                 var bytes = new BinaryReader(m).ReadBytes((int)m.Length);
                 return Encoding.UTF8.GetString(bytes);

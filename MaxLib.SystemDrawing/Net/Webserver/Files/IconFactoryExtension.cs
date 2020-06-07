@@ -1,4 +1,7 @@
-﻿using System;
+﻿using MaxLib.Net.Webserver.Files.Content.Grabber.Icons;
+using MaxLib.Net.Webserver.Files.Content.Grabber.Info;
+using MaxLib.Net.Webserver.Files.Source;
+using System;
 using System.Drawing;
 using IO = System.IO;
 
@@ -173,7 +176,7 @@ namespace MaxLib.Net.Webserver.Files
                     token.Discard();
                     return false;
                 }
-                token.SetMime(MimeTypes.ImagePng);
+                token.SetMime(MimeType.ImagePng);
                 token.NotifyContentReady();
                 iconInfo.ContentId = token.Url;
                 iconInfo.Type = IconInfo.ContentIdType.Url;

@@ -1,10 +1,8 @@
-﻿using MaxLib.Data.IniFiles;
-using System;
+﻿using System.Diagnostics;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,7 +24,7 @@ namespace MaxLib.Net.Webserver.SSL
         {
             if (SecureSettings.EnableUnsafePort)
                 base.Start();
-            WebServerInfo.Add(InfoType.Information, GetType(), "StartUp", "Start Secure Server on Port {0}", SecureSettings.SecurePort);
+            WebServerLog.Add(ServerLogType.Information, GetType(), "StartUp", "Start Secure Server on Port {0}", SecureSettings.SecurePort);
             ServerExecution = true;
             SecureListener = new TcpListener(new IPEndPoint(Settings.IPFilter, SecureSettings.SecurePort));
             SecureListener.Start();
@@ -41,31 +39,33 @@ namespace MaxLib.Net.Webserver.SSL
         {
             if (SecureSettings.EnableUnsafePort)
                 base.Stop();
-            WebServerInfo.Add(InfoType.Information, GetType(), "StartUp", "Stopped Secure Server");
+            WebServerLog.Add(ServerLogType.Information, GetType(), "StartUp", "Stopped Secure Server");
             ServerExecution = false;
         }
 
         protected virtual void SecureMainTask()
         {
-            WebServerInfo.Add(InfoType.Information, GetType(), "StartUp", "Secure Server succesfuly started");
+            WebServerLog.Add(ServerLogType.Information, GetType(), "StartUp", "Secure Server succesfuly started");
+            var watch = new Stopwatch();
             while (ServerExecution)
             {
-                var start = Environment.TickCount;
-                //Ausstehende Verbindungen
+                watch.Restart();
+                //pending connection
                 int step = 0;
                 for (; step < 10; step++)
                 {
                     if (!SecureListener.Pending()) break;
                     SecureClientConnected(SecureListener.AcceptTcpClient());
                 }
-                //Warten
-                var stop = Environment.TickCount;
-                if (SecureListener.Pending()) continue;
-                var time = (stop - start) % 20;
-                Thread.Sleep(20 - time);
+                //wait
+                if (SecureListener.Pending()) 
+                    continue;
+                var time = watch.ElapsedMilliseconds % 20;
+                Thread.Sleep(20 - (int)time);
             }
+            watch.Stop();
             SecureListener.Stop();
-            WebServerInfo.Add(InfoType.Information, GetType(), "StartUp", "Secure Server succesfuly stopped");
+            WebServerLog.Add(ServerLogType.Information, GetType(), "StartUp", "Secure Server succesfuly stopped");
         }
 
         protected virtual void SecureClientConnected(TcpClient client)
@@ -75,17 +75,25 @@ namespace MaxLib.Net.Webserver.SSL
                 client.Close();
                 return;
             }
+            //prepare session
             var session = CreateRandomSession();
             session.NetworkClient = client;
-            session.Ip = client.Client.RemoteEndPoint.ToString();
-            var ind = session.Ip.LastIndexOf(':');
-            if (ind != -1) session.Ip = session.Ip.Remove(ind);
+            session.Ip = client.Client.RemoteEndPoint is IPEndPoint iPEndPoint
+                ? iPEndPoint.Address.ToString()
+                : client.Client.RemoteEndPoint.ToString();
             AllSessions.Add(session);
-            Task.Run(() =>
+            //listen to connection
+            _ = Task.Run(() =>
             {
+                //authentificate as server and establish ssl connection
                 var stream = new SslStream(client.GetStream(), false);
                 session.NetworkStream = stream;
-                stream.AuthenticateAsServer(SecureSettings.Certificate, false, SslProtocols.Default, true);
+                stream.AuthenticateAsServer(
+                    serverCertificate:          SecureSettings.Certificate, 
+                    clientCertificateRequired:  false, 
+                    enabledSslProtocols:        SslProtocols.Default, 
+                    checkCertificateRevocation: true
+                    );
                 if (!stream.IsAuthenticated)
                 {
                     stream.Dispose();
@@ -94,48 +102,8 @@ namespace MaxLib.Net.Webserver.SSL
                     return;
                 }
 
-                ClientStartListen(session);
+                SafeClientStartListen(session);
             });
-        }
-    }
-
-    public class SecureWebServerSettings : WebServerSettings
-    {
-        public int SecurePort { get; private set; }
-
-        bool enableUnsafePort = true;
-        public bool EnableUnsafePort
-        {
-            get => enableUnsafePort;
-            set => enableUnsafePort = value;
-        }
-
-        public X509Certificate Certificate { get; set; }
-
-        public SecureWebServerSettings(string settingFolderPath)
-            : base(settingFolderPath)
-        {
-        }
-
-        public SecureWebServerSettings(int port, int securePort, int connectionTimeout)
-            : base(port, connectionTimeout)
-        {
-            SecurePort = securePort;
-        }
-
-        public SecureWebServerSettings(int securePort, int connectionTimeout)
-            : base(80, connectionTimeout)
-        {
-            SecurePort = securePort;
-            EnableUnsafePort = false;
-        }
-
-        protected override void Load_Server(OptionsLoader set)
-        {
-            base.Load_Server(set);
-            var server = set["Server"].Options;
-            SecurePort = server.GetInt32("SecurePort", 443);
-            EnableUnsafePort = server.GetBool("EnableUnsafePort", true);
         }
     }
 }

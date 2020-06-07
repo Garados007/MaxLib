@@ -3,7 +3,6 @@ using System.IO;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
 
 namespace MaxLib.Net.Webserver.SSL
 {
@@ -13,7 +12,7 @@ namespace MaxLib.Net.Webserver.SSL
 
         public DualSecureWebServer(DualSecureWebServerSettings settings) : base(settings)
         {
-            WebServerInfo.Add(InfoType.Information, GetType(), "StartUp", "The use of dual mode is critical");
+            WebServerLog.Add(ServerLogType.Information, GetType(), "StartUp", "The use of dual mode is critical");
         }
 
         protected override void ClientStartListen(HttpSession session)
@@ -26,7 +25,12 @@ namespace MaxLib.Net.Webserver.SSL
                 {
                     var ssl = new SslStream(peaker, false);
                     session.NetworkStream = ssl;
-                    ssl.AuthenticateAsServer(DualSettings.Certificate, false, SslProtocols.Default, true);
+                    ssl.AuthenticateAsServer(
+                        serverCertificate:          DualSettings.Certificate,
+                        clientCertificateRequired:  false,
+                        enabledSslProtocols:        SslProtocols.Default,
+                        checkCertificateRevocation: true
+                        );
                     if (!ssl.IsAuthenticated)
                     {
                         ssl.Dispose();
@@ -120,23 +124,6 @@ namespace MaxLib.Net.Webserver.SSL
             {
                 BaseStream.Write(buffer, offset, count);
             }
-        }
-    }
-
-    public class DualSecureWebServerSettings : WebServerSettings
-    {
-        public X509Certificate Certificate { get; set; }
-
-        public DualSecureWebServerSettings(string settingFolderPath)
-            : base(settingFolderPath)
-        {
-
-        }
-
-        public DualSecureWebServerSettings(int port, int connectionTimeout, X509Certificate certificate)
-            : base(port, connectionTimeout)
-        {
-            Certificate = certificate;
         }
     }
 }
