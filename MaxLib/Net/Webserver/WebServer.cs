@@ -262,17 +262,10 @@ namespace MaxLib.Net.Webserver
             var r = new Random();
             do
             {
-                var b = new byte[8];
-                r.NextBytes(b);
-                s.InternalSessionKey = BitConverter.ToInt64(b, 0);
+                s.SessionKey = new byte[16];
+                r.NextBytes(s.SessionKey);
             }
-            while (AllSessions.Exists((ht) => ht != null && ht.InternalSessionKey == s.InternalSessionKey));
-            do
-            {
-                s.PublicSessionKey = new byte[16];
-                r.NextBytes(s.PublicSessionKey);
-            }
-            while (AllSessions.Exists((ht) => ht != null && WebServerUtils.BytesEqual(ht.PublicSessionKey, s.PublicSessionKey)));
+            while (AllSessions.Exists((ht) => ht != null && WebServerUtils.BytesEqual(ht.SessionKey, s.SessionKey)));
             s.LastWorkTime = -1;
             return s;
         }

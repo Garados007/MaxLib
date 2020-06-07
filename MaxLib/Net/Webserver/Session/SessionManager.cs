@@ -14,7 +14,7 @@ namespace MaxLib.Net.Webserver.Session
             if (cookie == null)
             {
                 var si = RegisterNewSession(task.Session);
-                task.Session.PublicSessionKey = si.ByteKey;
+                task.Session.SessionKey = si.ByteKey;
                 task.Session.AlwaysSyncSessionInformation(si.Information);
                 task.Document.RequestHeader.Cookie.AddedCookies.Add("Session", new HttpCookie.Cookie("Session", si.HexKey, 3600));
             }
@@ -22,7 +22,7 @@ namespace MaxLib.Net.Webserver.Session
             {
                 if (!RegisterSession(task.Session, cookie.Value.ValueString))
                     task.Document.RequestHeader.Cookie.AddedCookies.Add("Session",
-                        new HttpCookie.Cookie("Session", Get(task.Session.PublicSessionKey).HexKey, 3600));
+                        new HttpCookie.Cookie("Session", Get(task.Session.SessionKey).HexKey, 3600));
             }
         }
 
@@ -44,7 +44,7 @@ namespace MaxLib.Net.Webserver.Session
         {
             var added = si != null;
             si = si ?? RegisterNewSession(session);
-            session.PublicSessionKey = si.ByteKey;
+            session.SessionKey = si.ByteKey;
             session.AlwaysSyncSessionInformation(si.Information);
             return !added;
         }
@@ -53,7 +53,7 @@ namespace MaxLib.Net.Webserver.Session
         {
             _ = session ?? throw new ArgumentNullException(nameof(session));
             var key = GenerateSessionKey(out byte[] bkey);
-            session.PublicSessionKey = bkey;
+            session.SessionKey = bkey;
             var si = new SessionInformation(key, bkey, DateTime.Now);
             Sessions.Add(si);
             return si;

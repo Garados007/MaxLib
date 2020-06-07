@@ -20,10 +20,9 @@ namespace MaxLib.Net.Webserver
                     ResponseHeader = new HttpResponseHeader(),
                     Session = new HttpSession()
                     {
-                        InternalSessionKey = 0,
                         Ip = "127.0.0.1",
                         LastWorkTime = -1,
-                        PublicSessionKey = new byte[0]
+                        SessionKey = new byte[0]
                     }
                 },
                 NetworkStream = new MemoryStream()
