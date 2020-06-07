@@ -8,7 +8,7 @@ namespace MaxLib.Data.BitData
         private readonly bool disposeStream = true;
         private Bits buffer;
 
-        public Stream BaseStream { get; private set; }
+        public Stream BaseStream { get; }
 
         public BitsWriter(Stream input)
             : this(input, false)
@@ -46,11 +46,7 @@ namespace MaxLib.Data.BitData
                 maxBytes++;
             if (maxBytes == 0)
                 return;
-            var flushBuffer = new byte[maxBytes];
-            for (int i = 0; i<maxBytes; ++i)
-            {
-                flushBuffer[i] = buffer.ToByte(i * 8);
-            }
+            var flushBuffer = buffer.ToBytes(0, maxBytes);
             BaseStream.Write(flushBuffer, 0, maxBytes);
             buffer >>= Math.Min(buffer.Length, maxBytes * 8);
         }

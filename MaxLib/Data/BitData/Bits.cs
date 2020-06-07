@@ -158,6 +158,8 @@ namespace MaxLib.Data.BitData
         {
             if (count < 0)
                 return b << (-count);
+            if (count >= b.Length)
+                return new Bits();
             var result = new Bit[b.Length - count];
             Array.Copy(b.bits, count, result, 0, result.Length);
             return new Bits(result);           
@@ -261,6 +263,34 @@ namespace MaxLib.Data.BitData
         {
             _ = bits ?? throw new ArgumentNullException(nameof(bits));
             return Concat(bits.ToArray());
+        }
+
+        /// <summary>
+        /// Take the section from <paramref name="offset"/> of <paramref name="value"/>
+        /// with a length of <paramref name="length"/> and convert them to <see cref="Bits"/>
+        /// </summary>
+        /// <param name="value">the source</param>
+        /// <param name="offset">the start in <paramref name="value"/></param>
+        /// <param name="length">the length of data in <paramref name="value"/></param>
+        /// <returns>the generated <see cref="Bits"/></returns>
+        public static Bits ToBits(byte[] value, int offset, int length)
+        {
+            _ = value ?? throw new ArgumentNullException(nameof(value));
+            if (offset < 0 || offset > value.Length)
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            if (length < 0 || offset + length > value.Length)
+                throw new ArgumentOutOfRangeException(nameof(length));
+            var result = new Bit[length << 8];
+            for (int i = 0; i< length; ++i)
+            {
+                int mask = 0x1;
+                for (int j = 0; j<8; ++j)
+                {
+                    result[(i << 3) + j] = (value[i] & mask) == mask;
+                    mask <<= 1;
+                }
+            }
+            return new Bits(result);
         }
 
         #endregion static methods

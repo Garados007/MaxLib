@@ -9,7 +9,7 @@ namespace MaxLib.Data.BitData
         private bool endReached = false;
         private Bits buffer;
 
-        public Stream BaseStream { get; private set; }
+        public Stream BaseStream { get; }
 
         public BitsReader(Stream input)
             : this(input, false)
@@ -43,10 +43,7 @@ namespace MaxLib.Data.BitData
             var result = new byte[numBytes];
             var readed = BaseStream.Read(result, 0, numBytes);
             endReached |= readed == 0;
-            var array = new byte[readed];
-            for (int i = 0; i < readed; ++i)
-                array[i] = result[i];
-            buffer = Bits.Concat(buffer, array);
+            buffer = Bits.Concat(buffer, Bits.ToBits(result, 0, readed));
         }
 
         public bool EndOfStream => endReached && buffer.Length == 0;
@@ -63,6 +60,8 @@ namespace MaxLib.Data.BitData
             var portion = buffer.ToBits(0, Math.Min(count, buffer.Length));
             buffer >>= portion.Length;
             //extend portion to match requested count
+            if (count == portion.Length)
+                return portion;
             var extend = new Bit[count - portion.Length];
             return Bits.Concat(portion, extend);
         }
