@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using IO = System.IO;
 using MaxLib.DB;
 using MaxLib.Collections;
+using MaxLib.Net.Webserver.Files.Source;
+using MaxLib.Net.Webserver.Files.Content.Grabber.Info;
 
 namespace MaxLib.Net.Webserver.Files
 {
