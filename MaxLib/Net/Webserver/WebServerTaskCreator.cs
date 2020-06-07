@@ -53,9 +53,9 @@ namespace MaxLib.Net.Webserver
             else Task.Document.RequestHeader.HeaderParameter.Add(key, value);
         }
 
-        public void SetPost(string post)
+        public void SetPost(string post, string mime)
         {
-            Task.Document.RequestHeader.Post.SetPost(post);
+            Task.Document.RequestHeader.Post.SetPost(post, mime);
         }
 
         public void SetAccept(string[] acceptTypes = null, string[] encoding = null)

@@ -108,11 +108,12 @@ namespace MaxLib.Net.Webserver.Services
                 task.NextTask = WebServiceType.PreCreateResponse;
                 return;
             }
-            if (header.ProtocolMethod == HttpProtocollMethod.Post)
+            if (header.HeaderParameter.ContainsKey("Content-Length"))
             {
                 var buffer = new char[int.Parse(header.HeaderParameter["Content-Length"])];
                 _ = await reader.ReadBlockAsync(buffer, 0, buffer.Length);
-                header.Post.SetPost(new string(buffer));
+                header.Post.SetPost(new string(buffer), 
+                    header.HeaderParameter.TryGetValue("Content-Type", out string mime) ? mime : null);
                 if (task.Server.Settings.Debug_WriteRequests) 
                     sb.AppendLine(new string(buffer));
             }

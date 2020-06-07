@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace MaxLib.Net.Webserver
 {
@@ -8,12 +9,44 @@ namespace MaxLib.Net.Webserver
     {
         public string CompletePost { get; private set; }
 
+        public string MimeType { get; private set; }
+
         public Dictionary<string, string> PostParameter { get; }
 
-        public virtual void SetPost(string post)
+        public virtual void SetPost(string post, string mime)
         {
             CompletePost = post ?? throw new ArgumentNullException("Post");
+
             PostParameter.Clear();
+            string args = "";
+            if (mime != null)
+            {
+                var ind = mime.IndexOf(';');
+                if (ind >= 0)
+                {
+                    args = mime.Substring(ind + 1);
+                    mime = mime.Remove(ind);
+                }
+            }
+
+            switch (MimeType = mime)
+            {
+                case Webserver.MimeType.ApplicationXWwwFromUrlencoded:
+                    SetPostFormUrlencoded(post);
+                    break;
+                case Webserver.MimeType.MultipartFormData:
+                    {
+                        var regex = new Regex("boundary\\s*=\\s*\"([^\"]*)\"");
+                        var match = regex.Match(args);
+                        var boundary = match.Success ? match.Groups[1].Value : "";
+                        SetPostFormData(post, boundary);
+                    } break;
+            }
+            PostParameter.Clear();
+        }
+
+        protected virtual void SetPostFormUrlencoded(string post)
+        {
             if (CompletePost != "")
             {
                 var tiles = CompletePost.Split('&');
@@ -35,11 +68,16 @@ namespace MaxLib.Net.Webserver
             }
         }
 
-        public HttpPost(string post)
+        protected virtual void SetPostFormData(string post, string boundary)
+        {
+
+        }
+
+        public HttpPost(string post, string mime)
         {
             _ = post ?? throw new ArgumentNullException(nameof(post));
             PostParameter = new Dictionary<string, string>();
-            SetPost(post);
+            SetPost(post, mime);
         }
 
         public override string ToString()
