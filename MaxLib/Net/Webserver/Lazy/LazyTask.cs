@@ -8,11 +8,11 @@ namespace MaxLib.Net.Webserver.Lazy
     {
         public WebServer Server { get; }
 
-        public HttpSession Session { get; private set; }
+        public HttpSession Session { get; }
 
-        public HttpRequestHeader Header { get; private set; }
+        public HttpRequestHeader Header { get; }
 
-        public Dictionary<object, object> Information { get; private set; }
+        public Dictionary<object, object> Information { get; }
         
         public object this[object identifer]
         {
@@ -22,7 +22,7 @@ namespace MaxLib.Net.Webserver.Lazy
 
         public LazyTask(WebProgressTask task)
         {
-            if (task == null) throw new ArgumentNullException("task");
+            _ = task ?? throw new ArgumentNullException(nameof(task));
             Server = task.Server;
             Session = task.Session;
             Header = task.Document.RequestHeader;
