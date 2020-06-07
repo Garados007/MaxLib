@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace MaxLib.Data.BitData
 {
@@ -20,8 +22,14 @@ namespace MaxLib.Data.BitData
             }
         }
 
-        public Bits Set(int index, Bit bit) 
-            => new Bits(bits.Select((b, ind) => ind == index ? bit : b));
+        public Bits Set(int index, Bit bit)
+        {
+            if (index < 0 || index >= Length)
+                throw new ArgumentOutOfRangeException(nameof(index));
+            var result = new Bit[Length];
+            result[index] = bit;
+            return new Bits(result);
+        }
 
         public Bits(params Bit[] bits)
         {
@@ -129,7 +137,12 @@ namespace MaxLib.Data.BitData
         #region operator: calc
 
         public static Bits operator !(Bits b)
-            => new Bits(b.bits?.Select(v => !v) ?? new Bit[0]);
+        {
+            var result = new Bit[b.Length];
+            for (int i = 0; i < b.Length; ++i)
+                result[i] = !result[i];
+            return new Bits(result);
+        }
 
         public static Bits operator ~(Bits b)
             => !b;
@@ -139,13 +152,15 @@ namespace MaxLib.Data.BitData
             if (count < 0)
                 return b >> (-count);
             var prefix = new Bit[count];
-            return new Bits(prefix.Concat(b.bits ?? new Bit[0]));
+            return Concat(prefix, b);
         }
         public static Bits operator >>(Bits b, int count)
         {
             if (count < 0)
                 return b << (-count);
-            return new Bits(b.bits?.Skip(count) ?? new Bit[0]);            
+            var result = new Bit[b.Length - count];
+            Array.Copy(b.bits, count, result, 0, result.Length);
+            return new Bits(result);           
         }
 
         public static Bits operator ^(Bits b1, Bits b2)
@@ -199,8 +214,11 @@ namespace MaxLib.Data.BitData
         /// </example>
         public static Bits Create(params byte[] bits)
         {
-            if (bits == null) throw new ArgumentNullException(nameof(bits));
-            return new Bits(bits.Select(b => new Bit(b != 0)));
+            _ = bits ?? throw new ArgumentNullException(nameof(bits));
+            var result = new Bit[bits.Length];
+            for (int i = 0; i < bits.Length; ++i)
+                result[i] = new Bit(bits[i] != 0);
+            return new Bits(result);
         }
 
         /// <summary>
@@ -216,20 +234,33 @@ namespace MaxLib.Data.BitData
         /// </example>
         public static Bits CreateReversed(params byte[] bits)
         {
-            if (bits == null) throw new ArgumentNullException(nameof(bits));
-            return new Bits(bits.Reverse().Select(b => new Bit(b != 0)));
+            _ = bits ?? throw new ArgumentNullException(nameof(bits));
+            var result = new Bit[bits.Length];
+            for (int i = 0; i < bits.Length; ++i)
+                result[bits.Length - i - 1] = new Bit(bits[i] != 0);
+            return new Bits(result);
         }
 
         public static Bits Concat(params Bits[] bits)
         {
-            if (bits == null) throw new ArgumentNullException(nameof(bits));
-            return new Bits(bits.SelectMany(b => b.bits ?? new Bit[0]));
+            _ = bits ?? throw new ArgumentNullException(nameof(bits));
+            var length = 0;
+            for (int i = 0; i < bits.Length; ++i)
+                length += bits[i].Length;
+            var result = new Bit[length];
+            int offset = 0;
+            for (int i = 0; i < bits.Length; ++i)
+            {
+                Array.Copy(bits[i], 0, result, offset, bits[i].Length);
+                offset += bits[i].Length;
+            }
+            return new Bits(result);
         }
 
         public static Bits Concat(IEnumerable<Bits> bits)
         {
-            if (bits == null) throw new ArgumentNullException(nameof(bits));
-            return new Bits(bits.SelectMany(b => b.bits ?? new Bit[0]));
+            _ = bits ?? throw new ArgumentNullException(nameof(bits));
+            return Concat(bits.ToArray());
         }
 
         #endregion static methods
@@ -259,20 +290,32 @@ namespace MaxLib.Data.BitData
         }
 
         public static implicit operator Bits(byte[] value)
-            => Concat(value?.Select(b => (Bits)b) 
-                ?? throw new ArgumentNullException(nameof(value)));
+        {
+            _ = value ?? throw new ArgumentNullException(nameof(value));
+            var result = new Bit[value.Length * 8];
+            for (int i = 0; i < value.Length; ++i)
+            {
+                int mask = 0x1;
+                for (int j = 0; j < 8; ++i)
+                {
+                    result[(i << 3) + j] = (value[i] & mask) == mask;
+                    mask <<= 1;
+                }
+            }
+            return new Bits(result);
+        }
 
         public static implicit operator Bits(sbyte value)
             => unchecked((byte)value);
 
         public static implicit operator Bits(ushort value)
         {
-            var result = new byte[2];
-            var mask = 0xff;
-            for (int i = 0; i < 2; ++i)
+            var result = new Bit[16];
+            var mask = 0x1;
+            for (int i = 0; i < 16; ++i)
             {
-                result[i] = (byte)(value & mask);
-                mask <<= 8;
+                result[i] = (value & mask) == mask;
+                mask <<= 1;
             }
             return result;
         }
@@ -282,12 +325,12 @@ namespace MaxLib.Data.BitData
 
         public static implicit operator Bits(uint value)
         {
-            var result = new byte[4];
-            uint mask = 0xff;
-            for (int i = 0; i < 4; ++i)
+            var result = new Bit[32];
+            uint mask = 0x1;
+            for (int i = 0; i < 32; ++i)
             {
-                result[i] = (byte)(value & mask);
-                mask <<= 8;
+                result[i] = (value & mask) == mask;
+                mask <<= 1;
             }
             return result;
         }
@@ -297,12 +340,12 @@ namespace MaxLib.Data.BitData
 
         public static implicit operator Bits(ulong value)
         {
-            var result = new byte[8];
-            ulong mask = 0xff;
-            for (int i = 0; i < 8; ++i)
+            var result = new Bit[64];
+            ulong mask = 0x1;
+            for (int i = 0; i < 64; ++i)
             {
-                result[i] = (byte)(value & mask);
-                mask <<= 8;
+                result[i] = (value & mask) == mask;
+                mask <<= 1;
             }
             return result;
         }
@@ -325,8 +368,7 @@ namespace MaxLib.Data.BitData
             if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException(nameof(index));
             if (length < 0 || index + length > Length) throw new ArgumentOutOfRangeException(nameof(length));
             var result = new Bit[length];
-            for (int i = 0; i < length; ++i)
-                result[i] = this[i + index];
+            Array.Copy(bits, index, result, 0, length);
             return new Bits(result);
         }
 
@@ -340,11 +382,29 @@ namespace MaxLib.Data.BitData
             if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException(nameof(index));
             byte result = 0;
             byte mask = 0x1;
-            for (int i = 0; i<8 && index + i < Length; ++i)
+            int max = Math.Min(8, Length - index);
+            for (int i = 0; i < max; ++i)
             {
-                if (this[index + i])
+                if (this[index + i].Set)
                     result |= mask;
                 mask <<= 1;
+            }
+            return result;
+        }
+
+        public byte[] ToBytes(int index, int resultLength)
+        {
+            if (index < 0 || index > Length)
+                throw new ArgumentOutOfRangeException(nameof(index));
+            if (resultLength < 0 || index + resultLength * 8 > Length + 8)
+                throw new ArgumentOutOfRangeException(nameof(resultLength));
+
+            var result = new byte[resultLength];
+            int max = Math.Min(Length - index, resultLength << 3);
+            for (int i = 0; i < max; ++i)
+            {
+                if (bits[index + i].Set)
+                    result[i >> 3] |= (byte)(1 << (i & 0x7));
             }
             return result;
         }
@@ -357,9 +417,10 @@ namespace MaxLib.Data.BitData
             if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException(nameof(index));
             ushort result = 0;
             ushort mask = 0x1;
-            for (int i = 0; i < 16 && index + i < Length; ++i)
+            int max = Math.Min(16, Length - index);
+            for (int i = 0; i < max; ++i)
             {
-                if (this[index + i])
+                if (this[index + i].Set)
                     result |= mask;
                 mask <<= 1;
             }
@@ -374,9 +435,10 @@ namespace MaxLib.Data.BitData
             if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException(nameof(index));
             uint result = 0;
             uint mask = 0x1;
-            for (int i = 0; i < 32 && index + i < Length; ++i)
+            int max = Math.Min(32, Length - index);
+            for (int i = 0; i < max; ++i)
             {
-                if (this[index + i])
+                if (this[index + i].Set)
                     result |= mask;
                 mask <<= 1;
             }
@@ -391,9 +453,10 @@ namespace MaxLib.Data.BitData
             if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException(nameof(index));
             ulong result = 0;
             ulong mask = 0x1;
-            for (int i = 0; i < 64 && index + i < Length; ++i)
+            int max = Math.Min(64, Length - index);
+            for (int i = 0; i < max; ++i)
             {
-                if (this[index + i])
+                if (this[index + i].Set)
                     result |= mask;
                 mask <<= 1;
             }
@@ -415,6 +478,9 @@ namespace MaxLib.Data.BitData
 
         public static explicit operator byte(Bits bits)
             => bits.ToByte(0);
+
+        public static explicit operator byte[](Bits bits)
+            => bits.ToBytes(0, (int)Math.Ceiling(bits.Length / 8.0));
 
         public static explicit operator sbyte(Bits bits)
             => bits.ToSbyte(0);
