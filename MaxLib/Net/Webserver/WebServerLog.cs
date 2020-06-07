@@ -8,19 +8,28 @@ namespace MaxLib.Net.Webserver
         public static List<ServerLogItem> ServerLog { get; } = new List<ServerLogItem>();
         public static List<Type> IgnoreSenderEvents { get; } = new List<Type>();
 
-        public static event ServerLogAddedHandler LogAdded;
+        /// <summary>
+        /// This event fires if some log item should be added. The log item can now filtered and discarded.
+        /// </summary>
+        public static event ServerLogAddedHandler LogPreAdded;
+
+        /// <summary>
+        /// This event fires after a log item is added.
+        /// </summary>
+        public static event Action<ServerLogItem> LogAdded;
 
         static readonly object lockObjekt = new object();
         public static void Add(ServerLogItem logItem)
         {
+            if (IgnoreSenderEvents.Exists((type) => type.FullName== logItem.SenderType)) 
+                return;
+            var eventArgs = new ServerLogArgs(logItem);
+            LogPreAdded?.Invoke(eventArgs);
+            if (eventArgs.Discard)
+                return;
             lock (lockObjekt) 
                 ServerLog.Add(logItem);
-            if (LogAdded != null)
-            {
-                if (IgnoreSenderEvents.Exists((type) => type.FullName== logItem.SenderType)) 
-                    return;
-                LogAdded(logItem);
-            }
+            LogAdded?.Invoke(logItem);
         }
 
         public static void Add(ServerLogType type, Type sender, string infoType, string information)

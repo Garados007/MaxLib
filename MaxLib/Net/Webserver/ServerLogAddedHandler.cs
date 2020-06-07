@@ -1,4 +1,4 @@
 ﻿namespace MaxLib.Net.Webserver
 {
-    public delegate void ServerLogAddedHandler(ServerLogItem tile);
+    public delegate void ServerLogAddedHandler(ServerLogArgs eventArgs);
 }
