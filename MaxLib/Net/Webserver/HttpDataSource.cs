@@ -125,7 +125,11 @@ namespace MaxLib.Net.Webserver
         {
             _ = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
             var buffered = new BufferedSinkStream();
-            _ = new Task(() => dataSource.WriteStream(buffered));
+            _ = new Task(() =>
+            {
+                dataSource.WriteStream(buffered);
+                buffered.FinisheWrite();
+            });
             return buffered;
         }
     }

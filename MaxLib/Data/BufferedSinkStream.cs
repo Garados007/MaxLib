@@ -17,6 +17,7 @@ namespace MaxLib.Data
 
         int readOffset = 0;
         int writeOffset = 0;
+        bool writeFinish = false;
 
         readonly object checkOffsetLock = new object();
         readonly Semaphore readLock;
@@ -49,7 +50,7 @@ namespace MaxLib.Data
 
         public override bool CanSeek => false;
 
-        public override bool CanWrite => true;
+        public override bool CanWrite => !writeFinish;
 
         public override long Length
             => throw new NotSupportedException();
@@ -60,8 +61,7 @@ namespace MaxLib.Data
             set => throw new NotSupportedException();
         }
 
-        public override void Flush()
-            => throw new NotSupportedException();
+        public override void Flush() { }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
@@ -78,6 +78,11 @@ namespace MaxLib.Data
                 {
                     readOffset = 0;
                     continue;
+                }
+                lock (checkOffsetLock)
+                {
+                    if (writeTotal == readTotal && writeFinish)
+                        return offset - origOff;
                 }
                 var readed = ReadPart(buffer, offset, part);
                 offset += readed;
@@ -113,6 +118,15 @@ namespace MaxLib.Data
         public override void SetLength(long value)
             => throw new NotSupportedException();
 
+        /// <summary>
+        /// this will mark that the writing is finished and no more data
+        /// will be ever written. This will lock the the 
+        /// <see cref="Write(byte[], int, int)"/> function and
+        /// <see cref="Read(byte[], int, int)"/> will not read further.
+        /// </summary>
+        public void FinisheWrite()
+            => writeFinish = true;
+
         public override void Write(byte[] buffer, int offset, int count)
         {
             _ = buffer ?? throw new ArgumentNullException(nameof(buffer));
@@ -120,6 +134,8 @@ namespace MaxLib.Data
                 throw new ArgumentOutOfRangeException(nameof(offset));
             if (count < 0 || offset + count > buffer.Length)
                 throw new ArgumentOutOfRangeException(nameof(count));
+            if (writeFinish)
+                throw new InvalidOperationException("this streams doen't expect more written data");
             while (count > 0)
             {
                 var part = Math.Min(count, buffer.Length - writeOffset);
