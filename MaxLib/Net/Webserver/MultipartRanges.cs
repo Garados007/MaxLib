@@ -50,13 +50,12 @@ namespace MaxLib.Net.Webserver
         readonly Stream baseStream;
         readonly HttpDocument document;
         List<Range> ranges = new List<Range>();
-        readonly string mime;
 
         public MultipartRanges(Stream stream, HttpDocument document, string mime)
         {
             this.document = document ?? throw new ArgumentNullException(nameof(document));
             baseStream = stream ?? throw new ArgumentNullException(nameof(stream));
-            this.mime = MimeType = mime;
+            MimeType = mime;
 
             document.ResponseHeader.HeaderParameter["Accept-Ranges"] = "bytes";
             if (document.RequestHeader.HeaderParameter.ContainsKey("Range"))
@@ -160,10 +159,10 @@ namespace MaxLib.Net.Webserver
             {
                 sb.Append("--");
                 sb.AppendLine(boundary);
-                if (mime != null)
+                if (MimeType != null)
                 {
                     sb.Append("Content-Type: ");
-                    sb.AppendLine(mime);
+                    sb.AppendLine(MimeType);
                 }
                 sb.Append("Content-Range: ");
                 sb.AppendLine(r.ToString(baseStream.Length));

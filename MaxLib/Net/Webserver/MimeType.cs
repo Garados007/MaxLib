@@ -136,24 +136,26 @@ namespace MaxLib.Net.Webserver
         /// </summary>
         public const string VideoAvi = "video/x-msvideo";
         /// <summary>
-        /// Überprüft ob ein Mimetyp mit einen Muster übereinstimmt.
+        /// Checks if the mime type matches the pattern.
         /// </summary>
-        /// <param name="mime">Der Mimetypstring</param>
+        /// <param name="mime">the mime type</param>
         /// <param name="pattern">
-        /// Das Muster. Es hat dasselbe Format wie ein Mimetyp, kann aber * als 
-        /// Platthalter haben (z.B. "text/plain", "text/*", "*/plain", "*/*").
+        /// the pattern in the same format like the mime type. It can contains * as
+        /// placeholder (e.g. "text/plain" matches "text/plain", "text/*", "*/plain" and "*/*")
         /// </param>
-        /// <returns>Ergebnis der Überprüfung</returns>
+        /// <returns>true if mime matches pattern</returns>
         public static bool Check(string mime, string pattern)
         {
-            if (mime == null) throw new ArgumentNullException("mime");
-            if (pattern == null) throw new ArgumentNullException("pattern");
+            _ = mime ?? throw new ArgumentNullException(nameof(mime));
+            _ = pattern ?? throw new ArgumentNullException(nameof(pattern));
             var ind = mime.IndexOf('/');
-            if (ind == -1) throw new ArgumentException("no Mime", "mime");
+            if (ind == -1) 
+                throw new ArgumentException("no Mime", nameof(mime));
             var ml = mime.Remove(ind).ToLower();
             var mh = mime.Substring(ind + 1).ToLower();
             ind = pattern.IndexOf('/');
-            if (ind == -1) throw new ArgumentException("no Mime", "pattern");
+            if (ind == -1) 
+                throw new ArgumentException("no Mime", nameof(pattern));
             var pl = pattern.Remove(ind).ToLower();
             var ph = pattern.Substring(ind + 1).ToLower();
             return (pl == "*" || pl == ml) && (ph == "*" || ph == mh);
