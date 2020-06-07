@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver
 {
@@ -12,7 +13,7 @@ namespace MaxLib.Net.Webserver
             Importance = WebProgressImportance.Normal;
         }
 
-        public abstract void ProgressTask(WebProgressTask task);
+        public abstract Task ProgressTask(WebProgressTask task);
 
         public abstract bool CanWorkWith(WebProgressTask task);
 

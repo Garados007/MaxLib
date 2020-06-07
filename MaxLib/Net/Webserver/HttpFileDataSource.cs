@@ -1,6 +1,7 @@
 ﻿using MaxLib.Data;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver
 {
@@ -50,8 +51,9 @@ namespace MaxLib.Net.Webserver
         public override long? Length()
             => File?.Length;
 
-        protected override long WriteStreamInternal(Stream stream, long start, long? stop)
+        protected override async Task<long> WriteStreamInternal(Stream stream, long start, long? stop)
         {
+            await Task.CompletedTask;
             File.Position = start;
             using (var skip = new SkipableStream(File, 0))
             {
@@ -68,8 +70,9 @@ namespace MaxLib.Net.Webserver
             }
         }
 
-        protected override long ReadStreamInternal(Stream stream, long? length)
+        protected override async Task<long> ReadStreamInternal(Stream stream, long? length)
         {
+            await Task.CompletedTask;
             if (ReadOnly)
                 throw new NotSupportedException();
             File.Position = 0;

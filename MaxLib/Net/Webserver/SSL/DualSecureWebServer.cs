@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver.SSL
 {
@@ -15,7 +16,7 @@ namespace MaxLib.Net.Webserver.SSL
             WebServerLog.Add(ServerLogType.Information, GetType(), "StartUp", "The use of dual mode is critical");
         }
 
-        protected override void ClientStartListen(HttpSession session)
+        protected override async Task ClientStartListen(HttpSession session)
         {
             if (session.NetworkStream == null && DualSettings.Certificate != null)
             {
@@ -41,7 +42,7 @@ namespace MaxLib.Net.Webserver.SSL
                 }
                 else session.NetworkStream = peaker;
             }
-            base.ClientStartListen(session);
+            await base.ClientStartListen(session);
         }
 
         class StreamPeaker : Stream

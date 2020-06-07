@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver.Files.Source
 {
@@ -42,7 +43,7 @@ namespace MaxLib.Net.Webserver.Files.Source
             return base.CanWorkWith(task);
         }
 
-        public sealed override void ProgressTask(WebProgressTask task)
+        public sealed override Task ProgressTask(WebProgressTask task)
         {
             var tp = task.Document.RequestHeader.Location.DocumentPathTiles;
             var rp = new string[tp.Length - PathRoot.Length];
@@ -72,6 +73,7 @@ namespace MaxLib.Net.Webserver.Files.Source
                 var r = task.Document.ResponseHeader;
                 r.StatusCode = HttpStateCode.NotFound;
             }
+            return Task.CompletedTask;
         }
 
         protected string GetPath(string id)

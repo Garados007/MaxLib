@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver
 {
@@ -31,10 +32,10 @@ namespace MaxLib.Net.Webserver
             TerminationState = WebServiceType.SendResponse;
         }
 
-        public void Start(WebServer server)
+        public async Task Start(WebServer server)
         {
             Task.Server = server;
-            server.ExecuteTaskChain(Task, TerminationState);
+            await server.ExecuteTaskChain(Task, TerminationState);
             Task.Server = null;
         }
 

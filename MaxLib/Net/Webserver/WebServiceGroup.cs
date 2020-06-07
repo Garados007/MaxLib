@@ -1,5 +1,6 @@
 ﻿using MaxLib.Collections;
 using System;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver
 {
@@ -71,7 +72,7 @@ namespace MaxLib.Net.Webserver
             return Services.Find((ws) => ws is T) as T;
         }
 
-        public virtual void Execute(WebProgressTask task)
+        public virtual async Task Execute(WebProgressTask task)
         {
             var se = SingleExecution;
             var set = false;
@@ -82,7 +83,7 @@ namespace MaxLib.Net.Webserver
                 if (service.CanWorkWith(task))
                 {
                     if (task.Session.NetworkClient != null && !task.Session.NetworkClient.Connected) return;
-                    service.ProgressTask(task);
+                    await service.ProgressTask(task);
                     task.Document[ServiceType] = true;
                     if (se) 
                         return;

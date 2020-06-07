@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver.Remote
 {
@@ -29,10 +30,10 @@ namespace MaxLib.Net.Webserver.Remote
             Origin.Dispose();
         }
 
-        public long WriteStream(Stream stream, long start, long? stop)
+        public Task<long> WriteStream(Stream stream, long start, long? stop)
             => Origin.WriteStream(stream, start, stop);
 
-        public long ReadStream(Stream stream, long? length)
+        public Task<long> ReadStream(Stream stream, long? length)
             => Origin.ReadStream(stream, length);
 
         public long? RangeEnd()

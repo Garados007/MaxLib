@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver.Lazy
 {
@@ -47,7 +48,7 @@ namespace MaxLib.Net.Webserver.Lazy
                     s.Dispose();
         }
 
-        protected override long WriteStreamInternal(Stream stream, long start, long? stop)
+        protected override async Task<long> WriteStreamInternal(Stream stream, long start, long? stop)
         {
             using (var skip = new SkipableStream(stream, start))
             {
@@ -60,7 +61,7 @@ namespace MaxLib.Net.Webserver.Lazy
                     var size = s.Length();
                     if (size == null)
                     {
-                        total += s.WriteStream(skip, 0, end);
+                        total += await s.WriteStream(skip, 0, end);
                     }
                     else
                     {
@@ -71,14 +72,14 @@ namespace MaxLib.Net.Webserver.Lazy
                         }
                         var leftSkip = skip.SkipBytes;
                         skip.Skip(skip.SkipBytes);
-                        total += s.WriteStream(skip, leftSkip, end);
+                        total += await s.WriteStream(skip, leftSkip, end);
                     }
                 }
                 return total;
             }
         }
 
-        protected override long ReadStreamInternal(Stream stream, long? length)
+        protected override Task<long> ReadStreamInternal(Stream stream, long? length)
             => throw new NotSupportedException();
 
         public override long RangeStart

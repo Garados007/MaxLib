@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver
 {
@@ -208,7 +209,7 @@ namespace MaxLib.Net.Webserver
             foreach (var s in streams) s.Dispose();
         }
 
-        protected override long WriteStreamInternal(Stream stream, long start, long? stop)
+        protected override async Task<long> WriteStreamInternal(Stream stream, long start, long? stop)
         {
             using (var skip = new SkipableStream(stream, start))
             {
@@ -221,7 +222,7 @@ namespace MaxLib.Net.Webserver
                     var size = s.Length();
                     if (size == null)
                     {
-                        total += s.WriteStream(skip, 0, end);
+                        total += await s.WriteStream(skip, 0, end);
                     }
                     else
                     {
@@ -232,14 +233,14 @@ namespace MaxLib.Net.Webserver
                         }
                         var leftSkip = skip.SkipBytes;
                         skip.Skip(skip.SkipBytes);
-                        total += s.WriteStream(skip, leftSkip, end);
+                        total += await s.WriteStream(skip, leftSkip, end);
                     }
                 }
                 return total;
             }
         }
 
-        protected override long ReadStreamInternal(Stream stream, long? length)
+        protected override Task<long> ReadStreamInternal(Stream stream, long? length)
             => throw new NotSupportedException();
     }
 }

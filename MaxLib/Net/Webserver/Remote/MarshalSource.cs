@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.Webserver.Remote
 {
@@ -22,10 +23,10 @@ namespace MaxLib.Net.Webserver.Remote
         public override void Dispose()
             => Container.Dispose();
 
-        protected override long WriteStreamInternal(Stream stream, long start, long? stop)
+        protected override Task<long> WriteStreamInternal(Stream stream, long start, long? stop)
             => Container.WriteStream(stream, start, stop);
 
-        protected override long ReadStreamInternal(Stream stream, long? length)
+        protected override Task<long> ReadStreamInternal(Stream stream, long? length)
             => Container.ReadStream(stream, length);
 
         public override long? RangeEnd

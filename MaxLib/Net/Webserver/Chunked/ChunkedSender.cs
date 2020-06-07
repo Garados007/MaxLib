@@ -26,30 +26,30 @@ namespace MaxLib.Net.Webserver.Chunked
                 ));
         }
 
-        public override void ProgressTask(WebProgressTask task)
+        public override async Task ProgressTask(WebProgressTask task)
         {
             var header = task.Document.ResponseHeader;
             var stream = task.NetworkStream;
             var writer = new StreamWriter(stream);
-            writer.Write(header.HttpProtocol);
-            writer.Write(" ");
-            writer.Write((int)header.StatusCode);
-            writer.Write(" ");
-            writer.WriteLine(StatusCodeText(header.StatusCode));
+            await writer.WriteAsync(header.HttpProtocol);
+            await writer.WriteAsync(" ");
+            await writer.WriteAsync(((int)header.StatusCode).ToString());
+            await writer.WriteAsync(" ");
+            await writer.WriteLineAsync(StatusCodeText(header.StatusCode));
             for (int i = 0; i < header.HeaderParameter.Count; ++i) //Parameter
             {
                 var e = header.HeaderParameter.ElementAt(i);
-                writer.Write(e.Key);
-                writer.Write(": ");
-                writer.WriteLine(e.Value);
+                await writer.WriteAsync(e.Key);
+                await writer.WriteAsync(": ");
+                await writer.WriteLineAsync(e.Value);
             }
             foreach (var cookie in task.Document.RequestHeader.Cookie.AddedCookies) //Cookies
             {
-                writer.Write("Set-Cookie: ");
-                writer.WriteLine(cookie.ToString());
+                await writer.WriteAsync("Set-Cookie: ");
+                await writer.WriteLineAsync(cookie.ToString());
             }
-            writer.WriteLine();
-            try { writer.Flush(); stream.Flush(); }
+            await writer.WriteLineAsync();
+            try { await writer.FlushAsync(); await stream.FlushAsync(); }
             catch (ObjectDisposedException)
             {
                 WebServerLog.Add(ServerLogType.Information, GetType(), "Send", "Connection closed by remote host.");
@@ -66,11 +66,11 @@ namespace MaxLib.Net.Webserver.Chunked
                 if (!(task.Document.Information.ContainsKey("Only Header") && (bool)task.Document.Information["Only Header"]))
                 {
                     foreach (var s in task.Document.DataSources)
-                        SendChunk(writer, stream, s);
-                    writer.WriteLine("0");
-                    writer.WriteLine();
-                    writer.Flush();
-                    stream.Flush();
+                        await SendChunk(writer, stream, s);
+                    await writer.WriteLineAsync("0");
+                    await writer.WriteLineAsync();
+                    await writer.FlushAsync();
+                    await stream.FlushAsync();
                 }
             }
             catch (IOException)
@@ -80,21 +80,21 @@ namespace MaxLib.Net.Webserver.Chunked
             }
         }
 
-        protected virtual void SendChunk(StreamWriter writer, Stream stream, HttpDataSource source)
+        protected virtual async Task SendChunk(StreamWriter writer, Stream stream, HttpDataSource source)
         {
             if (source is LazySource lazySource)
                 foreach (var s in lazySource.GetAllSources())
-                    SendChunk(writer, stream, s);
+                    await SendChunk(writer, stream, s);
             else if (source is Remote.MarshalSource ms && ms.IsLazy)
                 foreach (var s in ms.GetAllSources())
-                    SendChunk(writer, stream, s);
+                    await SendChunk(writer, stream, s);
             else if (source is HttpChunkedStream)
             {
-                stream.Flush();
-                writer.Flush();
-                source.WriteStream(stream);
-                stream.Flush();
-                writer.Flush();
+                await stream.FlushAsync();
+                await writer.FlushAsync();
+                await source.WriteStream(stream);
+                await stream.FlushAsync();
+                await writer.FlushAsync();
             }
             else
             {
@@ -102,12 +102,12 @@ namespace MaxLib.Net.Webserver.Chunked
                 if (length == null)
                     using (var sink = new BufferedSinkStream())
                     {
-                        _ = Task.Run(() =>
+                        _ = Task.Run(async () =>
                         {
-                            source.WriteStream(sink);
+                            await source.WriteStream(sink);
                             sink.FinishWrite();
                         });
-                        SendChunk(writer, stream, new HttpChunkedStream(sink));
+                        await SendChunk(writer, stream, new HttpChunkedStream(sink));
                     }
                 //using (var m = new MemoryStream())
                 //{
@@ -122,13 +122,13 @@ namespace MaxLib.Net.Webserver.Chunked
                 else
                 {
                     if (length.Value == 0) return;
-                    writer.WriteLine(length.Value.ToString("X"));
-                    writer.Flush();
-                    source.WriteStream(stream);
+                    await writer.WriteLineAsync(length.Value.ToString("X"));
+                    await writer.FlushAsync();
+                    await source.WriteStream(stream);
                 }
-                stream.Flush();
-                writer.WriteLine();
-                writer.Flush();
+                await stream.FlushAsync();
+                await writer.WriteLineAsync();
+                await writer.FlushAsync();
             }
         }
     }
