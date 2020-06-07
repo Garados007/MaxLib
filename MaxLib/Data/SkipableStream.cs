@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace MaxLib.Net.Webserver
+namespace MaxLib.Data
 {
     /// <summary>
     /// This stream reads/writes the data of/to <see cref="BaseStream"/> and skip the first
