@@ -104,6 +104,7 @@ namespace MaxLib.Data.BitData
                 {
                     for (int i = 0; i < node.Value.Length; ++i)
                         result[index++] = node.Value.Bits[node.Value.Start + i];
+                    node = node.Next;
                 }
                 return new Bits(result);
             }
@@ -293,13 +294,13 @@ namespace MaxLib.Data.BitData
             var result = new byte[byteLength];
             int i = 0; // i in result bits
             var node = list.First;
-            var max = Math.Min(Length - index, byteLength >> 3);
+            var max = Math.Min(Length - index, byteLength << 3);
             while (node != null && i < max)
             {
                 if (node.Value.Length > index)
                 {
                     var lmax = Math.Min(node.Value.Length - index, max - i);
-                    for (int j = 0; j < lmax; ++j)
+                    for (int j = 0; j < lmax; ++j, ++i)
                     {
                         if (node.Value.Bits[node.Value.Start + j + index].Set)
                             result[i >> 3] |= (byte)(1 << (i & 0x7));
@@ -455,6 +456,12 @@ namespace MaxLib.Data.BitData
 
         #endregion
 
+        public static implicit operator BitSegment(Bits bits)
+            => new BitSegment(ref bits);
+
+        public static implicit operator Bits(BitSegment bits)
+            => bits?.Bits ?? new Bits();
+
         /// <summary>
         /// Take the section from <paramref name="offset"/> of <paramref name="value"/>
         /// with a length of <paramref name="length"/> and convert them to <see cref="BitSegment"/>
@@ -470,7 +477,7 @@ namespace MaxLib.Data.BitData
                 throw new ArgumentOutOfRangeException(nameof(offset));
             if (length < 0 || offset + length > value.Length)
                 throw new ArgumentOutOfRangeException(nameof(length));
-            var result = new Bit[length << 8];
+            var result = new Bit[length << 3];
             for (int i = 0; i < length; ++i)
             {
                 int mask = 0x1;

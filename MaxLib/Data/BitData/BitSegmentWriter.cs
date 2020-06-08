@@ -46,10 +46,6 @@ namespace MaxLib.Data.BitData
                 maxBytes++;
             if (maxBytes == 0)
                 return;
-            //var bitsToHandle = Math.Min(buffer.Length, maxBytes * 8);
-            //var flushBuffer = buffer
-            //    .Section(0, bitsToHandle)
-            //    .ToBytes(0, maxBytes);
             var flushBuffer = buffer.ToBytes(0, maxBytes);
             BaseStream.Write(flushBuffer, 0, maxBytes);
             buffer.TrimStart(maxBytes << 3);

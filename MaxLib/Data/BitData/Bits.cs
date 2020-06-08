@@ -291,7 +291,7 @@ namespace MaxLib.Data.BitData
                 throw new ArgumentOutOfRangeException(nameof(offset));
             if (length < 0 || offset + length > value.Length)
                 throw new ArgumentOutOfRangeException(nameof(length));
-            var result = new Bit[length << 8];
+            var result = new Bit[length << 3];
             for (int i = 0; i< length; ++i)
             {
                 int mask = 0x1;
