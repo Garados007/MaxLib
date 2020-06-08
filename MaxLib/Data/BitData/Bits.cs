@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace MaxLib.Data.BitData
 {
-    public struct Bits : IComparable, IComparable<Bits>, IEquatable<Bits>
+    // test has shown that "readonly struct Bits" is 6.5% faster than "class Bits"
+    public readonly struct Bits : IComparable, IComparable<Bits>, IEquatable<Bits>, IEnumerable<Bit>
     {
         private readonly Bit[] bits;
 
@@ -91,6 +91,16 @@ namespace MaxLib.Data.BitData
         }
 
         #endregion IEquatable<Bits>
+
+        #region IEnumerable<Bit>
+
+        public IEnumerator<Bit> GetEnumerator()
+            => bits.AsEnumerable().GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator()
+            => bits.GetEnumerator();
+
+        #endregion IEnumerable<Bit>
 
         public override bool Equals(object obj)
         {
@@ -253,7 +263,8 @@ namespace MaxLib.Data.BitData
             int offset = 0;
             for (int i = 0; i < bits.Length; ++i)
             {
-                Array.Copy(bits[i], 0, result, offset, bits[i].Length);
+                if (bits[i].Length > 0)
+                    Array.Copy(bits[i].bits, 0, result, offset, bits[i].Length);
                 offset += bits[i].Length;
             }
             return new Bits(result);
@@ -304,7 +315,7 @@ namespace MaxLib.Data.BitData
             => new Bits(bits ?? throw new ArgumentNullException(nameof(bits)));
 
         public static implicit operator Bits(bool[] bits)
-            => bits?.Select(b => (Bit)b).ToArray() 
+            => bits.Select(b => (Bit)b).ToArray() 
             ?? throw new ArgumentNullException(nameof(bits));
 
         public static implicit operator Bits(byte value)
@@ -398,13 +409,14 @@ namespace MaxLib.Data.BitData
             if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException(nameof(index));
             if (length < 0 || index + length > Length) throw new ArgumentOutOfRangeException(nameof(length));
             var result = new Bit[length];
-            Array.Copy(bits, index, result, 0, length);
+            if (bits != null)
+                Array.Copy(bits, index, result, 0, length);
             return new Bits(result);
         }
 
         public Bit[] ToBitArray()
         {
-            return (Bit[])bits.Clone();
+            return (Bit[])bits?.Clone() ?? new Bit[0];
         }
 
         public byte ToByte(int index)
@@ -426,7 +438,7 @@ namespace MaxLib.Data.BitData
         {
             if (index < 0 || index > Length)
                 throw new ArgumentOutOfRangeException(nameof(index));
-            if (resultLength < 0 || index + resultLength * 8 > Length + 8)
+            if (resultLength < 0 || index + resultLength * 8 >= Length + 8)
                 throw new ArgumentOutOfRangeException(nameof(resultLength));
 
             var result = new byte[resultLength];
