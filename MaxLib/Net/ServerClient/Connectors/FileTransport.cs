@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using System.IO;
-using System.IO.Compression;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace MaxLib.Net.ServerClient.Connectors
 {
@@ -40,9 +38,6 @@ namespace MaxLib.Net.ServerClient.Connectors
 
         public event FileTaskChangedHandler RemoteTaskAdded, RemoteTaskFinished;
        
-        [Obsolete("Die Compression wird bei der Dataset-Technologie nicht mehr unterstüzt, bitte nutzen Sie diese nicht mehr.")]
-        public bool CompressBytes { get; set; }
-
         public ServerClientRole Role { get; set; }
 
         volatile int userwait = 0;
@@ -208,25 +203,25 @@ namespace MaxLib.Net.ServerClient.Connectors
 
                             task.State = FileTransportState.DecompressBytes;
                             task.OnServerStateUpdated();
-#pragma warning disable CS0618 // Typ oder Element ist veraltet
-                            if (CompressBytes && task.DatasetCount == 0)
-#pragma warning restore CS0618 // Typ oder Element ist veraltet
-                            {
-                                using (var m = new MemoryStream(task.CompressedBytes))
-                                using (var defl = new DeflateStream(m, CompressionMode.Decompress))
-                                using (var m2 = new MemoryStream())
-                                using (var r = new BinaryReader(m2))
-                                {
-                                    defl.CopyTo(m2);
-                                    m2.Position = 0;
-#pragma warning disable CS0618 // Typ oder Element ist veraltet
-                                    task.Data = r.ReadBytes((int)m2.Length);
-#pragma warning restore CS0618 // Typ oder Element ist veraltet
-                                }
-                            }
-#pragma warning disable CS0618 // Typ oder Element ist veraltet
-                            else task.Data = task.CompressedBytes;
-#pragma warning restore CS0618 // Typ oder Element ist veraltet
+//#pragma warning disable CS0618 // Typ oder Element ist veraltet
+//                            if (CompressBytes && task.DatasetCount == 0)
+//#pragma warning restore CS0618 // Typ oder Element ist veraltet
+//                            {
+//                                using (var m = new MemoryStream(task.CompressedBytes))
+//                                using (var defl = new DeflateStream(m, CompressionMode.Decompress))
+//                                using (var m2 = new MemoryStream())
+//                                using (var r = new BinaryReader(m2))
+//                                {
+//                                    defl.CopyTo(m2);
+//                                    m2.Position = 0;
+//#pragma warning disable CS0618 // Typ oder Element ist veraltet
+//                                    task.Data = r.ReadBytes((int)m2.Length);
+//#pragma warning restore CS0618 // Typ oder Element ist veraltet
+//                                }
+//                            }
+//#pragma warning disable CS0618 // Typ oder Element ist veraltet
+//                            else task.Data = task.CompressedBytes;
+//#pragma warning restore CS0618 // Typ oder Element ist veraltet
 
                             task.State = FileTransportState.Finished;
                             task.OnServerStateUpdated();
@@ -247,26 +242,26 @@ namespace MaxLib.Net.ServerClient.Connectors
             var t = new Task(() =>
             {
                 #region Daten verkleinern nur ohne Datasets
-#pragma warning disable CS0618 // Typ oder Element ist veraltet
-                if (CompressBytes && task.DatasetCount == 0)
-#pragma warning restore CS0618 // Typ oder Element ist veraltet
-                {
-                    task.State = FileTransportState.CompressBytes;
-                    using (var m = new MemoryStream())
-                    using (var comp = new DeflateStream(m, CompressionMode.Compress))
-                    using (var r = new BinaryReader(m))
-                    using (var w = new BinaryWriter(comp))
-                    {
-#pragma warning disable CS0618 // Typ oder Element ist veraltet
-                        w.Write(task.Data);
-#pragma warning restore CS0618 // Typ oder Element ist veraltet
-                        m.Position = 0;
-                        task.CompressedBytes = r.ReadBytes((int)m.Length);
-                    }
-                }
-#pragma warning disable CS0618 // Typ oder Element ist veraltet
-                else task.CompressedBytes = task.Data;
-#pragma warning restore CS0618 // Typ oder Element ist veraltet
+//#pragma warning disable CS0618 // Typ oder Element ist veraltet
+//                if (CompressBytes && task.DatasetCount == 0)
+//#pragma warning restore CS0618 // Typ oder Element ist veraltet
+//                {
+//                    task.State = FileTransportState.CompressBytes;
+//                    using (var m = new MemoryStream())
+//                    using (var comp = new DeflateStream(m, CompressionMode.Compress))
+//                    using (var r = new BinaryReader(m))
+//                    using (var w = new BinaryWriter(comp))
+//                    {
+//#pragma warning disable CS0618 // Typ oder Element ist veraltet
+//                        w.Write(task.Data);
+//#pragma warning restore CS0618 // Typ oder Element ist veraltet
+//                        m.Position = 0;
+//                        task.CompressedBytes = r.ReadBytes((int)m.Length);
+//                    }
+//                }
+//#pragma warning disable CS0618 // Typ oder Element ist veraltet
+//                else task.CompressedBytes = task.Data;
+//#pragma warning restore CS0618 // Typ oder Element ist veraltet
                 task.Size = task.CompressedBytes.Length;
                 #endregion
                 //Verbinden
@@ -371,9 +366,6 @@ namespace MaxLib.Net.ServerClient.Connectors
         public FileTransport()
         {
             Tasks = new List<FileTransportTask>();
-#pragma warning disable CS0618 // Typ oder Element ist veraltet
-            CompressBytes = false;
-#pragma warning restore CS0618 // Typ oder Element ist veraltet
             Connections.MainProtocol = ConnectorProtocol.TCP;
             CanChangeProtocol = false;
             Role = ServerClientRole.Undefined;
@@ -386,14 +378,6 @@ namespace MaxLib.Net.ServerClient.Connectors
 
     public sealed class FileTransportTask
     {
-        byte[] data = new byte[0];
-        [Obsolete("Verwenden Sie lieber die Dataset-Technologie. Use the Dataset-Technolgy, please.")]
-        public byte[] Data
-        {
-            get => data;
-            set => data = value;
-        }
-
         public int DatasetCount { get; set; }
         public int CurrentDataset { get; set; }
 

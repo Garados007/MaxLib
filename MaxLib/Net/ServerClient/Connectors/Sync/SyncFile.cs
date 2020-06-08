@@ -72,24 +72,6 @@ namespace MaxLib.Net.ServerClient.Connectors.Sync
 
         readonly List<SyncFile> Files = new List<SyncFile>();
 
-        [Obsolete("Use Syncronize(User, int, GetFileData, int)")]
-        public SyncFile Syncronize(User TargetUser, byte[] Data, int AccessID)
-        {
-            var sf = new SyncFile();
-            var t = sf.Task = new FileTransportTask();
-            t.Data = Data;
-            t.Size = Data.Length;
-            t.TargetUser = TargetUser;
-            sf.OwnerID = Manager.CurrentId.Id;
-            sf.Manager = this;
-            sf.SendData = true;
-            sf.AccessID = AccessID;
-            Files.Add(sf);
-            sf.SetEvents();
-            sf.Send();
-            return sf;
-        }
-
         public SyncFile Syncronize(User TargetUser, int DatasetCount, GetFileData getDataHandler, int AccessId)
         {
             var sf = new SyncFile();
@@ -164,9 +146,9 @@ namespace MaxLib.Net.ServerClient.Connectors.Sync
                     DecompressBytes?.Invoke(this, EventArgs.Empty);
                     break;
                 case FileTransportState.Finished:
-#pragma warning disable CS0618 // Typ oder Element ist veraltet
-                    Finished?.Invoke(this, Task.Data);
-#pragma warning restore CS0618 // Typ oder Element ist veraltet
+//#pragma warning disable CS0618 // Typ oder Element ist veraltet
+//                    Finished?.Invoke(this, Task.Data);
+//#pragma warning restore CS0618 // Typ oder Element ist veraltet
                     break;
                 case FileTransportState.Transport:
                     Transport?.Invoke(this, Task.TransportedBytes, Task.Size);
@@ -186,7 +168,7 @@ namespace MaxLib.Net.ServerClient.Connectors.Sync
 
         public event EventHandler CompressBytes, ConnectToServer, DecompressBytes, WaitForLocalConnector, 
             WaitForRemoteConnector, StateChanged;
-        public event SyncFileFinishedHandle Finished;
+        //public event SyncFileFinishedHandle Finished;
         public event SyncFileTransportHandle Transport;
         public event SyncFileWaitHandle Waiting;
         public event FileDataReceived DatasetReceived;

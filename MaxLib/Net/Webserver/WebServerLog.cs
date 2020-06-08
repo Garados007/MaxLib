@@ -37,18 +37,10 @@ namespace MaxLib.Net.Webserver
             Add(new ServerLogItem(type, sender, infoType, information));
         }
 
-        [Obsolete("you can no longer add additional data. put your data in the information string")]
-        public static void Add(ServerLogType type, Type sender, string infoType, object additionlData, string information)
-         =>  Add(type, sender, infoType, information);
-
         public static void Add(ServerLogType type, Type sender, string infoType, string mask, params object[] data)
         {
             Add(new ServerLogItem(type, sender, infoType, mask: mask, data: data));
         }
-
-        [Obsolete("you can no longer add additional data. put your data in the information string")]
-        public static void Add(ServerLogType type, Type sender, string infoType, object additionlData, string mask, params object[] data)
-            => Add(type, sender, infoType, mask, data);
 
         public static void Clear()
         {
