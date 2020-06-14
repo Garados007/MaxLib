@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MaxLib.Data.VirtualIO
 {
-    public class RootController
+    public class RootController : IDisposable
     {
         public HashSet<IIOHost> IOHosts { get; } = new HashSet<IIOHost>();
 
@@ -69,6 +69,20 @@ namespace MaxLib.Data.VirtualIO
             var host = new LocalHost(this, rootDirectory, basePath);
             IOHosts.Add(host);
             return host;
+        }
+
+        public virtual Memory.MemoryHost AddMemoryHost(VirtualPath basePath = null)
+        {
+            var host = new Memory.MemoryHost(this, basePath);
+            IOHosts.Add(host);
+            return host;
+        }
+
+        public void Dispose()
+        {
+            foreach (var host in IOHosts)
+                if (host is IDisposable disposable)
+                    disposable.Dispose();
         }
     }
 }
