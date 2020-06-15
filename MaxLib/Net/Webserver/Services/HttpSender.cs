@@ -108,7 +108,7 @@ namespace MaxLib.Net.Webserver.Services
             foreach (var cookie in task.Document.RequestHeader.Cookie.AddedCookies) //Cookies
             {
                 await writer.WriteAsync("Set-Cookie: ");
-                await writer.WriteLineAsync(cookie.ToString());
+                await writer.WriteLineAsync(cookie.Value.ToString());
             }
             await writer.WriteLineAsync();
             try { await writer.FlushAsync(); }
