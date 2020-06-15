@@ -71,7 +71,7 @@ namespace MaxLib.Net.Webserver.Api.Rest
             => new RestActionEndpoint(async args =>
             {
                 T arg = default;
-                if (!args.TryGetValue(argName, out object rawArg))
+                if (args.TryGetValue(argName, out object rawArg))
                     if (rawArg is T)
                         arg = (T)rawArg;
                 var result = await handler(arg);
@@ -84,7 +84,7 @@ namespace MaxLib.Net.Webserver.Api.Rest
             => new RestActionEndpoint(async args =>
             {
                 T arg = default;
-                if (!args.TryGetValue(argName, out object rawArg))
+                if (args.TryGetValue(argName, out object rawArg))
                     if (rawArg is T)
                         arg = (T)rawArg;
                 var result = await handler(arg);
@@ -97,7 +97,7 @@ namespace MaxLib.Net.Webserver.Api.Rest
             => new RestActionEndpoint(async args =>
             {
                 T arg = default;
-                if (!args.TryGetValue(argName, out object rawArg))
+                if (args.TryGetValue(argName, out object rawArg))
                     if (rawArg is T)
                         arg = (T)rawArg;
                 var result = await handler(arg);
@@ -110,11 +110,11 @@ namespace MaxLib.Net.Webserver.Api.Rest
             => new RestActionEndpoint(async args =>
             {
                 T1 arg1 = default;
-                if (!args.TryGetValue(argName1, out object rawArg))
+                if (args.TryGetValue(argName1, out object rawArg))
                     if (rawArg is T1)
                         arg1 = (T1)rawArg;
                 T2 arg2 = default;
-                if (!args.TryGetValue(argName2, out object rawArg2))
+                if (args.TryGetValue(argName2, out object rawArg2))
                     if (rawArg is T2)
                         arg2 = (T2)rawArg2;
                 var result = await handler(arg1, arg2);
@@ -127,11 +127,11 @@ namespace MaxLib.Net.Webserver.Api.Rest
             => new RestActionEndpoint(async args =>
             {
                 T1 arg1 = default;
-                if (!args.TryGetValue(argName1, out object rawArg))
+                if (args.TryGetValue(argName1, out object rawArg))
                     if (rawArg is T1)
                         arg1 = (T1)rawArg;
                 T2 arg2 = default;
-                if (!args.TryGetValue(argName2, out object rawArg2))
+                if (args.TryGetValue(argName2, out object rawArg2))
                     if (rawArg is T2)
                         arg2 = (T2)rawArg2;
                 var result = await handler(arg1, arg2);
@@ -144,11 +144,11 @@ namespace MaxLib.Net.Webserver.Api.Rest
             => new RestActionEndpoint(async args =>
             {
                 T1 arg1 = default;
-                if (!args.TryGetValue(argName1, out object rawArg))
+                if (args.TryGetValue(argName1, out object rawArg))
                     if (rawArg is T1)
                         arg1 = (T1)rawArg;
                 T2 arg2 = default;
-                if (!args.TryGetValue(argName2, out object rawArg2))
+                if (args.TryGetValue(argName2, out object rawArg2))
                     if (rawArg is T2)
                         arg2 = (T2)rawArg2;
                 var result = await handler(arg1, arg2);
@@ -161,15 +161,15 @@ namespace MaxLib.Net.Webserver.Api.Rest
             => new RestActionEndpoint(async args =>
             {
                 T1 arg1 = default;
-                if (!args.TryGetValue(argName1, out object rawArg))
+                if (args.TryGetValue(argName1, out object rawArg))
                     if (rawArg is T1)
                         arg1 = (T1)rawArg;
                 T2 arg2 = default;
-                if (!args.TryGetValue(argName2, out object rawArg2))
+                if (args.TryGetValue(argName2, out object rawArg2))
                     if (rawArg is T2)
                         arg2 = (T2)rawArg2;
                 T3 arg3 = default;
-                if (!args.TryGetValue(argName3, out object rawArg3))
+                if (args.TryGetValue(argName3, out object rawArg3))
                     if (rawArg is T3)
                         arg3 = (T3)rawArg3;
                 var result = await handler(arg1, arg2, arg3);
@@ -182,15 +182,15 @@ namespace MaxLib.Net.Webserver.Api.Rest
             => new RestActionEndpoint(async args =>
             {
                 T1 arg1 = default;
-                if (!args.TryGetValue(argName1, out object rawArg))
+                if (args.TryGetValue(argName1, out object rawArg))
                     if (rawArg is T1)
                         arg1 = (T1)rawArg;
                 T2 arg2 = default;
-                if (!args.TryGetValue(argName2, out object rawArg2))
+                if (args.TryGetValue(argName2, out object rawArg2))
                     if (rawArg is T2)
                         arg2 = (T2)rawArg2;
                 T3 arg3 = default;
-                if (!args.TryGetValue(argName3, out object rawArg3))
+                if (args.TryGetValue(argName3, out object rawArg3))
                     if (rawArg is T3)
                         arg3 = (T3)rawArg3;
                 var result = await handler(arg1, arg2, arg3);
@@ -203,15 +203,15 @@ namespace MaxLib.Net.Webserver.Api.Rest
             => new RestActionEndpoint(async args =>
             {
                 T1 arg1 = default;
-                if (!args.TryGetValue(argName1, out object rawArg))
+                if (args.TryGetValue(argName1, out object rawArg))
                     if (rawArg is T1)
                         arg1 = (T1)rawArg;
                 T2 arg2 = default;
-                if (!args.TryGetValue(argName2, out object rawArg2))
+                if (args.TryGetValue(argName2, out object rawArg2))
                     if (rawArg is T2)
                         arg2 = (T2)rawArg2;
                 T3 arg3 = default;
-                if (!args.TryGetValue(argName3, out object rawArg3))
+                if (args.TryGetValue(argName3, out object rawArg3))
                     if (rawArg is T3)
                         arg3 = (T3)rawArg3;
                 var result = await handler(arg1, arg2, arg3);
